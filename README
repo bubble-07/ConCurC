@@ -1,3 +1,2 @@
 Read the language spec for a brief overview.[Working on it - Alex G.]
 Feel free to commit any changes you want, but it might be difficult to do so until the interpreter is fully functional.
-The roadmap is to start with just the garbage collector and then implement the

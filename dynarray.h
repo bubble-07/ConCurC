@@ -1,3 +1,5 @@
+#ifndef DYNARRAY_DEFINED
+#define DYNARRAY_DEFINED
 #define DEFINE_DYNARRAY_TYPE(type) \
 typedef struct type##_dynarray type##_dynarray; \
 struct type##_dynarray { \
@@ -80,8 +82,8 @@ type type##_dynarray_foldl(type##_dynarray in, type (*f)(type, type), type start
         i++; \
     } \
     return start; \
-}
-
+} 
 #define DEFINE_DYNARRAY(type) \
 DEFINE_DYNARRAY_TYPE(type) \
 DEFINE_DYNARRAY_METHODS(type)
+#endif

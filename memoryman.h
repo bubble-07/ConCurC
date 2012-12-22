@@ -1,3 +1,6 @@
+#ifndef MEMMAN
+#include <stdio.h>
+#define MEMMAN
 void outofmemexception() {
      printf("%s", "you did something stupid");
      while (1 == 1) { }
@@ -19,4 +22,4 @@ void* memrealloc(void* ptr, size_t size) {
     return result;
 }
 
-
+#endif

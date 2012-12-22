@@ -1,6 +1,8 @@
 #include "dynarray.h"
 #include "memoryman.h"
 
+#ifndef DICT_DEFINED
+#define DICT_DEFINED
 #define DEFINE_DICT(keyT, valT) \
 typedef struct { \
     keyT key; \
@@ -58,3 +60,4 @@ keyT##_##valT##_dict keyT##_##valT##_dict_addNoDup(keyT##_##valT##_dict in, keyT
     in = keyT##_##valT##_dict_add(in, to_add); \
     return in; \
 }
+#endif

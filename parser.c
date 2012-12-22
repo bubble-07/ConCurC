@@ -1,6 +1,18 @@
 #include "parser.h"
 lexid display(lexid in, lexid_tree_dynarray other) {
-    printf("%d", in.tokenval);
+    if (in.tokenval == INT) {
+        printf("%s", "integer: ");
+        printf("%d", in.attr.intval);
+    }
+    else if (in.tokenval == FLOAT) {
+        printf("%s", "float: ");
+        printf("%.20f", in.attr.floatval);
+    }
+    else {
+        printf("%s", "identifier: ");
+        printf("%d", in.tokenval);
+    }
+    printf("%s", "\n");
     return in;
 }
 

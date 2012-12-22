@@ -1,5 +1,5 @@
 #include "lexer.h"
-#include "tree.h"
+#include "libs/tree.h"
 
 #ifndef PARSERDEFINED
 #define PARSERDEFINED

@@ -1,5 +1,5 @@
 #include <stdlib.h>
-#include "dynstring.h"
+#include "libs/dynstring.h"
 #ifndef LEXER_DEFINED
 #define LEXER_DEFINED
 

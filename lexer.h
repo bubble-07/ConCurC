@@ -1,6 +1,7 @@
 #ifndef LEXER_DEFINED
 #define LEXER_DEFINED
 #include "lexerdecls.h"
+
 lex_result lex() {
     string_lexid_dict symtable = string_lexid_dict_init(100);
     lexid_dynarray program = lexid_dynarray_make(100);

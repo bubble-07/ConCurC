@@ -9,7 +9,7 @@ struct type##_dynarray { \
 }; 
 
  #define DEFINE_DYNARRAY_METHODS(type) \
-type##_dynarray type##_dynarray_make(int startsize) { \
+inline static type##_dynarray type##_dynarray_make(int startsize) { \
     type##_dynarray result; \
     result.size = 0; \
     result.rsize = startsize; \
@@ -17,7 +17,7 @@ type##_dynarray type##_dynarray_make(int startsize) { \
     return result; \
 } \
  \
-type##_dynarray type##_dynarray_expand(type##_dynarray in) { \
+inline static type##_dynarray type##_dynarray_expand(type##_dynarray in) { \
     type##_dynarray result = type##_dynarray_make(in.rsize * 2); \
     result.size = in.size; \
     memcpy( result.begin,(const void*) in.begin, in.rsize * sizeof(type)); \
@@ -25,7 +25,7 @@ type##_dynarray type##_dynarray_expand(type##_dynarray in) { \
     return result; \
 } \
  \
-type##_dynarray type##_dynarray_checkexp(type##_dynarray in) { \
+inline static type##_dynarray type##_dynarray_checkexp(type##_dynarray in) { \
     if (in.size + 1 > in.rsize) { \
         return type##_dynarray_expand(in); \
     } \
@@ -33,14 +33,14 @@ type##_dynarray type##_dynarray_checkexp(type##_dynarray in) { \
 } \
      \
  \
-type##_dynarray type##_dynarray_add(type##_dynarray in, type val) { \
+inline static type##_dynarray type##_dynarray_add(type##_dynarray in, type val) { \
     in = type##_dynarray_checkexp(in); \
     in.begin[in.size] = val; \
     in.size++; \
     return in; \
 } \
  \
-type##_dynarray type##_dynarray_cat(type##_dynarray one, type##_dynarray two) { \
+inline static type##_dynarray type##_dynarray_cat(type##_dynarray one, type##_dynarray two) { \
     int i = 0; \
     while (i < two.size) { \
         one = type##_dynarray_add(one, two.begin[i]); \
@@ -48,16 +48,16 @@ type##_dynarray type##_dynarray_cat(type##_dynarray one, type##_dynarray two) { 
     } \
     return one; \
 } \
-type##_dynarray type##_dynarray_copy(type##_dynarray in) { \
+inline static type##_dynarray type##_dynarray_copy(type##_dynarray in) { \
     type##_dynarray result = type##_dynarray_make(1); \
     result = type##_dynarray_cat(result, in); \
     return result; \
 } \
-void type##_dynarray_free(type##_dynarray in) { \
+inline static void type##_dynarray_free(type##_dynarray in) { \
     free(in.begin); \
 } \
  \
-type##_dynarray type##_dynarray_fromarray(type * values, int len) { \
+inline static type##_dynarray type##_dynarray_fromarray(type * values, int len) { \
     int x = 0; \
     type##_dynarray result = type##_dynarray_make(1);  \
     while (x < len) { \
@@ -67,7 +67,7 @@ type##_dynarray type##_dynarray_fromarray(type * values, int len) { \
     return result; \
 } \
  \
-type##_dynarray type##_dynarray_map(type##_dynarray in, type (*f)(type)) { \
+inline static type##_dynarray type##_dynarray_map(type##_dynarray in, type (*f)(type)) { \
     int x = 0; \
     while (x < in.size) { \
         in.begin[x] = (*f)(in.begin[x]); \
@@ -75,7 +75,7 @@ type##_dynarray type##_dynarray_map(type##_dynarray in, type (*f)(type)) { \
     } \
     return in; \
 } \
-type type##_dynarray_foldl(type##_dynarray in, type (*f)(type, type), type start) { \
+inline static type type##_dynarray_foldl(type##_dynarray in, type (*f)(type, type), type start) { \
     size_t i = 0; \
     while (i < in.size) { \
         start = f(start, in.begin[i]); \

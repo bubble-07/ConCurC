@@ -7,7 +7,7 @@
 DEFINE_DYNARRAY(char)
 typedef char_dynarray string;
 
-string to_dynstring(char* in) {
+inline static string to_dynstring(char* in) {
     int i = 0;
     string result = char_dynarray_make(1);
     while (in[i]) {
@@ -17,7 +17,7 @@ string to_dynstring(char* in) {
     return result;
 }
 
-size_t hash_string(string in) {
+inline static size_t hash_string(string in) {
     size_t result = 0;
     size_t i = 0;
     while (i < in.size) {
@@ -27,7 +27,7 @@ size_t hash_string(string in) {
     return result;
 }
 
-int string_eq(string one, string two) {
+inline static int string_eq(string one, string two) {
     size_t i = 0;
     if (one.size != two.size) {
         return 0;

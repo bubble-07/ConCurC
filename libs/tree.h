@@ -18,17 +18,17 @@ DEFINE_DYNARRAY_METHODS(type##_tree); \
  \
  \
  \
-type##_tree type##_tree_init(type in) { \
+inline static type##_tree type##_tree_init(type in) { \
     type##_tree result; \
     result.children = type##_tree_dynarray_make(3); \
     result.data = in; \
     return result; \
 } \
-type##_tree type##_tree_addchild(type##_tree in, type##_tree toadd) { \
+inline static type##_tree type##_tree_addchild(type##_tree in, type##_tree toadd) { \
     in.children = type##_tree_dynarray_add(in.children, toadd); \
     return in; \
 } \
-type##_tree type##_tree_dfmap(type##_tree in, type (*transform)(type, type##_tree_dynarray)) { \
+static type##_tree type##_tree_dfmap(type##_tree in, type (*transform)(type, type##_tree_dynarray)) { \
      if (in.children.size > 0) { \
          size_t i = 0; \
          while (i < in.children.size) { \
@@ -40,7 +40,7 @@ type##_tree type##_tree_dfmap(type##_tree in, type (*transform)(type, type##_tre
      return in; \
 } \
  \
-type##_dynarray type##_tree_get_childarray(type##_tree in) { \
+inline static type##_dynarray type##_tree_get_childarray(type##_tree in) { \
     type##_dynarray result = type##_dynarray_make(in.children.size + 1); \
     size_t i = 0; \
     while (i < in.children.size) { \
@@ -51,7 +51,7 @@ type##_dynarray type##_tree_get_childarray(type##_tree in) { \
 } \
  \
  \
-type##_tree type##_tree_dfmap_foldl(type##_tree in, type (*transform)(type, type)) { \
+static type##_tree type##_tree_dfmap_foldl(type##_tree in, type (*transform)(type, type)) { \
     if (in.children.size > 0) { \
        size_t i = 0; \
        while (i < in.children.size) { \
@@ -63,7 +63,7 @@ type##_tree type##_tree_dfmap_foldl(type##_tree in, type (*transform)(type, type
     return in; \
 } \
  \
-type##_tree type##_tree_hfmap(type##_tree in, type##_tree_dynarray (*transform)(type##_tree_dynarray, type)) { \
+static type##_tree type##_tree_hfmap(type##_tree in, type##_tree_dynarray (*transform)(type##_tree_dynarray, type)) { \
     in.children = transform(in.children, in.data); \
     size_t i = 0; \
     while (i < in.children.size) { \

@@ -57,6 +57,19 @@ inline static void type##_dynarray_free(type##_dynarray in) { \
     free(in.begin); \
 } \
  \
+inline static type##_dynarray type##_dynarray_moveToBegin(size_t i, type##_dynarray in) { \
+    type tmp = in.begin[0]; \
+    type tmp2; \
+    in.begin[0] = in.begin[i]; \
+    size_t iter = 1; \
+    while (iter < i + 1) { \
+        tmp2 = in.begin[iter]; \
+        in.begin[iter] = tmp; \
+        iter++; \
+        tmp = tmp2; \
+    } \
+    return in; \
+} \
 inline static type##_dynarray type##_dynarray_fromarray(type * values, int len) { \
     int x = 0; \
     type##_dynarray result = type##_dynarray_make(1);  \

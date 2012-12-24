@@ -54,6 +54,12 @@ inline static int lexid_eq(lexid one, lexid two) {
     return 0;
 }
 
+inline static int isPrim(lexid in) {
+    return lexid_eq(in, DEF_LEXID) || lexid_eq(in, LAMBDA_LEXID) || lexid_eq(in, SUPS_LEXID) 
+    || lexid_eq(in, TYPE_LEXID) || lexid_eq(in, NAMESPACE_LEXID) || lexid_eq(in, SUBS_LEXID) 
+    || lexid_eq(in, IMPORT_LEXID);
+}
+
 DEFINE_DICT(string, lexid)
 
 

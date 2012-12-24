@@ -1,4 +1,5 @@
 #include "parser.h"
+#include "primorder.h"
 
 #define GENPRINT(tok) else if (in.tokenval == tok) { printf("%s", #tok); }
 lexid display(lexid in, lexid_tree_dynarray other) {
@@ -30,7 +31,7 @@ lexid display(lexid in, lexid_tree_dynarray other) {
 }
 
 int main(int argc, const char * argv[]) {
-    parse_result parseresult = parse(lex());
+    parse_result parseresult = primorder(parse(lex()));
     lexid_tree AST = parseresult.AST;
     lexid_tree_dfmap(AST, &display);    
     return 0;

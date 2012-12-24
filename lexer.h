@@ -29,6 +29,7 @@ const static lexid INT_LEXID = {INT, 0};
 const static lexid EXPR_LEXID = {EXPR, 0};
 const static lexid lexid_lookup_failure = {0, 0};
 
+//NOTE: spooky action-at a distance that lets us compare lexid_eq values for in dicts
 inline static int lexid_eq(lexid one, lexid two) {
     if (one.tokenval == two.tokenval) {
         return 1;
@@ -38,7 +39,6 @@ inline static int lexid_eq(lexid one, lexid two) {
 
 DEFINE_DICT(string, lexid)
 
-//end setup
 
 //LEXER: Input -- a string
 //Output -- a dynamic array of lexids [program text] AND a dynarray of strings [symbols to names]

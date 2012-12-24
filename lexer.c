@@ -1,5 +1,38 @@
 #include "lexer.h"
 
+lexid lexnum(char current, int negative) {
+    lexid tmpid = INT_LEXID;
+    ungetc(current, stdin);
+    scanf("%d", &tmpid.attr.intval);
+    current = getchar();
+    if (current != '.') {
+        ungetc(current, stdin);
+        if (negative) {
+            tmpid.attr.intval = -tmpid.attr.intval;
+        }
+    }
+    else {
+        int afterdecimal;
+        double nonintegral;
+        scanf("%d", &afterdecimal);
+        nonintegral = (double)afterdecimal;
+        while (nonintegral > 1.0) {
+            nonintegral = nonintegral * 0.1;
+        }
+        double resulting = (double) tmpid.attr.intval + nonintegral;
+        tmpid = FLOAT_LEXID;
+        if (negative) {
+            resulting = -resulting;
+        }
+        tmpid.attr.floatval = resulting;
+    }
+    return tmpid;
+}
+
+
+
+
+
 lex_result lex() {
     string_lexid_dict symtable = string_lexid_dict_init(100);
     lexid_dynarray program = lexid_dynarray_make(100);
@@ -24,28 +57,16 @@ lex_result lex() {
                 break;
             case '0': case '1': case '2': case '3': case '4':
             case '5': case '6': case '7': case '8': case '9':
-                tmpid = INT_LEXID;
-                ungetc(current, stdin);
-                scanf("%d", &tmpid.attr.intval);
-                current = getchar();
-                if (current != '.') {
-                    ungetc(current, stdin);
-                }
-                else {
-                    int afterdecimal;
-                    double nonintegral;
-                    scanf("%d", &afterdecimal);
-                    nonintegral = (double)afterdecimal;
-                    while (nonintegral > 1.0) {
-                        nonintegral = nonintegral * 0.1;
-                    }
-                    double resulting = (double) tmpid.attr.intval + nonintegral;
-                    tmpid = FLOAT_LEXID;
-                    tmpid.attr.floatval = resulting;
-                }
-
-                program = lexid_dynarray_add(program, tmpid);
+                program = lexid_dynarray_add(program, lexnum(current, 0));
                 break;
+            case '-':
+                current = getchar();
+                if (isdigit(current)) {
+                    program = lexid_dynarray_add(program, lexnum(current, 1));
+                    break;
+                }
+                ungetc(current, stdin);
+
             default:
                 id = to_dynstring("");
                 while (current != ((char) 0) && current != '(' && current != '\0' && current != '\n'

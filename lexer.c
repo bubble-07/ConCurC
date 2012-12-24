@@ -61,7 +61,7 @@ lexid lexIdentifier(char current, string_lexid_dict symtable, int* newlex) {
     return lookupval;
 }
 
-
+//Lexes a string literal from stdin
 lexid lexString(char current) {
     lexid tmpid = STRING_LEXID;
     char_dynarray stringval = to_dynstring("");
@@ -74,7 +74,8 @@ lexid lexString(char current) {
     return tmpid;
 }
 
-
+//convenience macro to fill the symtable with core forms [primitives] so their token values
+//are predictable
 #define ADDCONST_SYM(nstring, constid) symtable = \
 string_lexid_dict_add(symtable, string_lexid_bucket_make(to_dynstring(nstring), constid))
 
@@ -83,6 +84,7 @@ lex_result lex() {
     string_lexid_dict symtable = string_lexid_dict_init(100);
     lexid_dynarray program = lexid_dynarray_make(100);
 
+    /*filling the symtable with core forms*/
     ADDCONST_SYM("def", DEF_LEXID);
     ADDCONST_SYM("lambda", LAMBDA_LEXID);
     ADDCONST_SYM("namespace", NAMESPACE_LEXID);
@@ -97,11 +99,14 @@ lex_result lex() {
     ADDCONST_SYM(":>", SUPS_LEXID);
     ADDCONST_SYM("supertypes", SUPS_LEXID);
 
+    /*Meat of the actual lexer. Conceptually, it does this by predictive decisions using the 
+    current character as a reference.*/
     int i = 0;
     int newlex = EXPR + 1;
     char current = getchar();
     while (isNotGlobTerm(current)) {
         lexid tmpid;
+        //Consume until we get something that isn't a space
         while (current == ' ') {
             current = getchar();
         }
@@ -120,17 +125,20 @@ lex_result lex() {
                 tmpid = lexString(current);
                 break;
             case '-':
+                //We want to be able to handle subtraction AND negative numbers
                 current = getchar();
                 if (isdigit(current)) {
                     tmpid = lexNum(current, 1);
                     break;
                 }
+                //note: no break! If it's not a number, we just continue to the default case
                 ungetc(current, stdin);
 
             default:
                 tmpid = lexIdentifier(current, symtable, &newlex);
                 break;  
         }
+        //add the lexed token to the program, and get the next character
         program = lexid_dynarray_add(program, tmpid);
         current = getchar();
     }

@@ -9,11 +9,16 @@ typedef union {
     int intval;
 } lexattribute;
 
+/*A lex identifier is a token val [indicating what kind of token it is] and an associated
+attribute [if any], such as the value of a floating point literal. */
+
 typedef struct {
     int tokenval;
     lexattribute attr;
 } lexid;
 
+/*macro definitions for the token values. EXPR is assumed to be last in the core token values.
+User-defined identifiers continue after EXPR */
 #define LPAREN 1
 #define RPAREN 2
 #define STRING 3
@@ -28,6 +33,7 @@ typedef struct {
 #define SUPS 12
 #define EXPR 13
 
+/*defines common lex identifier constants, to make it easier to declare them in code*/
 #define D_LEX(name) const static lexid name##_LEXID = {name, 0};
 
 D_LEX(LPAREN)
@@ -44,6 +50,7 @@ D_LEX(SUBS)
 D_LEX(SUPS)
 D_LEX(EXPR)
 
+//Necessary to allow lookup failure in a dictionary. This is why LPAREN is 1, not 0*/
 const static lexid lexid_lookup_failure = {0, 0};
 
 //NOTE: spooky action-at a distance that lets us compare lexid_eq values for in dicts
@@ -54,12 +61,14 @@ inline static int lexid_eq(lexid one, lexid two) {
     return 0;
 }
 
+//Predicate that determines whether a given lexid is a primitive or not*/
 inline static int isPrim(lexid in) {
     return lexid_eq(in, DEF_LEXID) || lexid_eq(in, LAMBDA_LEXID) || lexid_eq(in, SUPS_LEXID) 
     || lexid_eq(in, TYPE_LEXID) || lexid_eq(in, NAMESPACE_LEXID) || lexid_eq(in, SUBS_LEXID) 
     || lexid_eq(in, IMPORT_LEXID);
 }
 
+/*defines a dictionary from strings to lexids in order to implement a working symbol table*/
 DEFINE_DICT(string, lexid)
 
 
@@ -69,9 +78,13 @@ DEFINE_DYNARRAY(lexid)
 DEFINE_DYNARRAY(string)
 typedef struct {
     lexid_dynarray program;
+    /*a "backwards" symbol table that is actually just a dynarray of strings, with the
+    identifier's number cleverly represented in the index*/
     string_dynarray backsymtable;
 } lex_result; 
 
+/*lex() reads characters from stdin, and returns the above structure. Terminates upon EOF,
+EOS, and currently upon \n FIXME: allow reading files by filename */
 lex_result lex();
 
 #endif 

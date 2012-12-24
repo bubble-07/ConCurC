@@ -8,6 +8,9 @@ lexid display(lexid in, lexid_tree_dynarray other) {
         printf("%s", "float: ");
         printf("%.20f", in.attr.floatval);
     }
+    else if (in.tokenval == STRING) {
+        printf("%s", "STRING CONSTANT");
+    }
     else {
         printf("%s", "identifier: ");
         printf("%d", in.tokenval);

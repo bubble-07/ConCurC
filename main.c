@@ -1,4 +1,6 @@
 #include "parser.h"
+
+#define GENPRINT(tok) else if (in.tokenval == tok) { printf("%s", #tok); }
 lexid display(lexid in, lexid_tree_dynarray other) {
     if (in.tokenval == INT) {
         printf("%s", "integer: ");
@@ -11,6 +13,14 @@ lexid display(lexid in, lexid_tree_dynarray other) {
     else if (in.tokenval == STRING) {
         printf("%s", "STRING CONSTANT");
     }
+    GENPRINT(DEF)
+    GENPRINT(LAMBDA)
+    GENPRINT(NAMESPACE)
+    GENPRINT(IMPORT)
+    GENPRINT(TYPE)
+    GENPRINT(SUBS)
+    GENPRINT(SUPS)
+    GENPRINT(EXPR)
     else {
         printf("%s", "identifier: ");
         printf("%d", in.tokenval);

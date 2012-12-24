@@ -83,8 +83,20 @@ lex_result lex() {
     string_lexid_dict symtable = string_lexid_dict_init(100);
     lexid_dynarray program = lexid_dynarray_make(100);
 
-    ADDCONST_SYM("(", LPAREN_LEXID);
-    ADDCONST_SYM(")", RPAREN_LEXID);
+    ADDCONST_SYM("def", DEF_LEXID);
+    ADDCONST_SYM("lambda", LAMBDA_LEXID);
+    ADDCONST_SYM("namespace", NAMESPACE_LEXID);
+    ADDCONST_SYM("import", IMPORT_LEXID);
+    ADDCONST_SYM("type", TYPE_LEXID);
+
+    ADDCONST_SYM("<:", SUBS_LEXID);
+    ADDCONST_SYM("subs", SUBS_LEXID);
+    ADDCONST_SYM("subtypes", SUBS_LEXID);
+
+    ADDCONST_SYM("sups", SUPS_LEXID);
+    ADDCONST_SYM(":>", SUPS_LEXID);
+    ADDCONST_SYM("supertypes", SUPS_LEXID);
+
     int i = 0;
     int newlex = EXPR + 1;
     char current = getchar();

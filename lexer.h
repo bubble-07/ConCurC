@@ -19,14 +19,31 @@ typedef struct {
 #define STRING 3
 #define FLOAT 4
 #define INT 5
-#define EXPR 6
+#define DEF 6
+#define LAMBDA 7
+#define NAMESPACE 8
+#define IMPORT 9
+#define TYPE 10
+#define SUBS 11
+#define SUPS 12
+#define EXPR 13
 
-const static lexid LPAREN_LEXID = {LPAREN, 0};
-const static lexid RPAREN_LEXID = {RPAREN, 0};
-const static lexid STRING_LEXID = {STRING, 0};
-const static lexid FLOAT_LEXID = {FLOAT, 0};
-const static lexid INT_LEXID = {INT, 0};
-const static lexid EXPR_LEXID = {EXPR, 0};
+#define D_LEX(name) const static lexid name##_LEXID = {name, 0};
+
+D_LEX(LPAREN)
+D_LEX(RPAREN)
+D_LEX(STRING)
+D_LEX(FLOAT)
+D_LEX(INT)
+D_LEX(DEF)
+D_LEX(LAMBDA)
+D_LEX(NAMESPACE)
+D_LEX(IMPORT)
+D_LEX(TYPE)
+D_LEX(SUBS)
+D_LEX(SUPS)
+D_LEX(EXPR)
+
 const static lexid lexid_lookup_failure = {0, 0};
 
 //NOTE: spooky action-at a distance that lets us compare lexid_eq values for in dicts

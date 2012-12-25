@@ -85,6 +85,6 @@ typedef struct {
 
 /*lex() reads characters from stdin, and returns the above structure. Terminates upon EOF,
 EOS, and currently upon \n FIXME: allow reading files by filename */
-lex_result lex();
+lex_result lex(FILE * file);
 
 #endif 

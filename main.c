@@ -31,7 +31,18 @@ lexid display(lexid in, lexid_tree_dynarray other) {
 }
 
 int main(int argc, const char * argv[]) {
-    parse_result parseresult = primorder(parse(lex()));
+    parse_result parseresult;
+    if (argc < 2) {
+        parseresult = primorder(parse(lex(stdin)));
+    }
+    else {
+        FILE * toparse = fopen(argv[1], "r");
+        if (toparse == NULL) {
+            printf("%s", "WTF?");
+        }
+        parseresult = primorder(parse(lex(toparse)));
+        fclose(toparse);
+    }
     lexid_tree AST = parseresult.AST;
     lexid_tree_dfmap(AST, &display);    
     return 0;

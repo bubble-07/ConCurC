@@ -3,13 +3,13 @@
 
 //takes the current character and whether it's supposed to be negative or not
 //returns a lexid that represents either a float or an int
-lexid lexNum(char current, int negative) {
+lexid lexNum(char current, int negative, FILE * file) {
     lexid tmpid = INT_LEXID;
-    ungetc(current, stdin);
+    ungetc(current, file);
     scanf("%d", &tmpid.attr.intval);
-    current = getchar();
+    current = getc(file);
     if (current != '.') {
-        ungetc(current, stdin);
+        ungetc(current, file);
         if (negative) {
             tmpid.attr.intval = -tmpid.attr.intval;
         }
@@ -36,20 +36,24 @@ int isNotGlobTerm(char c) {
     return c && c != EOF && c != '\0' && c != '\n';
 }
 
+int isNewline(char c) {
+    return c == '\n' || c == '\r';
+}
+
 int isNotTerm(char c) {
     return isNotGlobTerm(c) && c != '(' && c != ' ' && c != ')';
 }
 
 //takes the current character, a symbol table, and a reference to the new unique identifier num
 //returns a lexid with the new identifier (if not seen before) or a lexid of an old one.
-lexid lexIdentifier(char current, string_lexid_dict symtable, int* newlex) {
+lexid lexIdentifier(char current, string_lexid_dict symtable, int* newlex, FILE* file) {
     lexid tmpid;
     char_dynarray id = to_dynstring("");
     while (isNotTerm(current)) {    
         id = char_dynarray_add(id, current);
-        current = getchar();
+        current = getc(file);
     }
-    ungetc(current, stdin);
+    ungetc(current, file);
     lexid lookupval = string_lexid_dict_get(symtable, id);
     if (lexid_eq(lookupval, lexid_lookup_failure)) {
         tmpid.tokenval = *newlex;
@@ -61,14 +65,14 @@ lexid lexIdentifier(char current, string_lexid_dict symtable, int* newlex) {
     return lookupval;
 }
 
-//Lexes a string literal from stdin
-lexid lexString(char current) {
+//Lexes a string literal
+lexid lexString(char current, FILE * file) {
     lexid tmpid = STRING_LEXID;
     char_dynarray stringval = to_dynstring("");
-    current = getchar();
+    current = getc(file);
     while (current != '"') {
         stringval = char_dynarray_add(stringval, current);
-        current = getchar();
+        current = getc(file);
     }
     tmpid.attr.stringval = stringval;
     return tmpid;
@@ -80,9 +84,14 @@ lexid lexString(char current) {
 string_lexid_dict_add(symtable, string_lexid_bucket_make(to_dynstring(nstring), constid))
 
 
-lex_result lex() {
+lex_result lex(FILE * file) {
     string_lexid_dict symtable = string_lexid_dict_init(100);
     lexid_dynarray program = lexid_dynarray_make(100);
+
+    int repl = 0; //variable that is 1 if file is stdin, else 0
+    if (file == stdin) {
+        repl = 1;
+    }
 
     /*filling the symtable with core forms*/
     ADDCONST_SYM("def", DEF_LEXID);
@@ -103,12 +112,12 @@ lex_result lex() {
     current character as a reference.*/
     int i = 0;
     int newlex = EXPR + 1;
-    char current = getchar();
-    while (isNotGlobTerm(current)) {
+    char current = getc(file);
+    while (isNotGlobTerm(current) || (!repl && isNewline(current))) {
         lexid tmpid;
         //Consume until we get something that isn't a space
-        while (current == ' ') {
-            current = getchar();
+        while (current == ' ' || isNewline(current)) {
+            current = getc(file);
         }
         switch (current) {
             case '(':
@@ -119,28 +128,28 @@ lex_result lex() {
                 break;
             case '0': case '1': case '2': case '3': case '4':
             case '5': case '6': case '7': case '8': case '9':
-                tmpid = lexNum(current, 0);
+                tmpid = lexNum(current, 0, file);
                 break;
             case '"':
-                tmpid = lexString(current);
+                tmpid = lexString(current, file);
                 break;
             case '-':
                 //We want to be able to handle subtraction AND negative numbers
-                current = getchar();
+                current = getc(file);
                 if (isdigit(current)) {
-                    tmpid = lexNum(current, 1);
+                    tmpid = lexNum(current, 1, file);
                     break;
                 }
                 //note: no break! If it's not a number, we just continue to the default case
-                ungetc(current, stdin);
+                ungetc(current, file);
 
             default:
-                tmpid = lexIdentifier(current, symtable, &newlex);
+                tmpid = lexIdentifier(current, symtable, &newlex, file);
                 break;  
         }
         //add the lexed token to the program, and get the next character
         program = lexid_dynarray_add(program, tmpid);
-        current = getchar();
+        current = getc(file);
     }
     lex_result result;
     result.program = program;

@@ -1,17 +1,17 @@
 #include "parser.h"
 #include "primorder.h"
 
-#define GENPRINT(tok) else if (in.tokenval == tok) { printf("%s", #tok); }
-lexid display(lexid in, lexid_tree_dynarray other) {
-    if (in.tokenval == INT) {
+#define GENPRINT(tok) else if (in.data.tokenval == tok) { printf("%s", #tok); }
+void display(lexid_tree in) {
+    if (in.data.tokenval == INT) {
         printf("%s", "integer: ");
-        printf("%d", in.attr.intval);
+        printf("%d", in.data.attr.intval);
     }
-    else if (in.tokenval == FLOAT) {
+    else if (in.data.tokenval == FLOAT) {
         printf("%s", "float: ");
-        printf("%.20f", in.attr.floatval);
+        printf("%.20f", in.data.attr.floatval);
     }
-    else if (in.tokenval == STRING) {
+    else if (in.data.tokenval == STRING) {
         printf("%s", "STRING CONSTANT");
     }
     GENPRINT(DEF)
@@ -21,13 +21,21 @@ lexid display(lexid in, lexid_tree_dynarray other) {
     GENPRINT(TYPE)
     GENPRINT(SUBS)
     GENPRINT(SUPS)
-    GENPRINT(EXPR)
+    else if (in.data.tokenval == EXPR) {
+        printf("%s", "(");
+        size_t i = 0;
+        while (i < in.children.size) {
+            display(in.children.begin[i]);
+            i++;
+        }
+        printf("%s", ")");
+    }
     else {
         printf("%s", "identifier: ");
-        printf("%d", in.tokenval);
+        printf("%d", in.data.tokenval);
     }
-    printf("%s", "\n");
-    return in;
+    printf("%s", "   ");
+    return;
 }
 
 int main(int argc, const char * argv[]) {
@@ -44,10 +52,7 @@ int main(int argc, const char * argv[]) {
         fclose(toparse);
     }
     lexid_tree AST = parseresult.AST;
-    lexid_tree_dfmap(AST, &display);    
+    display(AST);
+    printf("%s", "\n");
     return 0;
 }
-                
-                
-
-

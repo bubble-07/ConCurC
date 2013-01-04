@@ -21,23 +21,37 @@ typedef struct {
 User-defined identifiers continue after EXPR */
 #define LPAREN 1
 #define RPAREN 2
-#define STRING 3
-#define FLOAT 4
-#define INT 5
-#define DEF 6
-#define LAMBDA 7
-#define NAMESPACE 8
-#define IMPORT 9
-#define TYPE 10
-#define SUBS 11
-#define SUPS 12
-#define EXPR 13
+#define DOT 3
+#define BEGIN 4
+#define END 5
+#define NEWLINE 6
+#define COMMA 7
+#define SPACE 8
+#define STRING 10
+#define FLOAT 11
+#define INT 12
+#define DEF 21
+#define LAMBDA 22
+#define NAMESPACE 23
+#define IMPORT 24
+#define TYPE 25
+#define SUBS 26
+#define SUPS 27
+#define EXPR 28
 
 /*defines common lex identifier constants, to make it easier to declare them in code*/
 #define D_LEX(name) const static lexid name##_LEXID = {name, 0};
 
 D_LEX(LPAREN)
 D_LEX(RPAREN)
+
+D_LEX(DOT)
+D_LEX(BEGIN)
+D_LEX(END)
+D_LEX(NEWLINE)
+D_LEX(COMMA)
+D_LEX(SPACE)
+
 D_LEX(STRING)
 D_LEX(FLOAT)
 D_LEX(INT)

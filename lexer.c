@@ -177,15 +177,46 @@ lex_result lex(FILE * file) {
             case '"':
                 tmpid = lexString(current, file);
                 break;
-            case '-':
+            case '-': case '/':
+                //We want to be able to handle comments AND
                 //We want to be able to handle subtraction AND negative numbers
-                current = getc(file);
-                if (isdigit(current)) {
-                    tmpid = lexNum(current, 1, file);
-                    break;
+                if (current == '-') {
+                    current = getc(file);
+                    if (isdigit(current)) {
+                        tmpid = lexNum(current, 1, file);
+                        break;
+                    }
+                    //note: no break! If it's not a number, we just continue to the default case
+                    ungetc(current, file);
                 }
-                //note: no break! If it's not a number, we just continue to the default case
-                ungetc(current, file);
+                else {
+                    current = getc(file);
+                    if (current == '/') {
+                        while (current != '\n') {
+                            current = getc(file);
+                        }
+                        tmpid = NEWLINE_LEXID;
+                        break;
+                    }
+                    else if (current == '*') {
+                        int done = 0;
+                        while (!done) {
+                            current = getc(file);
+                            if (current == '*') {
+                                current = getc(file);
+                                if (current == '/') {
+                                    done = 1;
+                                }
+                                else {
+                                    ungetc(current, file);
+                                }
+                            }
+                        }
+                        tmpid = NONE_LEXID;
+                        break;
+                    }
+                    ungetc(current, file);
+                }
 
             default:
                 tmpid = lexIdentifier(current, symtable, &newlex, file);
@@ -193,7 +224,9 @@ lex_result lex(FILE * file) {
                 break;  
         }
         //add the lexed token to the program, and get the next character
-        program = lexid_dynarray_add(program, tmpid);
+        if (tmpid.tokenval != 0) {
+            program = lexid_dynarray_add(program, tmpid);
+        }
         current = getc(file);
     }
     lex_result result;

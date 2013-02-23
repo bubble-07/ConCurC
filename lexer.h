@@ -19,6 +19,7 @@ typedef struct {
 
 /*macro definitions for the token values. EXPR is assumed to be last in the core token values.
 User-defined identifiers continue after EXPR */
+#define NONE 0
 #define LPAREN 1
 #define RPAREN 2
 #define DOT 3
@@ -42,6 +43,7 @@ User-defined identifiers continue after EXPR */
 /*defines common lex identifier constants, to make it easier to declare them in code*/
 #define D_LEX(name) const static lexid name##_LEXID = {name, 0};
 
+D_LEX(NONE)
 D_LEX(LPAREN)
 D_LEX(RPAREN)
 

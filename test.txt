@@ -1,4 +1,7 @@
-hello how are
+hello how are //you siwwy siwwy
     9.0 7 -6 -5.0 "hi"
         siwwy(siwwy, 1.0)
-        hi.there(5,6)
+        hi.there(5,6) (a b c d e
+        f g
+    h i j) /* 1 2 3 /* siwwy siwwy */ */
+def hello

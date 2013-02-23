@@ -1,58 +1,51 @@
-#include "parser.h"
-#include "primorder.h"
+#include "lexer.h"
 
-#define GENPRINT(tok) else if (in.data.tokenval == tok) { printf("%s", #tok); }
-void display(lexid_tree in) {
-    if (in.data.tokenval == INT) {
-        printf("%s", "integer: ");
-        printf("%d", in.data.attr.intval);
-    }
-    else if (in.data.tokenval == FLOAT) {
-        printf("%s", "float: ");
-        printf("%.20f", in.data.attr.floatval);
-    }
-    else if (in.data.tokenval == STRING) {
-        printf("%s", "STRING CONSTANT");
-    }
-    GENPRINT(DEF)
-    GENPRINT(LAMBDA)
-    GENPRINT(NAMESPACE)
-    GENPRINT(IMPORT)
-    GENPRINT(TYPE)
-    GENPRINT(SUBS)
-    GENPRINT(SUPS)
-    else if (in.data.tokenval == EXPR) {
-        printf("%s", "(");
-        size_t i = 0;
-        while (i < in.children.size) {
-            display(in.children.begin[i]);
-            i++;
+#define TOK in.program.begin[i].tokenval
+#define GENPRINT(tok) else if (in.program.begin[i].tokenval == tok) { printf("%s", #tok); }
+void display(lex_result in) {
+    int i;
+    for (i = 0; i < in.program.size; i++) {
+        if (TOK == INT) {
+            printf("%s", "integer: ");
+            printf("%d", in.program.begin[i].attr.intval);
         }
-        printf("%s", ")");
+        else if (TOK == FLOAT) {
+            printf("%s", "float: ");
+            printf("%.20f", in.program.begin[i].attr.floatval);
+        }
+        else if (TOK == STRING) {
+            printf("%s", "STRING CONSTANT");
+        }
+        GENPRINT(DEF)
+        GENPRINT(LAMBDA)
+        GENPRINT(NAMESPACE)
+        GENPRINT(IMPORT)
+        GENPRINT(TYPE)
+        GENPRINT(SUBS)
+        GENPRINT(SUPS) 
+        else {
+            printf("%s", "identifier: ");
+            printf("%d", TOK);
+        }
+        printf("%s", "   ");
     }
-    else {
-        printf("%s", "identifier: ");
-        printf("%d", in.data.tokenval);
-    }
-    printf("%s", "   ");
     return;
 }
 
 int main(int argc, const char * argv[]) {
-    parse_result parseresult;
+    lex_result lexresult;
     if (argc < 2) {
-        parseresult = primorder(parse(lex(stdin)));
+        lexresult = lex(stdin);
     }
     else {
-        FILE * toparse = fopen(argv[1], "r");
-        if (toparse == NULL) {
+        FILE * tolex = fopen(argv[1], "r");
+        if (tolex == NULL) {
             printf("%s", "WTF?");
         }
-        parseresult = primorder(parse(lex(toparse)));
-        fclose(toparse);
+        lexresult = lex(tolex);
+        fclose(tolex);
     }
-    lexid_tree AST = parseresult.AST;
-    display(AST);
+    display(lexresult);
     printf("%s", "\n");
     return 0;
 }

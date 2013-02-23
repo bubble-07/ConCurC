@@ -1,5 +1,4 @@
 #include "lexer.h"
-#include "math.h"
 //LEXER -- lex() gets you a stream of tokens. First, some helper functions.
 
 //takes the current character and whether it's supposed to be negative or not
@@ -7,7 +6,7 @@
 lexid lexNum(char current, int negative, FILE * file) {
     lexid tmpid = INT_LEXID;
     ungetc(current, file);
-    fscanf(file, "%d", &tmpid.attr.intval);
+    scanf("%d", &tmpid.attr.intval);
     current = getc(file);
     if (current != '.') {
         ungetc(current, file);
@@ -18,7 +17,7 @@ lexid lexNum(char current, int negative, FILE * file) {
     else {
         int afterdecimal;
         double nonintegral;
-        fscanf(file, "%d", &afterdecimal);
+        scanf("%d", &afterdecimal);
         nonintegral = (double)afterdecimal;
         while (nonintegral > 1.0) {
             nonintegral = nonintegral * 0.1;
@@ -42,8 +41,7 @@ int isNewline(char c) {
 }
 
 int isNotTerm(char c) {
-    return isNotGlobTerm(c) && c != '(' && c != ' ' && c != ')' && c != ',' && c != '\t' &&
-        c != '.';
+    return isNotGlobTerm(c) && c != '(' && c != ' ' && c != ')';
 }
 
 //takes the current character, a symbol table, and a reference to the new unique identifier num
@@ -51,9 +49,6 @@ int isNotTerm(char c) {
 lexid lexIdentifier(char current, string_lexid_dict symtable, int* newlex, FILE* file) {
     lexid tmpid;
     char_dynarray id = to_dynstring("");
-    printf("%s", " ");
-    printf("%d", (int) current);
-    printf("%s", "    ");
     while (isNotTerm(current)) {    
         id = char_dynarray_add(id, current);
         current = getc(file);
@@ -116,13 +111,12 @@ lex_result lex(FILE * file) {
     /*Meat of the actual lexer. Conceptually, it does this by predictive decisions using the 
     current character as a reference.*/
     int i = 0;
-    int currentindent = 0;
     int newlex = EXPR + 1;
     char current = getc(file);
     while (isNotGlobTerm(current) || (!repl && isNewline(current))) {
         lexid tmpid;
         //Consume until we get something that isn't a space
-        while (current == ' ') {
+        while (current == ' ' || isNewline(current)) {
             current = getc(file);
         }
         switch (current) {
@@ -131,44 +125,6 @@ lex_result lex(FILE * file) {
                 break;
             case ')':
                 tmpid = RPAREN_LEXID;
-                break;
-            case ',':
-                tmpid = COMMA_LEXID;
-                break;
-            case '.':
-                tmpid = DOT_LEXID;
-                break;
-            case '\n': case '\r':
-                printf("%s", "BLAHHHHH");
-                tmpid = NEWLINE_LEXID;
-                current = getc(file);
-                float tmpindent;
-                for (tmpindent = 0; 
-                     current == ' ' || current == '\t'; current = getc(file)) {
-                    if (current == '\t') {
-                        tmpindent = tmpindent + 1.0000;
-                    }
-                    if (current == ' ') {
-                        tmpindent = tmpindent + 0.2500;
-                    }
-                }
-                int newindent = floor(tmpindent);
-                if  (newindent > currentindent) {
-                    program = lexid_dynarray_add(program, NEWLINE_LEXID);
-                    tmpid = BEGIN_LEXID;
-                    for (i = 0; i < (newindent - currentindent - 1); i++) {
-                        program = lexid_dynarray_add(program, BEGIN_LEXID);
-                    }
-                }
-                else if (newindent < currentindent) {
-                    program = lexid_dynarray_add(program, NEWLINE_LEXID);
-                    tmpid = END_LEXID;
-                    for (i = 0; i < currentindent - newindent - 1; i++) {
-                        program = lexid_dynarray_add(program, END_LEXID);
-                    }
-                } 
-                currentindent = newindent;
-                ungetc(current, file); 
                 break;
             case '0': case '1': case '2': case '3': case '4':
             case '5': case '6': case '7': case '8': case '9':
@@ -189,7 +145,6 @@ lex_result lex(FILE * file) {
 
             default:
                 tmpid = lexIdentifier(current, symtable, &newlex, file);
-                printf("%s", "ID");
                 break;  
         }
         //add the lexed token to the program, and get the next character

@@ -84,6 +84,10 @@ inline static int isPrim(lexid in) {
     || lexid_eq(in, IMPORT_LEXID);
 }
 
+inline static int isID(lexid in) {
+    return (isPrim(in) || (in.tokenval > ( EXPR )));
+}
+
 /*defines a dictionary from strings to lexids in order to implement a working symbol table*/
 DEFINE_DICT(string, lexid)
 

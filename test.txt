@@ -1,8 +1,11 @@
-def (B doublearg) ((A -> (A -> B)) F) (A arg)
+a.9.0.c
+/* def (B doublearg) ((A -> (A -> B)) F) (A arg)
     F arg arg
 def (float double)
     doublearg +
 def (float square)
     doublearg *
 hello(5)
-siwwy /* siwwy */ siwwy
+siwwy siwwy siwwy */
+
+hello(siwwy)

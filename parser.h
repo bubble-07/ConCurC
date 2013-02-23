@@ -32,7 +32,11 @@ parser_state parser_state_init(lexid_dynarray, size_t i);
 
 parser_state consume(lexid toconsume, parser_state in);
 
-parse_part parse_list(parser_state state);
+parse_part parse_listitem(parser_state state);
+parse_part parse_dotitem(parser_state state);
+parse_part parse_dotapp(parser_state state);
+parse_part parse_sexpr(parser_state state);
+parse_part parse_funapp(parser_state state);
 
 /*The actual parsing function */
 parse_result parse(lex_result in);

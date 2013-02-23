@@ -23,6 +23,9 @@ parser_state consume(lexid toconsume, parser_state in) {
 parse_part parse_listitem(parser_state state) {
     parse_part result;
     lexid current = getCurrent(state);
+    printf("%s", "\n siwwy:");
+    printf("%d", current.tokenval);
+    printf("%s", "\n");
     if (lexid_eq(FLOAT_LEXID, current) || lexid_eq(INT_LEXID, current)
         || lexid_eq(STRING_LEXID, current)) {
 
@@ -59,12 +62,28 @@ parse_part parse_dotitem(parser_state state) {
 }
 
 parse_part parse_funapp(parser_state state) {
+    printf("%s", "parsing funapp...");
+    printf("%d", state.index);
+    printf("%s", "\n");
     parse_part result;
+    parse_part tmp;
     result.tree = lexid_tree_init(EXPR_LEXID);
     result.tree = lexid_tree_addchild(result.tree, lexid_tree_init(getCurrent(state)));
     //get us past the opening paren
     state.index += 2;
-
+    while (!lexid_eq(getCurrent(state), RPAREN_LEXID)) {
+        tmp = parse_listitems(state);
+        result.tree = lexid_tree_addchild(result.tree, tmp.tree);
+        state = tmp.state;
+        if (lexid_eq(getCurrent(state), COMMA_LEXID)) {
+            state = consume(COMMA_LEXID, state);
+        }
+    }
+    printf("%s", "terminating due to rparen \n");
+    state = consume(RPAREN_LEXID, state);
+    printf("%d", state.index);
+    result.state = state;
+    return result;
 }
 
 parse_part parse_dotapp(parser_state state) {
@@ -113,12 +132,15 @@ parse_part parse_sexpr(parser_state state) {
 /*Parses list items out of the token stream. Takes the current parser state, and returns a partial
 result*/
 parse_part parse_listitems(parser_state state) {
+    printf("%s", "look at this!");
+    printf("%d", state.index);
     parse_part result;
     parse_part tmp;
 
+    state.index -= 1;
+
     result.tree = lexid_tree_init(EXPR_LEXID);
     
-    state.index -= 1;
     lexid current = SPACE_LEXID;
 
     while (isWhite(current)) {
@@ -136,6 +158,8 @@ parse_part parse_listitems(parser_state state) {
         current = getCurrent(state);
     }
     result.state = state;
+    printf("%s", "closing");
+    printf("%d", result.state.index);
     return result;
 }
 
@@ -145,7 +169,7 @@ parse_part parse_listitems(parser_state state) {
 parse_result parse(lex_result in) {
      parse_result result;
      result.backsymtable = in.backsymtable;
-     result.AST = parse_sexpr(parser_state_init(in.program, 0)).tree;
+     result.AST = parse_funapp(parser_state_init(in.program, 0)).tree;
      lexid_dynarray_free(in.program);
      return result;
 }

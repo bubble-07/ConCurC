@@ -119,8 +119,11 @@ lex_result lex(FILE * file) {
     while (isNotGlobTerm(current) || (!repl && isNewline(current))) {
         lexid tmpid;
         //Consume until we get something that isn't a space
-        while (current == ' ') {
-            current = getc(file);
+        if (current == ' ') {
+            program = lexid_dynarray_add(program, SPACE_LEXID);
+            while (current == ' ') {
+                current = getc(file);
+            }
         }
         switch (current) {
             case '(':
@@ -206,6 +209,11 @@ lex_result lex(FILE * file) {
                                 }
                             }
                         }
+                        current = getc(file);
+                        while (current == ' ') {
+                            current = getc(file);
+                        }
+                        ungetc(current, file);
                         tmpid = NONE_LEXID;
                         break;
                     }

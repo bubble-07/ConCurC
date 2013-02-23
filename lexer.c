@@ -51,9 +51,6 @@ int isNotTerm(char c) {
 lexid lexIdentifier(char current, string_lexid_dict symtable, int* newlex, FILE* file) {
     lexid tmpid;
     char_dynarray id = to_dynstring("");
-    printf("%s", " ");
-    printf("%d", (int) current);
-    printf("%s", "    ");
     while (isNotTerm(current)) {    
         id = char_dynarray_add(id, current);
         current = getc(file);
@@ -139,8 +136,7 @@ lex_result lex(FILE * file) {
                 tmpid = DOT_LEXID;
                 break;
             case '\n': case '\r':
-                printf("%s", "BLAHHHHH");
-                tmpid = NEWLINE_LEXID;
+                program = lexid_dynarray_add(program, NEWLINE_LEXID);
                 current = getc(file);
                 float tmpindent;
                 for (tmpindent = 0; 
@@ -153,20 +149,18 @@ lex_result lex(FILE * file) {
                     }
                 }
                 int newindent = floor(tmpindent);
+
                 if  (newindent > currentindent) {
-                    program = lexid_dynarray_add(program, NEWLINE_LEXID);
-                    tmpid = BEGIN_LEXID;
-                    for (i = 0; i < (newindent - currentindent - 1); i++) {
+                    for (i = 0; i < (newindent - currentindent); i++) {
                         program = lexid_dynarray_add(program, BEGIN_LEXID);
                     }
                 }
                 else if (newindent < currentindent) {
-                    program = lexid_dynarray_add(program, NEWLINE_LEXID);
-                    tmpid = END_LEXID;
-                    for (i = 0; i < currentindent - newindent - 1; i++) {
+                    for (i = 0; i < currentindent - newindent; i++) {
                         program = lexid_dynarray_add(program, END_LEXID);
                     }
                 } 
+                tmpid = NONE_LEXID;
                 currentindent = newindent;
                 ungetc(current, file); 
                 break;
@@ -220,7 +214,6 @@ lex_result lex(FILE * file) {
 
             default:
                 tmpid = lexIdentifier(current, symtable, &newlex, file);
-                printf("%s", "ID");
                 break;  
         }
         //add the lexed token to the program, and get the next character

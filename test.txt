@@ -1,4 +1,5 @@
-a.9.0.c
+(hello.how.are.you 1 2 3 4)
+
 /* def (B doublearg) ((A -> (A -> B)) F) (A arg)
     F arg arg
 def (float double)

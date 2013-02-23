@@ -88,6 +88,11 @@ inline static int isID(lexid in) {
     return (isPrim(in) || (in.tokenval > ( EXPR )));
 }
 
+inline static int isWhite(lexid in) {
+    return (lexid_eq(in, SPACE_LEXID) || lexid_eq(in, BEGIN_LEXID) ||
+            lexid_eq(in, END_LEXID) || lexid_eq(in, NEWLINE_LEXID));
+}
+
 /*defines a dictionary from strings to lexids in order to implement a working symbol table*/
 DEFINE_DICT(string, lexid)
 

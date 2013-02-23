@@ -36,6 +36,7 @@ parse_part parse_listitem(parser_state state);
 parse_part parse_dotitem(parser_state state);
 parse_part parse_dotapp(parser_state state);
 parse_part parse_sexpr(parser_state state);
+parse_part parse_listitems(parser_state state);
 parse_part parse_funapp(parser_state state);
 
 /*The actual parsing function */

@@ -101,45 +101,51 @@ parse_part parse_dotapp(parser_state state) {
     return result;
     
 }
+
+parse_part parse_sexpr(parser_state state) {
+    parse_part result;
+    state = consume(LPAREN_LEXID, state);
+    result = parse_listitems(state);
+    result.state = consume(RPAREN_LEXID, result.state);
+    return result;
+}
  
 /*Parses list items out of the token stream. Takes the current parser state, and returns a partial
 result*/
 parse_part parse_listitems(parser_state state) {
-     parse_part result;
-     /*get ready to store an expression*/
+    parse_part result;
+    parse_part tmp;
 
-     result.tree = lexid_tree_init(EXPR_LEXID);
-     lexid current;
-     parse_part subexpr;
-     /*While we haven't hit the end of the input,  if we find
-     a left paren, recursively spawn this function, and by default add the current lexid
-     as a child to the tree that results from a call to this function*/
-     size_t i = state.index;
-     current = state.program.begin[i];
-     while (i < state.program.size && current.tokenval != RPAREN && current.tokenval != DOT
-             && current.tokenval != COMMA) {
-         switch (current.tokenval) {
-             case LPAREN:
-                subexpr = parse_sexpr(parser_state_init(state.program, i));
-                result.tree = lexid_tree_addchild(result.tree, subexpr.tree);
-                i = subexpr.state.index;
-                break;
-             default:
-                result.tree = lexid_tree_addchild(result.tree, lexid_tree_init(current));
-                break;
-         }
-         i++;
-         current = state.program.begin[i];
-      }
-      result.state.index = i;
-      return result;
+    result.tree = lexid_tree_init(EXPR_LEXID);
+    
+    state.index -= 1;
+    lexid current = SPACE_LEXID;
+
+    while (isWhite(current)) {
+        while (isWhite(current)) {
+            state.index += 1;
+            current = getCurrent(state);
+        }
+        if (lexid_eq(current, COMMA_LEXID) || lexid_eq(current, RPAREN_LEXID)) {
+            printf("%s", "OOOOOHHHHH");
+            continue;
+        }
+        tmp = parse_listitem(state);
+        result.tree = lexid_tree_addchild(result.tree, tmp.tree);
+        state.index = tmp.state.index;
+        current = getCurrent(state);
+    }
+    result.state = state;
+    return result;
 }
+
+
 
 /*Glue to make sure the types match up*/
 parse_result parse(lex_result in) {
      parse_result result;
      result.backsymtable = in.backsymtable;
-     result.AST = parse_dotapp(parser_state_init(in.program, 0)).tree;
+     result.AST = parse_sexpr(parser_state_init(in.program, 0)).tree;
      lexid_dynarray_free(in.program);
      return result;
 }

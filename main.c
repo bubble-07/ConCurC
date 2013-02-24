@@ -2,7 +2,8 @@
 #include "primorder.h"
 
 #define GENPRINT(tok) else if (in.data.tokenval == tok) { printf("%s", #tok); }
-void display(lexid_tree in) {
+void display(lexid_tree in, string_dynarray backsymtable) {
+    string toprint;
     if (in.data.tokenval == INT) {
         printf("%s", "integer: ");
         printf("%d", in.data.attr.intval);
@@ -25,14 +26,15 @@ void display(lexid_tree in) {
         printf("%s", "(");
         size_t i = 0;
         while (i < in.children.size) {
-            display(in.children.begin[i]);
+            display(in.children.begin[i], backsymtable);
             i++;
         }
         printf("%s", ")");
     }
     else {
-        printf("%s", "identifier: ");
-        printf("%d", in.data.tokenval);
+        toprint = char_dynarray_copy(backsymtable.begin[in.data.tokenval]);
+        toprint = char_dynarray_add(toprint, (char) 0);
+        printf("%s", toprint.begin);
     }
     printf("%s", "   ");
     return;
@@ -52,7 +54,7 @@ int main(int argc, const char * argv[]) {
         fclose(toparse);
     }
     lexid_tree AST = parseresult.AST;
-    display(AST);
+    display(AST, parseresult.backsymtable);
     printf("%s", "\n");
     return 0;
 }

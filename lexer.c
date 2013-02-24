@@ -185,6 +185,7 @@ lex_result lex(FILE * file) {
                     }
                     //note: no break! If it's not a number, we just continue to the default case
                     ungetc(current, file);
+                    current = '-';
                 }
                 else {
                     current = getc(file);
@@ -218,6 +219,7 @@ lex_result lex(FILE * file) {
                         break;
                     }
                     ungetc(current, file);
+                    current = '/';
                 }
 
             default:
@@ -232,5 +234,20 @@ lex_result lex(FILE * file) {
     }
     lex_result result;
     result.program = program;
+
+    //fill the "backsymtable" with entries
+    //string_lexid_dict to string_dynarray
+    //remember, string_lexid_dict is actually string_lexid_bucket_dynarray_dynarray
+    result.backsymtable = string_dynarray_make(newlex + 1);
+    result.backsymtable.size = newlex + 1;
+    int j = 0;
+    string_lexid_bucket_dynarray tmp;
+    for (i=0; i < symtable.size; i++) {
+        tmp = symtable.begin[i];
+        for (j=0; j < tmp.size; j++) {
+            result.backsymtable.begin[tmp.begin[j].value.tokenval] = tmp.begin[j].key;
+        }
+    } 
+
     return result;
 }

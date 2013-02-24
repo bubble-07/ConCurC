@@ -1,12 +1,2 @@
-this(id(9), f(12))
-
-/* def (B doublearg) ((A -> (A -> B)) F) (A arg)
-    F arg arg
-def (float double)
-    doublearg +
-def (float square)
-    doublearg *
-hello(5)
-siwwy siwwy siwwy */
-
-hello(siwwy)
+a b c /* Alphabet! */
+    1 2 3)

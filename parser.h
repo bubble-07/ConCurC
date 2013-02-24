@@ -36,8 +36,10 @@ parse_part parse_listitem(parser_state state);
 parse_part parse_dotitem(parser_state state);
 parse_part parse_dotapp(parser_state state);
 parse_part parse_sexpr(parser_state state);
-parse_part parse_listitems(parser_state state);
+//singleln true if on single line, false if not
+parse_part parse_listitems(parser_state state, int singleln);
 parse_part parse_funapp(parser_state state);
+parse_part parse_blockline(parser_state state);
 
 /*The actual parsing function */
 parse_result parse(lex_result in);

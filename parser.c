@@ -156,23 +156,59 @@ parse_part parse_listitems(parser_state state, int singleln) {
 
 parse_part parse_blockline(parser_state state) {
     parse_part result;
+    
+    //for the block body formatting
+    lexid_tree header;
+    lexid_tree tmp;
+    int i;
+
     result = parse_listitems(state,1);
     result.state = consume(NEWLINE_LEXID, result.state);
     //may have to protect against "end of program" bugs...
     if (lexid_eq(getCurrent(result.state),BEGIN_LEXID)) {
         //parse block body
+        header = result.tree;
+        result.state = consume(BEGIN_LEXID, result.state);
+        result = parse_blocklines(result.state);
+        result.state = consume(END_LEXID, result.state);
+
+        //assemble the formatting correctly
+        //Format the header
+        tmp = lexid_tree_init(EXPR_LEXID);
+        for (i=1; i < header.children.size; i++) {
+            tmp = lexid_tree_addchild(tmp, header.children.begin[i]);
+        }
+        header = lexid_tree_addchild(lexid_tree_init(EXPR_LEXID), header.children.begin[0]);
+        header = lexid_tree_addchild(header, tmp);
+
+        //Assimilate with the body
+        result.tree.children = lexid_tree_dynarray_cat(header.children, result.tree.children);
+        
     }
     //parsed a block line, we're good, return
     return result; 
 }
 
+//parse blocklines until we hit an "end"
+parse_part parse_blocklines(parser_state state) {
+    parse_part result;
+    parse_part tmp;
+    result.tree = lexid_tree_init(EXPR_LEXID);
+    while (!lexid_eq(getCurrent(state), END_LEXID) && state.index < state.program.size) {
+        tmp = parse_blockline(state);
+        state = tmp.state;
+        result.tree = lexid_tree_addchild(result.tree, tmp.tree);
+    }
+    result.state = state;
+    return result;
+}
 
 
 /*Glue to make sure the types match up*/
 parse_result parse(lex_result in) {
      parse_result result;
      result.backsymtable = in.backsymtable;
-     result.AST = parse_listitems(parser_state_init(in.program, 0),0).tree;
+     result.AST = parse_blocklines(parser_state_init(in.program, 0)).tree;
      lexid_dynarray_free(in.program);
      return result;
 }

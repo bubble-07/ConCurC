@@ -40,6 +40,7 @@ parse_part parse_sexpr(parser_state state);
 parse_part parse_listitems(parser_state state, int singleln);
 parse_part parse_funapp(parser_state state);
 parse_part parse_blockline(parser_state state);
+parse_part parse_blocklines(parser_state state);
 
 /*The actual parsing function */
 parse_result parse(lex_result in);

@@ -67,7 +67,13 @@ parse_part parse_funapp(parser_state state) {
     state.index += 2;
     while (!lexid_eq(getCurrent(state), RPAREN_LEXID)) {
         tmp = parse_listitems(state,0);
-        result.tree = lexid_tree_addchild(result.tree, tmp.tree);
+        //flatten if there's just one element
+        if (tmp.tree.children.size == 1) {
+            result.tree = lexid_tree_addchild(result.tree, tmp.tree.children.begin[0]);
+        } 
+        else {
+            result.tree = lexid_tree_addchild(result.tree, tmp.tree);
+        }
         state = tmp.state;
         if (lexid_eq(getCurrent(state), COMMA_LEXID)) {
             state = consume(COMMA_LEXID, state);

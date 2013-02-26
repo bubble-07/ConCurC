@@ -207,6 +207,9 @@ parse_part parse_blocklines(parser_state state) {
     result.tree = lexid_tree_init(EXPR_LEXID);
     while (!lexid_eq(getCurrent(state), END_LEXID) && state.index < state.program.size) {
         tmp = parse_blockline(state);
+        if (tmp.tree.children.size == 1) {
+            tmp.tree = tmp.tree.children.begin[0];
+        }
         state = tmp.state;
         result.tree = lexid_tree_addchild(result.tree, tmp.tree);
     }

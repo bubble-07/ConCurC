@@ -6,3 +6,6 @@ def (int nCr) (int n) (int r)
     fact(n) / (fact(r) * fact(n - r))
 def fun
     5
+(def ((double x))
+    (x + x)
+)

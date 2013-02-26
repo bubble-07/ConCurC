@@ -36,6 +36,10 @@ inline static type##_tree type##_tree_addchild(type##_tree in, type##_tree toadd
     in.children = type##_tree_dynarray_add(in.children, toadd); \
     return in; \
 } \
+inline static void type##_tree_free(type##_tree in) { \
+    type##_tree_dynarray_free(in.children); \
+    return; \
+} \
 \
 /*Depth-first map on the tree in the first argument using the function in the second arg, which
 is a function that conceptually takes the data at the current root node as the first argument, 
@@ -67,13 +71,16 @@ inline static type##_dynarray type##_tree_get_childarray(type##_tree in) { \
  over dynamic array of the children's data with the root's data as the "zero element" 
  The function pointer passed follows the same format as dynarray_foldl's second arg */\
 static type##_tree type##_tree_dfmap_foldl(type##_tree in, type (*transform)(type, type)) { \
+    type##_dynarray tmp; \
     if (in.children.size > 0) { \
        size_t i = 0; \
        while (i < in.children.size) { \
            in.children.begin[i] = type##_tree_dfmap_foldl(in.children.begin[i], transform); \
            i++; \
        } \
-       in.data = type##_dynarray_foldl(type##_tree_get_childarray(in), transform, in.data); \
+       tmp = type##_tree_get_childarray(in); \
+       in.data = type##_dynarray_foldl(tmp, transform, in.data); \
+       type##_dynarray_free(tmp); \
     } \
     return in; \
 } \

@@ -41,6 +41,11 @@ typedef keyT##_##valT##_bucket_dynarray_dynarray keyT##_##valT##_dict; \
 inline static keyT##_##valT##_bucket_dynarray keyT##_##valT##_initrow(keyT##_##valT##_bucket_dynarray in) { \
     return keyT##_##valT##_bucket_dynarray_make(1); \
 }\
+inline static keyT##_##valT##_bucket_dynarray keyT##_##valT##_freerow(keyT##_##valT##_bucket_dynarray in) { \
+    keyT##_##valT##_bucket_dynarray result; \
+    keyT##_##valT##_bucket_dynarray_free(in); \
+    return result; \
+} \
 /* initialilzes a dictionary with the given table size. Recommended to be appropriately large*/\
 inline static keyT##_##valT##_dict keyT##_##valT##_dict_init(size_t size) { \
     keyT##_##valT##_dict result; \
@@ -49,6 +54,12 @@ inline static keyT##_##valT##_dict keyT##_##valT##_dict_init(size_t size) { \
     result = keyT##_##valT##_bucket_dynarray_dynarray_map(result, & keyT##_##valT##_initrow); \
     return result; \
 } \
+inline static void keyT##_##valT##_dict_free(keyT##_##valT##_dict in) { \
+    in = keyT##_##valT##_bucket_dynarray_dynarray_map(in, & keyT##_##valT##_freerow); \
+    keyT##_##valT##_bucket_dynarray_dynarray_free(in); \
+    return; \
+} \
+\
 /* adds the bucket given as the second argument to the given dictionary*/ \
 inline static keyT##_##valT##_dict keyT##_##valT##_dict_add(keyT##_##valT##_dict in, keyT##_##valT##_bucket to_add) { \
      size_t i = hash_##keyT(to_add.key) % in.size; \

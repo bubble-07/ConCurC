@@ -70,6 +70,7 @@ parse_part parse_funapp(parser_state state) {
         //flatten if there's just one element
         if (tmp.tree.children.size == 1) {
             result.tree = lexid_tree_addchild(result.tree, tmp.tree.children.begin[0]);
+            lexid_tree_free(tmp.tree);
         } 
         else {
             result.tree = lexid_tree_addchild(result.tree, tmp.tree);
@@ -102,6 +103,7 @@ parse_part parse_dotapp(parser_state state) {
 
     if (dotsepvals.size == 1) {
         result.tree = dotsepvals.begin[0];
+        lexid_tree_dynarray_free(dotsepvals);
         return result;
     }
     
@@ -115,6 +117,7 @@ parse_part parse_dotapp(parser_state state) {
         result.tree = lexid_tree_addchild(lexid_tree_init(EXPR_LEXID), dotsepvals.begin[i]);
         result.tree = lexid_tree_addchild(result.tree, tmp);
     }
+    lexid_tree_dynarray_free(dotsepvals);
     return result;
     
 }
@@ -188,7 +191,9 @@ parse_part parse_blockline(parser_state state) {
         header = lexid_tree_addchild(header, tmp);
 
         //Assimilate with the body
-        result.tree.children = lexid_tree_dynarray_cat(header.children, result.tree.children);
+        tmp.children = result.tree.children;
+        result.tree.children = lexid_tree_dynarray_cat(header.children, tmp.children);
+        lexid_tree_dynarray_free(tmp.children);
         
     }
     //parsed a block line, we're good, return

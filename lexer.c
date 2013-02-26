@@ -248,6 +248,7 @@ lex_result lex(FILE * file) {
             result.backsymtable.begin[tmp.begin[j].value.tokenval] = tmp.begin[j].key;
         }
     } 
+    string_lexid_dict_free(symtable);
 
     return result;
 }

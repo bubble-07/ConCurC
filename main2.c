@@ -7,6 +7,10 @@ void display(lexid_dynarray in) {
     for (i=0; i < in.size; i++) {
         printf("%s", "\n token: ");
         printf("%d", in.begin[i].tokenval);
+        printf("%s", " on line:  ");
+        printf("%d", (int) in.begin[i].loc.lineno);
+        printf("%s", " column: ");
+        printf("%d", (int) in.begin[i].loc.linepos);
     }
     printf("%s", "   ");
     return;

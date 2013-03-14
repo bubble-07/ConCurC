@@ -2,7 +2,7 @@
 #define LEXER_DEFINED
 
 #include <stdlib.h>
-#include "libs/dynstring.h"
+#include "errormodule.h"
 typedef union {
     double floatval;
     string stringval;
@@ -15,6 +15,7 @@ attribute [if any], such as the value of a floating point literal. */
 typedef struct {
     int tokenval;
     lexattribute attr;
+    fileLoc loc;
 } lexid;
 
 /*macro definitions for the token values. EXPR is assumed to be last in the core token values.

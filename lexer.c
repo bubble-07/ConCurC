@@ -2,15 +2,39 @@
 #include "math.h"
 //LEXER -- lex() gets you a stream of tokens. First, some helper functions.
 
+int isNewline(char c) {
+    return c == '\n' || c == '\r';
+}
+
+
+char get_char(fileLoc* file) {
+    file->linepos += 1;
+    char current = getc(file->fileptr);
+    if (isNewline(current)) {
+        file->lineno += 1;
+        file->linepos = 0;
+    }
+    return current;
+}
+void unget_char(char current, fileLoc* file) {
+    ungetc(current, file->fileptr);
+    file->linepos -= 1;
+    if (isNewline(current)) {
+        file->lineno -= 1;
+        file->linepos = LINE_END;
+    }
+    return;
+}
+
 //takes the current character and whether it's supposed to be negative or not
 //returns a lexid that represents either a float or an int
-lexid lexNum(char current, int negative, FILE * file) {
+lexid lexNum(char current, int negative, fileLoc* file) {
     lexid tmpid = INT_LEXID;
-    ungetc(current, file);
-    fscanf(file, "%d", &tmpid.attr.intval);
-    current = getc(file);
+    unget_char(current, file);
+    fscanf(file->fileptr, "%d", &tmpid.attr.intval);
+    current = get_char(file);
     if (current != '.') {
-        ungetc(current, file);
+        unget_char(current, file);
         if (negative) {
             tmpid.attr.intval = -tmpid.attr.intval;
         }
@@ -18,7 +42,7 @@ lexid lexNum(char current, int negative, FILE * file) {
     else {
         int afterdecimal;
         double nonintegral;
-        fscanf(file, "%d", &afterdecimal);
+        fscanf(file->fileptr, "%d", &afterdecimal);
         nonintegral = (double)afterdecimal;
         while (nonintegral > 1.0) {
             nonintegral = nonintegral * 0.1;
@@ -37,10 +61,6 @@ int isNotGlobTerm(char c) {
     return c && c != EOF && c != '\0' && c != '\n';
 }
 
-int isNewline(char c) {
-    return c == '\n' || c == '\r';
-}
-
 int isNotTerm(char c) {
     return isNotGlobTerm(c) && c != '(' && c != ' ' && c != ')' && c != ',' && c != '\t' &&
         c != '.';
@@ -48,14 +68,14 @@ int isNotTerm(char c) {
 
 //takes the current character, a symbol table, and a reference to the new unique identifier num
 //returns a lexid with the new identifier (if not seen before) or a lexid of an old one.
-lexid lexIdentifier(char current, string_lexid_dict symtable, int* newlex, FILE* file) {
+lexid lexIdentifier(char current, string_lexid_dict symtable, int* newlex, fileLoc* file) {
     lexid tmpid;
     char_dynarray id = to_dynstring("");
     while (isNotTerm(current)) {    
         id = char_dynarray_add(id, current);
-        current = getc(file);
+        current = get_char(file);
     }
-    ungetc(current, file);
+    unget_char(current, file);
     lexid lookupval = string_lexid_dict_get(symtable, id);
     if (lexid_eq(lookupval, lexid_lookup_failure)) {
         tmpid.tokenval = *newlex;
@@ -68,13 +88,13 @@ lexid lexIdentifier(char current, string_lexid_dict symtable, int* newlex, FILE*
 }
 
 //Lexes a string literal
-lexid lexString(char current, FILE * file) {
+lexid lexString(char current, fileLoc* file) {
     lexid tmpid = STRING_LEXID;
     char_dynarray stringval = to_dynstring("");
-    current = getc(file);
+    current = get_char(file);
     while (current != '"') {
         stringval = char_dynarray_add(stringval, current);
-        current = getc(file);
+        current = get_char(file);
     }
     tmpid.attr.stringval = stringval;
     return tmpid;
@@ -89,7 +109,7 @@ string_lexid_dict_add(symtable, string_lexid_bucket_make(to_dynstring(nstring), 
 lex_result lex(FILE * file) {
     string_lexid_dict symtable = string_lexid_dict_init(100);
     lexid_dynarray program = lexid_dynarray_make(100);
-
+    
     int repl = 0; //variable that is 1 if file is stdin, else 0
     if (file == stdin) {
         repl = 1;
@@ -115,14 +135,24 @@ lex_result lex(FILE * file) {
     int i = 0;
     int currentindent = 0;
     int newlex = EXPR + 1;
-    char current = getc(file);
+
+    fileLoc* currentloc = memalloc(sizeof(fileLoc));
+    currentloc->lineno = 1;
+    currentloc->linepos = 0;
+    currentloc->fileptr = file;
+
+
+    char current = get_char(currentloc);
+
     while (isNotGlobTerm(current) || (!repl && isNewline(current))) {
         lexid tmpid;
         //Consume until we get something that isn't a space
         if (current == ' ') {
-            program = lexid_dynarray_add(program, SPACE_LEXID);
+            tmpid = SPACE_LEXID;
+            tmpid.loc = *currentloc;
+            program = lexid_dynarray_add(program, tmpid);
             while (current == ' ') {
-                current = getc(file);
+                current = get_char(currentloc);
             }
         }
         switch (current) {
@@ -139,11 +169,13 @@ lex_result lex(FILE * file) {
                 tmpid = DOT_LEXID;
                 break;
             case '\n': case '\r':
-                program = lexid_dynarray_add(program, NEWLINE_LEXID);
-                current = getc(file);
+                tmpid = NEWLINE_LEXID;
+                tmpid.loc = *currentloc;
+                program = lexid_dynarray_add(program, tmpid);
+                current = get_char(currentloc);
                 float tmpindent;
                 for (tmpindent = 0; 
-                     current == ' ' || current == '\t'; current = getc(file)) {
+                     current == ' ' || current == '\t'; current = get_char(currentloc)) {
                     if (current == '\t') {
                         tmpindent = tmpindent + 1.0000;
                     }
@@ -155,43 +187,47 @@ lex_result lex(FILE * file) {
 
                 if  (newindent > currentindent) {
                     for (i = 0; i < (newindent - currentindent); i++) {
-                        program = lexid_dynarray_add(program, BEGIN_LEXID);
+                        tmpid = BEGIN_LEXID;
+                        tmpid.loc = *currentloc;
+                        program = lexid_dynarray_add(program, tmpid);
                     }
                 }
                 else if (newindent < currentindent) {
                     for (i = 0; i < currentindent - newindent; i++) {
-                        program = lexid_dynarray_add(program, END_LEXID);
+                        tmpid = END_LEXID;
+                        tmpid.loc = *currentloc;
+                        program = lexid_dynarray_add(program, tmpid);
                     }
                 } 
                 tmpid = NONE_LEXID;
                 currentindent = newindent;
-                ungetc(current, file); 
+                unget_char(current, currentloc); 
                 break;
             case '0': case '1': case '2': case '3': case '4':
             case '5': case '6': case '7': case '8': case '9':
-                tmpid = lexNum(current, 0, file);
+                tmpid = lexNum(current, 0, currentloc);
                 break;
             case '"':
-                tmpid = lexString(current, file);
+                tmpid = lexString(current, currentloc);
                 break;
             case '-': case '/':
                 //We want to be able to handle comments AND
                 //We want to be able to handle subtraction AND negative numbers
                 if (current == '-') {
-                    current = getc(file);
+                    current = get_char(currentloc);
                     if (isdigit(current)) {
-                        tmpid = lexNum(current, 1, file);
+                        tmpid = lexNum(current, 1, currentloc);
                         break;
                     }
                     //note: no break! If it's not a number, we just continue to the default case
-                    ungetc(current, file);
+                    unget_char(current, currentloc);
                     current = '-';
                 }
                 else {
-                    current = getc(file);
+                    current = get_char(currentloc);
                     if (current == '/') {
                         while (current != '\n') {
-                            current = getc(file);
+                            current = get_char(currentloc);
                         }
                         tmpid = NEWLINE_LEXID;
                         break;
@@ -199,38 +235,41 @@ lex_result lex(FILE * file) {
                     else if (current == '*') {
                         int done = 0;
                         while (!done) {
-                            current = getc(file);
+                            current = get_char(currentloc);
                             if (current == '*') {
-                                current = getc(file);
+                                current = get_char(currentloc);
                                 if (current == '/') {
                                     done = 1;
                                 }
                                 else {
-                                    ungetc(current, file);
+                                    unget_char(current, currentloc);
                                 }
                             }
                         }
-                        current = getc(file);
+                        current = get_char(currentloc);
                         while (current == ' ') {
-                            current = getc(file);
+                            current = get_char(currentloc);
                         }
-                        ungetc(current, file);
+                        unget_char(current, currentloc);
                         tmpid = NONE_LEXID;
                         break;
                     }
-                    ungetc(current, file);
+                    unget_char(current, currentloc);
                     current = '/';
                 }
 
             default:
-                tmpid = lexIdentifier(current, symtable, &newlex, file);
+                tmpid = lexIdentifier(current, symtable, &newlex, currentloc);
                 break;  
         }
+       
+        tmpid.loc = *currentloc;
+
         //add the lexed token to the program, and get the next character
         if (tmpid.tokenval != 0) {
             program = lexid_dynarray_add(program, tmpid);
         }
-        current = getc(file);
+        current = get_char(currentloc);
     }
     lex_result result;
     result.program = program;

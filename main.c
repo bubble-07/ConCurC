@@ -6,6 +6,8 @@ void display(lexid_tree in, string_dynarray backsymtable) {
     string toprint;
     printf("%s", "\n on line: ");
     printf("%d", (int) in.data.loc.lineno);
+    printf("%s", " col: ");
+    printf("%d", (int) in.data.loc.linepos);
     printf("%s", " ");
 
     if (in.data.tokenval == INT) {
@@ -46,17 +48,17 @@ void display(lexid_tree in, string_dynarray backsymtable) {
 
 int main(int argc, const char * argv[]) {
     parse_result parseresult;
+    fileLoc* file;
     if (argc < 2) {
-        parseresult = primorder(parse(lex(stdin)));
+        file = load_stdin();
+        parseresult = primorder(parse(lex(load_stdin())));
     }
     else {
-        FILE * toparse = fopen(argv[1], "r");
-        if (toparse == NULL) {
-            printf("%s", "WTF?");
-        }
-        parseresult = primorder(parse(lex(toparse)));
-        fclose(toparse);
+        file = load_file(argv[1]);
+        parseresult = primorder(parse(lex(file)));
     }
+    close_file(file);
+    free(file);
     lexid_tree AST = parseresult.AST;
     display(AST, parseresult.backsymtable);
     printf("%s", "\n");

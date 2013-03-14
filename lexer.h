@@ -2,7 +2,7 @@
 #define LEXER_DEFINED
 
 #include <stdlib.h>
-#include "errormodule.h"
+#include "filehandler.h"
 typedef union {
     double floatval;
     string stringval;
@@ -111,6 +111,6 @@ typedef struct {
 
 /*lex() reads characters from stdin, and returns the above structure. Terminates upon EOF,
 EOS, and currently upon \n FIXME: allow reading files by filename */
-lex_result lex(FILE * file);
+lex_result lex(fileLoc* file);
 
 #endif 

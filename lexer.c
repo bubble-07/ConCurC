@@ -106,12 +106,12 @@ lexid lexString(char current, fileLoc* file) {
 string_lexid_dict_add(symtable, string_lexid_bucket_make(to_dynstring(nstring), constid))
 
 
-lex_result lex(FILE * file) {
+lex_result lex(fileLoc* currentloc) {
     string_lexid_dict symtable = string_lexid_dict_init(100);
     lexid_dynarray program = lexid_dynarray_make(100);
     
     int repl = 0; //variable that is 1 if file is stdin, else 0
-    if (file == stdin) {
+    if (currentloc->fileptr == stdin) {
         repl = 1;
     }
 
@@ -135,13 +135,6 @@ lex_result lex(FILE * file) {
     int i = 0;
     int currentindent = 0;
     int newlex = EXPR + 1;
-
-    fileLoc* currentloc = memalloc(sizeof(fileLoc));
-    currentloc->lineno = 1;
-    currentloc->linepos = 0;
-    currentloc->fileptr = file;
-
-
     char current = get_char(currentloc);
 
     while (isNotGlobTerm(current) || (!repl && isNewline(current))) {

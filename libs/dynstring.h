@@ -8,7 +8,7 @@ DEFINE_DYNARRAY(char)
 typedef char_dynarray string;
 
 /*Creates a dynstring from a traditional C string*/
-inline static string to_dynstring(char* in) {
+inline static string to_dynstring(const char* in) {
     int i = 0;
     string result = char_dynarray_make(1);
     while (in[i]) {

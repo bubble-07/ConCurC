@@ -2,8 +2,10 @@
 #include <stdlib.h>
 #include "memoryman.h"
 #include "dynarray.h"
+#include <stdint.h>
 
-typedef char flag;
+typedef int32_t eightflag;
+
 DEFINE_DYNARRAY(flag)
 DEFINE_DYNARRAY(flag_dynarray)
 
@@ -62,14 +64,7 @@ void flag_mat_print(flag_mat in) {
     }
     return;
 }
-flag_mat flag_mat_copy(flag_mat in) {
-    flag_mat result = flag_mat_init(in.size, in.size);
-    size_t i;
-    for (i=0; i < in.size; i++) {
-        result.begin[i] = flag_dynarray_copy(in.begin[i]);
-    }
-    return result;
-}
+            
     
 
 DEFINE_DYNARRAY(int)
@@ -107,9 +102,6 @@ int_digraph int_digraph_addedge(int_digraph in, noderef n1, noderef n2) {
     in.adjmat.begin[n1].begin[n2] = FLAG_TRUE;
     return in;
 }
-int int_digraph_testedge(int_digraph in, noderef n1, noderef n2) {
-    return in.adjmat.begin[n1].begin[n2];
-}
 noderef_dynarray int_digraph_getchildren(int_digraph in, noderef current) {
     noderef_dynarray result = noderef_dynarray_make(in.size);
     noderef i;
@@ -120,34 +112,18 @@ noderef_dynarray int_digraph_getchildren(int_digraph in, noderef current) {
     }
     return result;
 }
-int_digraph int_digraph_copy(int_digraph in) {
-    int_digraph result = in;
-    result.adjmat = flag_mat_copy(in.adjmat);
-    result.nodes = int_dynarray_copy(in.nodes);
-    return result;
-}
 
-int_digraph int_digraph_floydwarshall(int_digraph in) {
-    int i;
-    int j;
-    int k;
-    for (k=0; k < in.size; k++) {
-        for (i=0; i < in.size; i++) {
-            for (j=0; j < in.size; j++) {
-                /*
-                if (int_digraph_testedge(in, i, k) & int_digraph_testedge(in, k, j)) {
-                    in = int_digraph_addedge(in, i, j);
-                } */
-                in.adjmat.begin[i].begin[j] = 
-                    in.adjmat.begin[i].begin[k] & in.adjmat.begin[k].begin[j] | 
-                    in.adjmat.begin[i].begin[j];
-            }
-        }
+int_digraph int_digraph_gbanclosure(int_digraph in, noderef current, noderef_dynarray crumbs) {
+    size_t i;
+    for (i=0; i < crumbs.size; i++) {
+        in = int_digraph_addedge(in, crumbs.begin[i], current);
     }
-    return in;
-}
-int_digraph int_digraph_transitiveclosure(int_digraph in) {
-    in = int_digraph_floydwarshall(in);
+    noderef_dynarray children = int_digraph_getchildren(in, current);
+    noderef_dynarray tmp;
+    for (i=0; i < children.size; i++) {
+        tmp = noderef_dynarray_add(noderef_dynarray_copy(crumbs), current);
+        in = int_digraph_gbanclosure(in, children.begin[i], tmp);
+    }
     return in;
 }
 
@@ -161,18 +137,15 @@ int_digraph int_digraph_free(int_digraph in) {
 int main() {
     int_digraph test = int_digraph_init(1);
     size_t i;
-    size_t s = 16384;
+    size_t s = 8000;
     for (i=0; i < s; i++) {
         test = int_digraph_addnode(test, i);
     }
-    for (i=0; i < s-2; i++) {
+    for (i=0; i < s-1; i++) {
         test = int_digraph_addedge(test, i, i + 1);
-        test = int_digraph_addedge(test, i, i + 2);
     }
-    //flag_mat_print(test.adjmat);
-    test = int_digraph_transitiveclosure(test);
-    //printf("%s", "COMPLETE! \n");
-    //flag_mat_print(test.adjmat);
+    test = int_digraph_gbanclosure(test, 0, noderef_dynarray_make(1));
     int_digraph_free(test);
+    //flag_mat_print(test.adjmat);
     return 0;
 }

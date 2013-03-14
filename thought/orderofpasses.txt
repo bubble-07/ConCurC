@@ -1,0 +1,14 @@
+Begin by lexing, parsing
+Then reorder known primitives
+Recursively scan for dependencies of the files [make a graph, not necessarily acyclic], create
+    file structure in memory
+Process in reverse topological order, with circularly dependent files processed as one [for each
+    of the following]
+    Note: types are qualified just like function names! [CRITICAL]
+Scan for type definitions relavant to macro-ing [pop from source program]
+Find the transitive closure of macro types
+Find function definitions referencing macro types, load into memory
+Lexically scope macro function definitions (turn them into a proper DAG)
+Search and destroy within the rest of the program text [evaluation according to rules]
+
+

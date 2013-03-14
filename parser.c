@@ -61,7 +61,9 @@ parse_part parse_dotitem(parser_state state) {
 parse_part parse_funapp(parser_state state) {
     parse_part result;
     parse_part tmp;
-    result.tree = lexid_tree_init(EXPR_LEXID);
+    lexid exprid = EXPR_LEXID;
+    exprid.loc = getCurrent(state).loc;
+    result.tree = lexid_tree_init(exprid);
     result.tree = lexid_tree_addchild(result.tree, lexid_tree_init(getCurrent(state)));
     //get us past the opening paren
     state.index += 2;
@@ -88,6 +90,10 @@ parse_part parse_funapp(parser_state state) {
 parse_part parse_dotapp(parser_state state) {
     parse_part result;
     parse_part temp;
+   
+    lexid exprid = EXPR_LEXID;
+    exprid.loc = getCurrent(state).loc;
+
     lexid_tree_dynarray dotsepvals = lexid_tree_dynarray_make(5); 
     lexid current = DOT_LEXID;
     while (lexid_eq(current, DOT_LEXID)) {
@@ -109,12 +115,12 @@ parse_part parse_dotapp(parser_state state) {
     
     int i;
     lexid_tree tmp;
-    result.tree = lexid_tree_init(EXPR_LEXID);
+    result.tree = lexid_tree_init(exprid);
     result.tree = lexid_tree_addchild(result.tree, dotsepvals.begin[1]);
     result.tree = lexid_tree_addchild(result.tree, dotsepvals.begin[0]);
     for (i = 2; i < dotsepvals.size; i++) {
         tmp = result.tree;
-        result.tree = lexid_tree_addchild(lexid_tree_init(EXPR_LEXID), dotsepvals.begin[i]);
+        result.tree = lexid_tree_addchild(lexid_tree_init(exprid), dotsepvals.begin[i]);
         result.tree = lexid_tree_addchild(result.tree, tmp);
     }
     lexid_tree_dynarray_free(dotsepvals);
@@ -139,7 +145,10 @@ parse_part parse_listitems(parser_state state, int singleln) {
 
     state.index -= 1;
 
-    result.tree = lexid_tree_init(EXPR_LEXID);
+    lexid exprid = EXPR_LEXID;
+    exprid.loc = getCurrent(state).loc;
+
+    result.tree = lexid_tree_init(exprid);
     
     lexid current = SPACE_LEXID;
 
@@ -171,6 +180,9 @@ parse_part parse_blockline(parser_state state) {
     lexid_tree tmp;
     int i;
 
+    lexid exprid = EXPR_LEXID;
+    exprid.loc = getCurrent(state).loc;
+
     result = parse_listitems(state,1);
     result.state = consume(NEWLINE_LEXID, result.state);
     //may have to protect against "end of program" bugs...
@@ -183,11 +195,11 @@ parse_part parse_blockline(parser_state state) {
 
         //assemble the formatting correctly
         //Format the header
-        tmp = lexid_tree_init(EXPR_LEXID);
+        tmp = lexid_tree_init(exprid);
         for (i=1; i < header.children.size; i++) {
             tmp = lexid_tree_addchild(tmp, header.children.begin[i]);
         }
-        header = lexid_tree_addchild(lexid_tree_init(EXPR_LEXID), header.children.begin[0]);
+        header = lexid_tree_addchild(lexid_tree_init(exprid), header.children.begin[0]);
         header = lexid_tree_addchild(header, tmp);
 
         //Assimilate with the body
@@ -204,7 +216,11 @@ parse_part parse_blockline(parser_state state) {
 parse_part parse_blocklines(parser_state state) {
     parse_part result;
     parse_part tmp;
-    result.tree = lexid_tree_init(EXPR_LEXID);
+
+    lexid exprid = EXPR_LEXID;
+    exprid.loc = getCurrent(state).loc;
+
+    result.tree = lexid_tree_init(exprid);
     while (!lexid_eq(getCurrent(state), END_LEXID) && state.index < state.program.size) {
         tmp = parse_blockline(state);
         if (tmp.tree.children.size == 1) {

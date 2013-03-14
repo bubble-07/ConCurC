@@ -4,6 +4,10 @@
 #define GENPRINT(tok) else if (in.data.tokenval == tok) { printf("%s", #tok); }
 void display(lexid_tree in, string_dynarray backsymtable) {
     string toprint;
+    printf("%s", "\n on line: ");
+    printf("%d", (int) in.data.loc.lineno);
+    printf("%s", " ");
+
     if (in.data.tokenval == INT) {
         printf("%s", "integer: ");
         printf("%d", in.data.attr.intval);

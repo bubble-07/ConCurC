@@ -12,3 +12,24 @@ Lexically scope macro function definitions (turn them into a proper DAG)
 Search and destroy within the rest of the program text [evaluation according to rules]
 
 
+
+Dependency-determination pass:
+    Scan current program AST for instances of outer-file references
+    Record these references as a list of trees.
+    At the end of the pass, flatten to semi-absolute file references
+    Then, eliminate overlapping elements
+    Parsed programs live in a big dynarray.
+Dependency-determination: recursion
+    For each overlapping element, recurse down using the "dependency-determination" pass.
+    Every reference becomes an edge. Each recursion, continue to pass the graph
+    structure along, as it gets modified. If an edge already exists, do not continue.
+EDIT: Actually, we need to traverse the directory structure in order to find what constitute acceptable "roots" -- this constitutes a walk upwards from the file called into question in a search
+for the named directory, ending at predefined limits. If we hit something that's unreadable,
+    abort the search. In addition, file walks from the roots should be carried out as accesses
+    occur -- this will eliminate some awkwardness. Cache information as-you-go. (What you really
+    need is an array of trees where parent elements are accessible...)
+
+Dependency-resolution pass:
+    Recreate the global namespace structure in a logical "file". 
+    Return the recreated AST.
+

@@ -17,6 +17,15 @@ inline static string to_dynstring(const char* in) {
     }
     return result;
 }
+inline static char* to_cstring(string in) {
+    char* result = (char*) malloc(sizeof(char) * (in.size + 1));
+    int i;
+    for (i=0; i < in.size; i++) {
+        result[i] = in.begin[i];
+    }
+    result[i] = '\0';
+    return result;
+}
 
 /*Methods to allow them to be used in dictionaries*/
 

@@ -13,7 +13,8 @@ void listallindir(DIR* dirp) {
     return;
 }
 
-int main() {
+int main(int argc, const char* argv[]) {
+    printf("%s", realpath(argv[1], NULL));
     string dirstring = to_dynstring(".");
     char* currentcstring = to_cstring(dirstring);
     char* prev = malloc(sizeof(char) + 1);

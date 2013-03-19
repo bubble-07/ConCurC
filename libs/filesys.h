@@ -25,6 +25,12 @@ static inline string path_to_string(path in) {
 static inline int path_eq(path one, path two) {
     return !strcmp(one, two);
 }
+static inline size_t hash_path(path in) {
+    string tmp = path_to_string(in);
+    size_t result = hash_string(tmp);
+    char_dynarray_free(tmp);
+    return result;
+}
 
 static inline path cat_paths(path one, path two) {
     path result = strcat(strcpy(malloc(sizeof(char) * strlen(one)), one), "/");

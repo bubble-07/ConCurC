@@ -22,6 +22,10 @@ static inline string path_to_string(path in) {
     return result;
 }
 
+static inline int path_eq(path one, path two) {
+    return !strcmp(one, two);
+}
+
 static inline path cat_paths(path one, path two) {
     path result = strcat(strcpy(malloc(sizeof(char) * strlen(one)), one), "/");
     return strcat(result, two);

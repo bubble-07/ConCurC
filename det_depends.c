@@ -2,6 +2,9 @@
 
 DEFINE_DICT(string, path)
 
+string string_lookup_failure = {0, 0, NULL};
+DEFINE_REVERSE_LOOKUP(string, path)
+
 string_path_dict glob_file_roots;
 string_dynarray glob_backtable;
 
@@ -17,11 +20,8 @@ lexid depends_t(lexid root, lexid_tree_dynarray children) {
     }
     lexid childid = NONE_LEXID;
     lexid rootid = NONE_LEXID;
-    if (children.size == 1 && isNonPrimID(root)) {
-       childid = children.begin[0].data;
-       rootid = root;
-    }
-    else if (children.size == 2 && lexid_eq(root, EXPR_LEXID)) {
+    
+    if (children.size == 2 && lexid_eq(root, EXPR_LEXID)) {
         printf("%s", "nooooo\n");
         childid = children.begin[1].data;
         rootid = children.begin[0].data;
@@ -29,6 +29,20 @@ lexid depends_t(lexid root, lexid_tree_dynarray children) {
     else {
         return root;
     }
+    /*fix the case where we "shadow" a sub-directory with one in the root set*/
+    if (lexid_eq(rootid, FILEREF_LEXID)) {
+        path rootpath = string_to_path(rootid.attr.stringval);
+        string name = string_path_dict_reverse_get(glob_file_roots, rootpath);
+        rootid.tokenval = 0;
+        size_t i;
+        for (i=0; i < glob_backtable.size; i++) {
+            if (string_eq(name, glob_backtable.begin[i])) {
+                rootid.tokenval = i;
+            }
+        }
+        //TODO: THROW SOME KIND OF ERROR IF TOKENVAL=0
+    }
+
     if (lexid_eq(childid, FILEREF_LEXID) && isNonPrimID(rootid)) {
         printf("%s", "hello\n");
         path childpath = string_to_path(childid.attr.stringval);

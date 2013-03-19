@@ -91,4 +91,20 @@ inline static keyT##_##valT##_dict keyT##_##valT##_dict_addNoDup(keyT##_##valT##
     in = keyT##_##valT##_dict_add(in, to_add); \
     return in; \
 }
+
+#define DEFINE_REVERSE_LOOKUP(keyT, valT) \
+/* Reverse lookup operation -- O(n), be sure to define valT##_eq and keyT##_lookup_failure*/ \
+inline static keyT keyT##_##valT##_dict_reverse_get(keyT##_##valT##_dict in, valT query) { \
+    size_t i; \
+    size_t j; \
+    for (i=0; i < in.size; i++) { \
+        for (j=0; j < in.begin[i].size; j++) { \
+            if(valT##_eq(in.begin[i].begin[j].value, query)) { \
+                return in.begin[i].begin[j].key; \
+            } \
+        } \
+    } \
+    return keyT##_lookup_failure; \
+}
+
 #endif

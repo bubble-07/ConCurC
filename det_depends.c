@@ -1,9 +1,12 @@
 #include "det_depends.h"
+#include "libs/set.h"
 
 DEFINE_DICT(string, path)
 
 string string_lookup_failure = {0, 0, NULL};
 DEFINE_REVERSE_LOOKUP(string, path)
+
+DEFINE_SET(path)
 
 string_path_dict glob_file_roots;
 string_dynarray glob_backtable;

@@ -17,7 +17,7 @@ static inline path string_to_path(string in) {
     return result;
 }
 
-static inline string path_to_string(path in) {
+static inline string path_to_string(const_path in) {
     string result = to_dynstring(in);
     return result;
 }
@@ -33,8 +33,11 @@ static inline size_t hash_path(path in) {
 }
 
 static inline path cat_paths(path one, path two) {
-    path result = strcat(strcpy(malloc(sizeof(char) * strlen(one)), one), "/");
-    return strcat(result, two);
+    path result = strcat(strcpy(malloc(sizeof(char) * (strlen(one) + 2)), one), "/");
+    result = strcat(result, two);
+    path resultpath = strcpy(malloc(strlen(result) + 1), result);
+    free(result);
+    return resultpath;
 }
 
 static inline path cat_extn(path one, path extn) {

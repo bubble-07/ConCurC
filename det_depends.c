@@ -52,11 +52,8 @@ lexid depends_t(lexid root, lexid_tree_dynarray children) {
         DIR* dirp = opendir(childpath);
         if (dir_contains(dirp, rootpath)) {
             root.tokenval = FILEREF;
-            printf("%s", "\n child:  ");
-            printf("%s", childpath);
-            printf("%s", "\n root:  ");
-            printf("%s", rootpath);
-            root.attr.stringval = path_to_string(cat_paths(childpath, rootpath));
+            path resultpath = cat_paths(childpath, rootpath);
+            root.attr.stringval = path_to_string(resultpath);
         }
     }
     return root;
@@ -67,7 +64,8 @@ lexid_tree_dynarray remove_unused_t(lexid_tree_dynarray children, lexid root) {
         lexid_tree_dynarray_free(children);
         glob_paths = path_set_add(glob_paths, string_to_path(root.attr.stringval));
         printf("%s", "\n here it is: ");
-        printf("%s", string_to_path(root.attr.stringval));
+        printf("%s", to_cstring(root.attr.stringval));
+        printf("%s", "\n");
         return lexid_tree_dynarray_make(1);
     }
     return children;

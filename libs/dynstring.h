@@ -11,7 +11,7 @@ typedef char_dynarray string;
 inline static string to_dynstring(const char* in) {
     int i = 0;
     string result = char_dynarray_make(1);
-    while (in[i]) {
+    while (in[i] != '\0') {
         result = char_dynarray_add(result, in[i]);
         i++;
     }

@@ -10,7 +10,7 @@
 typedef char* path;
 typedef const char* const_path;
 
-path path_lookup_failure = NULL;
+static path path_lookup_failure = NULL;
 
 static inline path string_to_path(string in) {
     path result = to_cstring(in);

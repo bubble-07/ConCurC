@@ -1,5 +1,6 @@
 #include "parser.h"
 #include "primorder.h"
+#include "det_depends.h"
 
 #define GENPRINT(tok) else if (in.data.tokenval == tok) { printf("%s", #tok); }
 void display(lexid_tree in, string_dynarray backsymtable) {
@@ -20,6 +21,9 @@ void display(lexid_tree in, string_dynarray backsymtable) {
     }
     else if (in.data.tokenval == STRING) {
         printf("%s", "STRING CONSTANT");
+    }
+    else if (in.data.tokenval == FILEREF) {
+        printf("%s", "FILE REF");
     }
     GENPRINT(DEF)
     GENPRINT(LAMBDA)
@@ -51,11 +55,11 @@ int main(int argc, const char * argv[]) {
     fileLoc* file;
     if (argc < 2) {
         file = load_stdin();
-        parseresult = primorder(parse(lex(load_stdin())));
+        parseresult = deps_test(primorder(parse(lex(load_stdin()))));
     }
     else {
         file = load_file(argv[1]);
-        parseresult = primorder(parse(lex(file)));
+        parseresult = deps_test(primorder(parse(lex(file))));
     }
     close_file(file);
     free(file);

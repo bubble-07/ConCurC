@@ -11,25 +11,27 @@ Find function definitions referencing macro types, load into memory
 Lexically scope macro function definitions (turn them into a proper DAG)
 Search and destroy within the rest of the program text [evaluation according to rules]
 
+Dependency-determination: single file:
+    1. Compile a list of applicable outer-file "roots"
+    2. Search for these "roots" at the bottom of the AST, then, if one is found:
+        a. The parent is checked to see if it is a file/directory within its' child's directory
+        b. If it is, recursively continue this process for the next "root".
+        c. If it isn't, terminate, flatten into an "absolute reference", and add the child's
+        absolute reference to the global set for the file's dependencies.
+Dependency-determination: general:
+    I. If the given file path already has not been logged in the global dict:
+        a. For file A, find its dependencies
+        b. Log file A and its' location in a global dictionary from file refs to programs
+        c. Recursively call the dependency-determination procedure on its dependencies
+    II. Return
 
+Macro type resolution:
+    I. Resolve all macro type declarations at top level in the first file in the 
+    reverse-topological ordering of the dependency graph of files. (construct a graph)
+    II. Transfer macro types to usable format
+    III. 
 
-Dependency-determination pass:
-    Scan current program AST for instances of outer-file references
-    Record these references as a list of trees.
-    At the end of the pass, flatten to semi-absolute file references
-    Then, eliminate overlapping elements
-    Parsed programs live in a big dynarray.
-Dependency-determination: recursion
-    For each overlapping element, recurse down using the "dependency-determination" pass.
-    Every reference becomes an edge. Each recursion, continue to pass the graph
-    structure along, as it gets modified. If an edge already exists, do not continue.
-EDIT: Actually, we need to traverse the directory structure in order to find what constitute acceptable "roots" -- this constitutes a walk upwards from the file called into question in a search
-for the named directory, ending at predefined limits. If we hit something that's unreadable,
-    abort the search. In addition, file walks from the roots should be carried out as accesses
-    occur -- this will eliminate some awkwardness. Cache information as-you-go. (What you really
-    need is an array of trees where parent elements are accessible...)
+Resulting structure we want:
+    
 
-Dependency-resolution pass:
-    Recreate the global namespace structure in a logical "file". 
-    Return the recreated AST.
 

@@ -32,6 +32,7 @@ User-defined identifiers continue after EXPR */
 #define STRING 10
 #define FLOAT 11
 #define INT 12
+#define FILEREF 13
 #define DEF 21
 #define LAMBDA 22
 #define NAMESPACE 23
@@ -58,6 +59,7 @@ D_LEX(SPACE)
 D_LEX(STRING)
 D_LEX(FLOAT)
 D_LEX(INT)
+D_LEX(FILEREF)
 D_LEX(DEF)
 D_LEX(LAMBDA)
 D_LEX(NAMESPACE)
@@ -87,6 +89,9 @@ inline static int isPrim(lexid in) {
 
 inline static int isID(lexid in) {
     return (isPrim(in) || (in.tokenval > ( EXPR )));
+}
+inline static int isNonPrimID(lexid in) {
+    return (in.tokenval > EXPR);
 }
 
 inline static int isWhite(lexid in) {

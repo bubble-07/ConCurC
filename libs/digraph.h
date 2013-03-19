@@ -1,4 +1,4 @@
-/* Implementation of an unweighted graph -- n^2 transitive closure, etc */
+/* Implementation of an unweighted graph -- n^3 transitive closure, etc */
 #include "flagmat.h"   
 #ifndef GRAPHDEFINED
 #define GRAPHDEFINED

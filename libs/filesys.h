@@ -68,6 +68,28 @@ static inline int dir_contains(DIR* dirp, path file) {
     rewinddir(dirp);
     return 0;
 }
+static inline path get_file_extn(DIR* dirp, path file) {
+    path dotccur = cat_extn(file, "cur");
+    path dotcur = cat_extn(file, "ccur");
+    struct dirent* entry;
+    while ((entry = readdir(dirp)) != NULL) {
+        if (!strcmp(entry->d_name, dotcur)) {
+            rewinddir(dirp);
+            path_free(dotccur);
+            return dotcur;
+        }
+        if (!strcmp(entry->d_name, dotccur)) {
+            rewinddir(dirp);
+            path_free(dotcur);
+            return dotccur;
+        }
+    }
+    path_free(dotcur);
+    path_free(dotccur);
+    rewinddir(dirp);
+    return strcpy(malloc(strlen(file) + 1), file);
+}
+
 
 static inline path get_parent_dir(const_path file) {
     size_t i;

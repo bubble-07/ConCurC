@@ -52,6 +52,7 @@ lexid depends_t(lexid root, lexid_tree_dynarray children) {
         DIR* dirp = opendir(childpath);
         if (dir_contains(dirp, rootpath)) {
             root.tokenval = FILEREF;
+            MUTATE(path, rootpath, get_file_extn(dirp, rootpath))
             path resultpath = cat_paths(childpath, rootpath);
             root.attr.stringval = path_to_string(resultpath);
         }

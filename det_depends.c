@@ -109,11 +109,21 @@ string_path_dict getroots(path file) {
     QUICKADD("libs", "/usr/local/concur/libs")
     QUICKADD("test", "/Users/bubble-07/Programmingstuff/test")
 
+    //main_path will be "stdin" if we are REPL'ing
     if (main_path == NULL) {
-        main_path = get_parent_dir(file);
+        if (file == NULL) {
+            main_path = "stdin";
+        }
+        else {
+            main_path = get_parent_dir(file);
+        }
     }
-    
-    QUICKADD( (get_innermost_dir(main_path)), (main_path))
+        
+    //If main_path is "stdin", we shouldn't have to add anything extra to the "libs" namespace
+    if (main_path != "stdin") {
+        //but if it isn't, we should add the main_path
+        QUICKADD( (get_innermost_dir(main_path)), (main_path))
+    }
     path_dynarray stops = string_path_dict_get_all_values(result);
 
     path_dynarray roots = get_parent_dirs_to_root(file, stops);

@@ -28,11 +28,28 @@ lexid depends_t(lexid root, lexid_tree_dynarray children) {
     else if (lexid_eq(root, EXPR_LEXID) && children.size == 2) {
         lexid top_lexid = children.begin[1].data;
         if (lexid_eq(top_lexid, FILEREF_LEXID)) {
-            if (lexid_eq(children.begin[0].data, FILEREF_LEXID)) {
-                /*Special case handling over-matched identifier */
+            lexid sub_lexid = children.begin[0].data;
+            if (lexid_eq(sub_lexid, FILEREF_LEXID)) {
+                /*Special case handling shadowed identifier */
+                string tmp = sub_lexid.attr.stringval;
+                path tmppath = string_to_path(tmp);
+                if (!path_is_rel(tmppath)) {
+                    return root; //cannot actually have been shadowed
+                }
+                else {
+                    //yup! it's been shadowed, all right!
+                    size_t i = 0;
+                    for (i=0; !string_eq(glob_backtable.begin[i], tmp); i++) {
+                       if (i == glob_backtable.size) {
+                           //THROW A BIG STINKIN' ERROR!
+                           printf("%s", "ERRRRRRROOOORRRR \n");
+                        }
+                    }
+                    sub_lexid.tokenval = i;
+                    char_dynarray_free(sub_lexid.attr.stringval);
+                }
             }
-            else if (isNonPrimID(children.begin[0].data)) {
-                lexid sub_lexid = children.begin[0].data;
+            if (isNonPrimID(sub_lexid)) {
                 path_dynarray top_paths;
                 string top_string = top_lexid.attr.stringval;
 

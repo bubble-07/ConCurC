@@ -61,7 +61,7 @@ int main(int argc, const char * argv[]) {
     }
     else {
         file = load_file(argv[1]);
-        parseresult = primorder(parse(lex(file)));
+        parseresult = deps_test(primorder(parse(lex(file))), argv[1]);
     }
     close_file(file);
     free(file);

@@ -56,7 +56,7 @@ lexid depends_t(lexid root, lexid_tree_dynarray children) {
             path resultpath = cat_paths(childpath, rootpath);
             root.attr.stringval = path_to_string(resultpath);
         }
-        closedir(dirp);
+        //closedir(dirp); BE WARY OF THIS LINE! Somethin's wrong here!
     }
     return root;
 }

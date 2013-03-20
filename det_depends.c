@@ -10,12 +10,18 @@ DEFINE_GET_ALL(string, path)
 
 DEFINE_SET(path)
 
-string_path_dict glob_file_roots;
-string_dynarray glob_backtable;
-path_set glob_paths;
-path main_path = NULL;
+//FOR ALL OF THESE, see depends_t and remove_unused_t
+string_path_dict glob_file_roots; //Global dictionary of "Roots" for extra-file references
+string_dynarray glob_backtable; //Global backwards symbol table 
+path_set glob_extern_refs; //Global set of external references in the current file
+path main_path = NULL; //Path to the directory of the first file interpreted
 
 
+/* Transform the AST by replacing references to files [in identifiers] with FILEREF_LEXID's.
+ * This transformation is intended to be carried out depth-first, so that folders can
+ * be identified before the files they contain :P. Note: due to the nature of this as a
+ * transformation to be used with tree_df_map(), global variables [above] needed to be defined
+ * in order to fake extra parameters [no partial application in C!]. */
 lexid depends_t(lexid root, lexid_tree_dynarray children) {
     if (isNonPrimID(root) && children.size == 0) {
         path test = string_path_dict_get(glob_file_roots, glob_backtable.begin[root.tokenval]);
@@ -76,10 +82,13 @@ lexid depends_t(lexid root, lexid_tree_dynarray children) {
     return root;
 }
 
+/* Since depends_t leaves unneeded children of FILEREFs, we need to remove them with a
+ * breadth-first transformation. In addition, remove_unused_t adds paths to the global
+ * glob_extern_refs to give a final set of external references */
 lexid_tree_dynarray remove_unused_t(lexid_tree_dynarray children, lexid root) {
     if (lexid_eq(root, FILEREF_LEXID)) {
         lexid_tree_dynarray_free(children);
-        glob_paths = path_set_add(glob_paths, string_to_path(root.attr.stringval));
+        glob_extern_refs = path_set_add(glob_extern_refs, string_to_path(root.attr.stringval));
         printf("%s", "\n here it is: ");
         printf("%s", to_cstring(root.attr.stringval));
         printf("%s", "\n");
@@ -91,6 +100,8 @@ lexid_tree_dynarray remove_unused_t(lexid_tree_dynarray children, lexid root) {
 #define QUICKADD(name, filen) tmpstring = to_dynstring(name); \
     result = string_path_dict_add(result, string_path_bucket_make(tmpstring, filen));
 
+/* Given a file's path, return a dictionary of accessible external file reference "roots".
+ * If this is the first file examined, set main_path */
 string_path_dict getroots(path file) {
     string tmpstring;
     string_path_dict result = string_path_dict_init(20); 
@@ -118,7 +129,7 @@ string_path_dict getroots(path file) {
 parse_result deps_test(parse_result in) {
     path file = realpath(to_cstring(in.AST.data.loc.file), NULL);
     glob_backtable = in.backsymtable;
-    glob_paths = path_set_init(1);
+    glob_extern_refs = path_set_init(1);
     glob_file_roots = getroots(file);
 
     size_t i;

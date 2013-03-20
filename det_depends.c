@@ -95,9 +95,20 @@ string_path_dict getroots(const_path file) {
 parse_result deps_test(parse_result in, const_path file) {
     glob_backtable = in.backsymtable;
     glob_paths = path_set_init(1);
-    glob_file_roots = string_path_dict_init(5);
-    string testdir = to_dynstring("test");
     glob_file_roots = getroots(file);
+
+    size_t i;
+    size_t j;
+    for (i=0; i < glob_file_roots.size; i++) {
+        for (j=0; j < glob_file_roots.begin[i].size; j++) {
+            printf("%s", to_cstring(glob_file_roots.begin[i].begin[j].key));
+            printf("%s", " ");
+            printf("%s", glob_file_roots.begin[i].begin[j].value);
+            printf("%s", "\n");
+        }
+    }
+
+
     in.AST = lexid_tree_dfmap(in.AST, &depends_t);
     in.AST = lexid_tree_hfmap(in.AST, &remove_unused_t);
     return in;

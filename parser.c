@@ -225,9 +225,14 @@ parse_part parse_blocklines(parser_state state) {
         tmp = parse_blockline(state);
         if (tmp.tree.children.size == 1) {
             tmp.tree = tmp.tree.children.begin[0];
+            result.tree = lexid_tree_addchild(result.tree, tmp.tree);
+        }
+        else if (tmp.tree.children.size == 0) {
+        }
+        else {
+            result.tree = lexid_tree_addchild(result.tree, tmp.tree);
         }
         state = tmp.state;
-        result.tree = lexid_tree_addchild(result.tree, tmp.tree);
     }
     result.state = state;
     return result;

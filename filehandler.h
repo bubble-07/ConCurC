@@ -24,7 +24,7 @@ inline static fileLoc* load_stdin() {
     result->fileptr = stdin;
     result->lineno = 1;
     result->linepos = 0;
-    result->file = to_dynstring("REPL Input");
+    result->file = to_dynstring("stdin");
     return result;
 }
 inline static void close_file(fileLoc* in) {

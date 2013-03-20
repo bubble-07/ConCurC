@@ -10,6 +10,8 @@ void display(lexid_tree in, string_dynarray backsymtable) {
     printf("%s", " col: ");
     printf("%d", (int) in.data.loc.linepos);
     printf("%s", " ");
+    printf("%s", " in file: ");
+    printf("%s", to_cstring(in.data.loc.file));
 
     if (in.data.tokenval == INT) {
         printf("%s", "integer: ");
@@ -59,7 +61,7 @@ int main(int argc, const char * argv[]) {
     }
     else {
         file = load_file(argv[1]);
-        parseresult = deps_test(primorder(parse(lex(file))), argv[1]);
+        parseresult = primorder(parse(lex(file)));
     }
     close_file(file);
     free(file);

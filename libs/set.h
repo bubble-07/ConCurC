@@ -25,5 +25,16 @@ inline static int type##_set_isElem(type##_set set, type elem) { \
 inline static void type##_set_free(type##_set set) { \
     type##_setflag_dict_free(set); \
     return; \
+} \
+inline static type##_dynarray type##_set_to_dynarray(type##_set set) { \
+    type##_dynarray result = type##_dynarray_make(1); \
+    size_t i; \
+    size_t j; \
+    for (i=0; i < set.size; i++) { \
+        for (j=0; j < set.begin[i].size; j++) { \
+            result = type##_dynarray_add(result, set.begin[i].begin[j].key); \
+        } \
+    } \
+    return result; \
 }
 

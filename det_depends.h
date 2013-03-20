@@ -14,7 +14,7 @@ typedef struct {
 
 depends_result det_deps(parse_result in);
 
-parse_result deps_test(parse_result in);
+parse_result deps_test(parse_result in, const_path file);
 
 
 

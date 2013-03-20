@@ -10,6 +10,8 @@
 typedef char* path;
 typedef const char* const_path;
 
+DEFINE_DYNARRAY(path)
+
 static path path_lookup_failure = NULL;
 
 static inline path string_to_path(string in) {
@@ -30,6 +32,9 @@ static inline size_t hash_path(path in) {
     size_t result = hash_string(tmp);
     char_dynarray_free(tmp);
     return result;
+}
+static inline path copy_path(path in) {
+    return strcpy(malloc(strlen(in) + 1), in);
 }
 
 static inline path cat_paths(path one, path two) {
@@ -101,14 +106,22 @@ static inline path go_up_dir(const_path dir) {
     MUTATE(path, result, realpath(result, NULL));
     return result;
 }
+static inline path get_innermost_dir(const_path file) {
+    size_t i;
+    for (i=strlen(file) - 1; i && (file[i] != '/'); i--);
+    i++;
+    return strcpy(malloc(strlen(file) - i), file + i);
+}
 
-static inline void get_parent_dirs_to_main(const_path file) {
+static inline path_dynarray get_parent_dirs_to_main(const_path file) {
+    path_dynarray result = path_dynarray_make(1);
     path currentpath = realpath(file, NULL);
     if (currentpath == NULL) {
         //PANIC!
         return;
     }
     MUTATE(path, currentpath, get_parent_dir(currentpath));
+    result = path_dynarray_add(result, copy_path(currentpath));
     DIR* dirp = opendir(currentpath);
     path prevpath = malloc(sizeof(char) * strlen(currentpath)); 
 
@@ -117,12 +130,13 @@ static inline void get_parent_dirs_to_main(const_path file) {
 
         strcpy(prevpath, currentpath);
         MUTATE(path, currentpath, go_up_dir(currentpath))
+        result = path_dynarray_add(result, copy_path(currentpath));
         closedir(dirp);
         dirp = opendir(currentpath);
     }
     free(currentpath);
     free(prevpath);
     closedir(dirp);
-    return;
+    return result;
 }
 #endif

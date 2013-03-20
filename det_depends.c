@@ -56,6 +56,7 @@ lexid depends_t(lexid root, lexid_tree_dynarray children) {
             path resultpath = cat_paths(childpath, rootpath);
             root.attr.stringval = path_to_string(resultpath);
         }
+        closedir(dirp);
     }
     return root;
 }
@@ -72,13 +73,31 @@ lexid_tree_dynarray remove_unused_t(lexid_tree_dynarray children, lexid root) {
     return children;
 }
 
-parse_result deps_test(parse_result in) {
+#define QUICKADD(name, filen) tmpstring = to_dynstring(name); \
+    result = string_path_dict_add(result, string_path_bucket_make(tmpstring, filen));
+
+string_path_dict getroots(const_path file) {
+    string tmpstring;
+    string_path_dict result = string_path_dict_init(20);
+    QUICKADD("libs", "/usr/local/concur/libs")
+    QUICKADD("test", "/Users/bubble-07/Programmingstuff/test")
+    
+    path_dynarray roots = get_parent_dirs_to_main(file);
+    size_t i;
+    for (i=0; i < roots.size; i++) {
+        QUICKADD( (get_innermost_dir(roots.begin[i])) , (roots.begin[i]))
+    }
+    
+    return result;
+}
+    
+
+parse_result deps_test(parse_result in, const_path file) {
     glob_backtable = in.backsymtable;
     glob_paths = path_set_init(1);
     glob_file_roots = string_path_dict_init(5);
     string testdir = to_dynstring("test");
-    glob_file_roots = string_path_dict_add(glob_file_roots, string_path_bucket_make(testdir, 
-                "/Users/bubble-07/Programmingstuff/test"));
+    glob_file_roots = getroots(file);
     in.AST = lexid_tree_dfmap(in.AST, &depends_t);
     in.AST = lexid_tree_hfmap(in.AST, &remove_unused_t);
     return in;

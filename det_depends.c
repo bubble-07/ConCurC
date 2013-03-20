@@ -6,6 +6,7 @@ DEFINE_DICT(string, path)
 string string_lookup_failure = {0, 0, NULL};
 DEFINE_REVERSE_LOOKUP(string, path)
 DEFINE_GET_ALL_VALS(string, path)
+DEFINE_GET_ALL(string, path)
 
 DEFINE_SET(path)
 
@@ -16,56 +17,44 @@ path main_path = NULL;
 
 
 lexid depends_t(lexid root, lexid_tree_dynarray children) {
-    if (isNonPrimID(root) && (children.size == 0)) {
-        path p = string_path_dict_get(glob_file_roots, glob_backtable.begin[root.tokenval]);
-        if (p != path_lookup_failure) {
+    if (isNonPrimID(root) && children.size == 0) {
+        path test = string_path_dict_get(glob_file_roots, glob_backtable.begin[root.tokenval]);
+        if (test != path_lookup_failure) {
+            /* Must be in the list of roots, therefore, fileref*/
+            root.attr.stringval = char_dynarray_copy(glob_backtable.begin[root.tokenval]);
             root.tokenval = FILEREF;
-            root.attr.stringval = path_to_string(p);
         }
-        return root;
     }
-    lexid childid = NONE_LEXID;
-    lexid rootid = NONE_LEXID;
-    
-    if (children.size == 2 && lexid_eq(root, EXPR_LEXID)) {
-        childid = children.begin[1].data;
-        rootid = children.begin[0].data;
-    }
-    else {
-        return root;
-    }
-    int corrected;
-    /*fix the case where we "shadow" a sub-directory with one in the root set*/
-    if (lexid_eq(rootid, FILEREF_LEXID)) {
-        path rootpath = string_to_path(rootid.attr.stringval);
-        string name = string_path_dict_reverse_get(glob_file_roots, rootpath);
-        rootid.tokenval = 0;
-        corrected = 1;
-        size_t i;
-        for (i=0; i < glob_backtable.size; i++) {
-            if (string_eq(name, glob_backtable.begin[i])) {
-                rootid.tokenval = i;
+    else if (lexid_eq(root, EXPR_LEXID) && children.size == 2) {
+        lexid top_lexid = children.begin[1].data;
+        if (lexid_eq(top_lexid, FILEREF_LEXID)) {
+            if (lexid_eq(children.begin[0].data, FILEREF_LEXID)) {
+                /*Special case handling over-matched identifier */
+            }
+            else if (isNonPrimID(children.begin[0].data)) {
+                lexid sub_lexid = children.begin[0].data;
+                path_dynarray top_paths;
+                string top_string = top_lexid.attr.stringval;
+
+                if (path_is_rel(string_to_path(top_lexid.attr.stringval))) {
+                    //top path is actually relative -- resolve it
+                    top_paths = string_path_dict_get_all(glob_file_roots, top_string);
+                }
+                else {
+                    //top path is not relative
+                    top_paths = path_dynarray_make(1);
+                    top_paths = path_dynarray_add(top_paths, string_to_path(top_string));
+                }
+
+                path sub_path = string_to_path(glob_backtable.begin[sub_lexid.tokenval]);
+                path within = rel_get_within(sub_path, top_paths);
+                if (!path_eq(within, path_lookup_failure)) {
+                    path resulting = cat_paths(within, get_file_extn(sub_path, within));
+                    root.attr.stringval = path_to_string(resulting);
+                    root.tokenval = FILEREF;
+                }
             }
         }
-        //TODO: THROW SOME KIND OF ERROR IF TOKENVAL=0
-    }
-
-    if (lexid_eq(childid, FILEREF_LEXID) && isNonPrimID(rootid)) {
-        path childpath = string_to_path(childid.attr.stringval);
-        path rootpath = string_to_path(glob_backtable.begin[rootid.tokenval]);
-        DIR* dirp = opendir(childpath);
-        if (dir_contains(dirp, rootpath)) {
-            root.tokenval = FILEREF;
-            MUTATE(path, rootpath, get_file_extn(dirp, rootpath))
-            path resultpath = cat_paths(childpath, rootpath);
-            root.attr.stringval = path_to_string(resultpath);
-        }
-        else if (corrected) {
-            //We erroneously converted back into an identifier from a file ref!
-            //FIXME: handle this
-        }
-
-        //closedir(dirp); BE WARY OF THIS LINE! Somethin's wrong here!
     }
     return root;
 }
@@ -90,7 +79,7 @@ string_path_dict getroots(path file) {
     string_path_dict result = string_path_dict_init(20); 
 
     QUICKADD("libs", "/usr/local/concur/libs")
-    //QUICKADD("test", "/Users/bubble-07/Programmingstuff/test")
+    QUICKADD("test", "/Users/bubble-07/Programmingstuff/test")
 
     if (main_path == NULL) {
         main_path = get_parent_dir(file);

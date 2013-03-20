@@ -119,4 +119,20 @@ inline static valT##_dynarray keyT##_##valT##_dict_get_all_values(keyT##_##valT#
     return result; \
 }
 
+#define DEFINE_GET_ALL(keyT, valT) \
+/* Carries out a lookup operation that gets ALL values matching a given key */ \
+inline static valT##_dynarray  keyT##_##valT##_dict_get_all(keyT##_##valT##_dict in, keyT key) { \
+     valT##_dynarray result = valT##_dynarray_make(1); \
+     size_t i = hash_##keyT(key) % in.size; \
+     keyT##_##valT##_bucket_dynarray row = in.begin[i]; \
+     i = 0; \
+     while (i < row.size) { \
+         if (keyT##_eq(row.begin[i].key, key)) { \
+             result = valT##_dynarray_add(result, row.begin[i].value); \
+         } \
+         i++; \
+     } \
+     return result; \
+}
+
 #endif

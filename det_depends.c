@@ -92,7 +92,8 @@ string_path_dict getroots(const_path file) {
 }
     
 
-parse_result deps_test(parse_result in, const_path file) {
+parse_result deps_test(parse_result in) {
+    const_path file = to_cstring(in.AST.data.loc.file);
     glob_backtable = in.backsymtable;
     glob_paths = path_set_init(1);
     glob_file_roots = getroots(file);

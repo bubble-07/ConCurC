@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <stdio.h>
 #include "libs/dynstring.h"
 
 typedef struct {
@@ -20,7 +21,7 @@ inline static fileLoc* load_file(const char* name) {
     return result;
 }
 inline static fileLoc* load_stdin() {
-    fileLoc* result;
+    fileLoc* result = memalloc(sizeof(fileLoc));
     result->fileptr = stdin;
     result->lineno = 1;
     result->linepos = 0;

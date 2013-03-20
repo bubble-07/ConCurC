@@ -6,14 +6,17 @@
 #ifndef FILESYS_DEFINED
 #define FILESYS_DEFINED
 
+//define a handy macro that replaces a c string with one that has been newly allocated
 #define MUTATE(type, var, val) type type##_tmp = val; free(var); var = type##_tmp;
+
+//Yep, keeping it real simple
 typedef char* path;
 typedef const char* const_path;
 
 DEFINE_DYNARRAY(path)
 
-static path path_lookup_failure = NULL;
 
+/*Conversion routines between strings and paths -- both allocate new memory*/
 static inline path string_to_path(string in) {
     path result = to_cstring(in);
     return result;
@@ -23,6 +26,9 @@ static inline string path_to_string(const_path in) {
     string result = to_dynstring(in);
     return result;
 }
+
+/*All of these are needed to be able to define dictionaries with paths */
+static path path_lookup_failure = NULL;
 
 static inline int path_eq(path one, path two) {
     if (one == NULL && two != NULL) {
@@ -42,10 +48,13 @@ static inline size_t hash_path(path in) {
     char_dynarray_free(tmp);
     return result;
 }
+
+/* Now for some operations */
 static inline path copy_path(path in) {
     return strcpy(malloc(strlen(in) + 1), in);
 }
 
+/* Concatenate a path and a relative folder path [within the first arg]. */
 static inline path cat_paths(path one, path two) {
     path result = strcat(strcpy(malloc(sizeof(char) * (strlen(one) + 2)), one), "/");
     result = strcat(result, two);
@@ -54,15 +63,19 @@ static inline path cat_paths(path one, path two) {
     return resultpath;
 }
 
+/* Concatenate an extension onto a file path */
 static inline path cat_extn(const_path one, path extn) {
     path result = strcat(strcpy(malloc(sizeof(char) * strlen(one)), one), ".");
     return strcat(result, extn);
 }
+
+
 static inline void path_free(path in) {
     free(in);
     return;
 }
 
+/* If the path is a relative path [not anchored anywhere], returns 1, else 0 */
 static inline int path_is_rel(path in) {
     size_t i;
     for (i=0; i < strlen(in); i++) {
@@ -73,6 +86,7 @@ static inline int path_is_rel(path in) {
     return 1;
 }
 
+/* Gets the name of "file" within "folder" with its extension [if any] appended */
 static inline path get_file_extn(path file, path folder) {
     DIR* dirp = opendir(folder);
     path dotccur = cat_extn(file, "cur");
@@ -96,12 +110,14 @@ static inline path get_file_extn(path file, path folder) {
     return strcpy(malloc(strlen(file) + 1), file);
 }
 
-
+/* gets the parent directory of an absolute path*/
 static inline path get_parent_dir(const_path file) {
     size_t i;
     for (i=strlen(file) - 1; i && (file[i] != '/'); i--);
     return strncpy(malloc(sizeof(char) * (i + 1)), file, i);
 }
+
+/* gets the innermost directory of a path to a directory */
 static inline path get_innermost_dir(const_path file) {
     size_t i;
     for (i=strlen(file) - 1; i && (file[i] != '/'); i--);
@@ -109,6 +125,7 @@ static inline path get_innermost_dir(const_path file) {
     return strcpy(malloc(strlen(file) - i), file + i);
 }
 
+/* gets if a given file [sans extension] is within a folder's path */
 static inline int rel_is_within(const_path file, path folder) {
     DIR* dirp = opendir(folder);
     path dotcur = cat_extn(file, "cur");
@@ -129,6 +146,7 @@ static inline int rel_is_within(const_path file, path folder) {
     return 0;
 }
 
+/*Gets the folder path that "file" is within */
 static inline path rel_get_within(const_path file, path_dynarray folders) {
     size_t i;
     for (i=0; i < folders.size; i++) {
@@ -140,7 +158,7 @@ static inline path rel_get_within(const_path file, path_dynarray folders) {
 }
 
 
-
+/* if an absolute path "file" is within absolute path "folder", return 1, else 0 */
 static inline int abs_is_within(const_path file, path folder) {
     size_t i;
     if (strlen(file) < strlen(folder)) {
@@ -157,6 +175,7 @@ static inline int abs_is_within(const_path file, path folder) {
     return 1;
 }
 
+/* returns true if the given absolute file path is within any of the folders */
 static inline int abs_is_within_anyof(const_path file, path_dynarray folders) {
     size_t i;
     for (i=0; i < folders.size; i++) {
@@ -167,6 +186,8 @@ static inline int abs_is_within_anyof(const_path file, path_dynarray folders) {
     return 0;
 }
 
+/*returns a dynamic array of paths that are parents of file, up to, but not including any of
+ * the absolute directory paths in "folders" */
 static inline path_dynarray get_parent_dirs_to_root(const_path file, path_dynarray folders) {
     path_dynarray result = path_dynarray_make(1);
     path currentpath = realpath(file, NULL);

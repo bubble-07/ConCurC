@@ -1,6 +1,6 @@
 #include <stdlib.h>
 #include <stdio.h>
-#include "libs/dynstring.h"
+#include "dynstring.h"
 
 typedef struct {
     size_t lineno;

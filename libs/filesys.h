@@ -101,11 +101,6 @@ static inline path get_parent_dir(const_path file) {
     for (i=strlen(file) - 1; i && (file[i] != '/'); i--);
     return strncpy(malloc(sizeof(char) * (i + 1)), file, i);
 }
-static inline path go_up_dir(const_path dir) {
-    path result = strcat(strcpy(malloc(sizeof(char) * strlen(dir)), dir),"/..");
-    MUTATE(path, result, realpath(result, NULL));
-    return result;
-}
 static inline path get_innermost_dir(const_path file) {
     size_t i;
     for (i=strlen(file) - 1; i && (file[i] != '/'); i--);
@@ -113,30 +108,45 @@ static inline path get_innermost_dir(const_path file) {
     return strcpy(malloc(strlen(file) - i), file + i);
 }
 
-static inline path_dynarray get_parent_dirs_to_main(const_path file) {
+static inline int is_within(const_path file, path folder) {
+    size_t i;
+    if (strlen(file) < strlen(folder)) {
+        return 0;
+    }
+    if (!strcmp(file,folder)) {
+        return 0;
+    }
+    for (i=0; i < strlen(folder); i++) {
+        if (file[i] != folder[i]) {
+            return 0;
+        }
+    }
+    return 1;
+}
+
+static inline int is_within_anyof(const_path file, path_dynarray folders) {
+    size_t i;
+    for (i=0; i < folders.size; i++) {
+        if (is_within(file, folders.begin[i])) {
+            return 1;
+        }
+    }
+    return 0;
+}
+
+static inline path_dynarray get_parent_dirs_to_root(const_path file, path_dynarray folders) {
     path_dynarray result = path_dynarray_make(1);
     path currentpath = realpath(file, NULL);
     if (currentpath == NULL) {
         //PANIC!
         return;
     }
-    MUTATE(path, currentpath, get_parent_dir(currentpath));
-    result = path_dynarray_add(result, copy_path(currentpath));
-    DIR* dirp = opendir(currentpath);
-    path prevpath = malloc(sizeof(char) * strlen(currentpath)); 
-
-    while (!(dir_contains(dirp, "main.cur") | dir_contains(dirp, "main.ccur")) &&
-            strcmp(prevpath, currentpath)) {
-
-        strcpy(prevpath, currentpath);
-        MUTATE(path, currentpath, go_up_dir(currentpath))
+    MUTATE(path, currentpath, get_parent_dir(currentpath))
+    while (is_within_anyof(currentpath, folders)) {
         result = path_dynarray_add(result, copy_path(currentpath));
-        closedir(dirp);
-        dirp = opendir(currentpath);
+        MUTATE(path, currentpath, get_parent_dir(currentpath));
     }
     free(currentpath);
-    free(prevpath);
-    closedir(dirp);
     return result;
 }
 #endif

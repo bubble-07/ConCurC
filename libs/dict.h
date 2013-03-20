@@ -106,5 +106,17 @@ inline static keyT keyT##_##valT##_dict_reverse_get(keyT##_##valT##_dict in, val
     } \
     return keyT##_lookup_failure; \
 }
+#define DEFINE_GET_ALL_VALS(keyT, valT) \
+inline static valT##_dynarray keyT##_##valT##_dict_get_all_values(keyT##_##valT##_dict in) { \
+    valT##_dynarray result = valT##_dynarray_make(1); \
+    size_t i; \
+    size_t j; \
+    for (i=0; i < in.size; i++) { \
+        for (j=0; j < in.begin[i].size; j++) { \
+            result = valT##_dynarray_add(result, in.begin[i].begin[j].value); \
+        } \
+    } \
+    return result; \
+}
 
 #endif

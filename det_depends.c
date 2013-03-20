@@ -5,12 +5,14 @@ DEFINE_DICT(string, path)
 
 string string_lookup_failure = {0, 0, NULL};
 DEFINE_REVERSE_LOOKUP(string, path)
+DEFINE_GET_ALL_VALS(string, path)
 
 DEFINE_SET(path)
 
 string_path_dict glob_file_roots;
 string_dynarray glob_backtable;
 path_set glob_paths;
+path main_path = NULL;
 
 
 lexid depends_t(lexid root, lexid_tree_dynarray children) {
@@ -32,11 +34,13 @@ lexid depends_t(lexid root, lexid_tree_dynarray children) {
     else {
         return root;
     }
+    int corrected;
     /*fix the case where we "shadow" a sub-directory with one in the root set*/
     if (lexid_eq(rootid, FILEREF_LEXID)) {
         path rootpath = string_to_path(rootid.attr.stringval);
         string name = string_path_dict_reverse_get(glob_file_roots, rootpath);
         rootid.tokenval = 0;
+        corrected = 1;
         size_t i;
         for (i=0; i < glob_backtable.size; i++) {
             if (string_eq(name, glob_backtable.begin[i])) {
@@ -56,6 +60,11 @@ lexid depends_t(lexid root, lexid_tree_dynarray children) {
             path resultpath = cat_paths(childpath, rootpath);
             root.attr.stringval = path_to_string(resultpath);
         }
+        else if (corrected) {
+            //We erroneously converted back into an identifier from a file ref!
+            //FIXME: handle this
+        }
+
         //closedir(dirp); BE WARY OF THIS LINE! Somethin's wrong here!
     }
     return root;
@@ -76,13 +85,21 @@ lexid_tree_dynarray remove_unused_t(lexid_tree_dynarray children, lexid root) {
 #define QUICKADD(name, filen) tmpstring = to_dynstring(name); \
     result = string_path_dict_add(result, string_path_bucket_make(tmpstring, filen));
 
-string_path_dict getroots(const_path file) {
+string_path_dict getroots(path file) {
     string tmpstring;
-    string_path_dict result = string_path_dict_init(20);
+    string_path_dict result = string_path_dict_init(20); 
+
     QUICKADD("libs", "/usr/local/concur/libs")
-    QUICKADD("test", "/Users/bubble-07/Programmingstuff/test")
+    //QUICKADD("test", "/Users/bubble-07/Programmingstuff/test")
+
+    if (main_path == NULL) {
+        main_path = get_parent_dir(file);
+    }
     
-    path_dynarray roots = get_parent_dirs_to_main(file);
+    QUICKADD( (get_innermost_dir(main_path)), (main_path))
+    path_dynarray stops = string_path_dict_get_all_values(result);
+
+    path_dynarray roots = get_parent_dirs_to_root(file, stops);
     size_t i;
     for (i=0; i < roots.size; i++) {
         QUICKADD( (get_innermost_dir(roots.begin[i])) , (roots.begin[i]))
@@ -93,7 +110,7 @@ string_path_dict getroots(const_path file) {
     
 
 parse_result deps_test(parse_result in) {
-    const_path file = to_cstring(in.AST.data.loc.file);
+    path file = realpath(to_cstring(in.AST.data.loc.file), NULL);
     glob_backtable = in.backsymtable;
     glob_paths = path_set_init(1);
     glob_file_roots = getroots(file);

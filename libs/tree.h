@@ -40,6 +40,21 @@ inline static void type##_tree_free(type##_tree in) { \
     type##_tree_dynarray_free(in.children); \
     return; \
 } \
+inline static void type##_tree_recfree(type##_tree in) { \
+    size_t i; \
+    for (i=0; i < in.children.size; i++) { \
+        type##_tree_recfree(in.children.begin[i]); \
+    } \
+    type##_tree_free(in); \
+    return; \
+} \
+inline static void type##_tree_dynarray_recfree(type##_tree_dynarray in) { \
+    size_t i; \
+    for (i=0; i < in.size; i++) { \
+        type##_tree_recfree(in.begin[i]); \
+    } \
+    return; \
+} \
 \
 /*Depth-first map on the tree in the first argument using the function in the second arg, which
 is a function that conceptually takes the data at the current root node as the first argument, 

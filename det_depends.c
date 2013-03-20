@@ -52,21 +52,23 @@ lexid depends_t(lexid root, lexid_tree_dynarray children) {
                         }
                     }
                     sub_lexid.tokenval = i;
-                    char_dynarray_free(sub_lexid.attr.stringval);
                 }
+                free(tmppath);
             }
             if (isNonPrimID(sub_lexid)) {
                 path_dynarray top_paths;
                 string top_string = top_lexid.attr.stringval;
+                path testpath = string_to_path(top_string);
 
-                if (path_is_rel(string_to_path(top_lexid.attr.stringval))) {
+                if (path_is_rel(testpath)) {
                     //top path is actually relative -- resolve it
+                    free(testpath);
                     top_paths = string_path_dict_get_all(glob_file_roots, top_string);
                 }
                 else {
                     //top path is not relative
                     top_paths = path_dynarray_make(1);
-                    top_paths = path_dynarray_add(top_paths, string_to_path(top_string));
+                    top_paths = path_dynarray_add(top_paths, testpath);
                 }
 
                 path sub_path = string_to_path(glob_backtable.begin[sub_lexid.tokenval]);
@@ -87,7 +89,7 @@ lexid depends_t(lexid root, lexid_tree_dynarray children) {
  * glob_extern_refs to give a final set of external references */
 lexid_tree_dynarray remove_unused_t(lexid_tree_dynarray children, lexid root) {
     if (lexid_eq(root, FILEREF_LEXID)) {
-        lexid_tree_dynarray_free(children);
+        lexid_tree_dynarray_recfree(children); //TODO: should really free lexid data.
         glob_extern_refs = path_set_add(glob_extern_refs, string_to_path(root.attr.stringval));
         printf("%s", "\n here it is: ");
         printf("%s", to_cstring(root.attr.stringval));

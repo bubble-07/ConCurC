@@ -24,11 +24,10 @@ typedef struct {
 typedef struct {
     string_path_dict file_roots;//  dictionary of "Roots" for extra-file references
     string_dynarray backtable;//  backwards symbol table 
-    path_set extern_refs;//  set of external references in the current file
-    path main_path; //Path to the directory of the first file interpreted
 } depends_t_state;
 
 DEFINE_STATEFUL_TREE_OPS(lexid, depends_t_state)
+DEFINE_STATEFUL_TREE_OPS(lexid, path_set)
 
 depends_result det_deps(parse_result in);
 

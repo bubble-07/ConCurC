@@ -10,8 +10,6 @@ lexid depends_t(lexid root, lexid_tree_dynarray children, depends_t_state state)
     //Temporary fix for global variables...
     string_path_dict glob_file_roots = state.file_roots;
     string_dynarray glob_backtable = state.backtable;
-    path_set glob_extern_refs = state.extern_refs;
-    path main_path = state.main_path;
 
     if (isNonPrimID(root) && children.size == 0) {
         path test = string_path_dict_get(glob_file_roots, glob_backtable.begin[root.tokenval]);
@@ -75,15 +73,13 @@ lexid depends_t(lexid root, lexid_tree_dynarray children, depends_t_state state)
 }
 
 /* Since depends_t leaves unneeded children of FILEREFs, we need to remove them with a
- * breadth-first transformation. In addition, remove_unused_t adds paths to the global
- * glob_extern_refs to give a final set of external references */
-lexid_tree_dynarray remove_unused_t(lexid_tree_dynarray children, lexid root, depends_t_state state) {
-
-    path_set glob_extern_refs = state.extern_refs;
+ * breadth-first transformation. In addition, remove_unused_t adds paths to
+ * refs to give a final set of external references */
+lexid_tree_dynarray remove_unused_t(lexid_tree_dynarray children, lexid root, path_set refs) {
 
     if (lexid_eq(root, FILEREF_LEXID)) {
         lexid_tree_dynarray_recfree(children); //TODO: should really free lexid data.
-        glob_extern_refs = path_set_add(glob_extern_refs, string_to_path(root.attr.stringval));
+        refs = path_set_add(refs, string_to_path(root.attr.stringval));
         printf("%s", "\n here it is: ");
         printf("%s", to_cstring(root.attr.stringval));
         printf("%s", "\n");
@@ -97,8 +93,7 @@ lexid_tree_dynarray remove_unused_t(lexid_tree_dynarray children, lexid root, de
 
 /* Given a file's path, return a dictionary of accessible external file reference "roots".
  * If this is the first file examined, set main_path */
-string_path_dict getroots(path file, depends_t_state state) {
-    path main_path = state.main_path;
+string_path_dict getroots(path file, path main_path) {
     string tmpstring;
     string_path_dict result = string_path_dict_init(20); 
 
@@ -135,12 +130,11 @@ string_path_dict getroots(path file, depends_t_state state) {
 parse_result deps_test(parse_result in) {
 
     depends_t_state state;
-    state.main_path = NULL; //Path to the directory of the first file interpreted
+    path main_path = NULL; //Path to the directory of the first file interpreted
 
     path file = realpath(to_cstring(in.AST.data.loc.file), NULL);
     state.backtable = in.backsymtable;
-    state.extern_refs = path_set_init(1);
-    state.file_roots = getroots(file, state);
+    state.file_roots = getroots(file, main_path);
 
     size_t i;
     size_t j;
@@ -153,9 +147,10 @@ parse_result deps_test(parse_result in) {
         }
     }
 
+    path_set extern_refs = path_set_init(1);
 
-    in.AST = lexid_tree_stateful_dfmap(in.AST, &depends_t, state);
-    in.AST = lexid_tree_stateful_hfmap(in.AST, &remove_unused_t, state);
+    in.AST = lexid_tree_depends_t_state_dfmap(in.AST, &depends_t, state);
+    in.AST = lexid_tree_path_set_hfmap(in.AST, &remove_unused_t, extern_refs);
     return in;
 }
 

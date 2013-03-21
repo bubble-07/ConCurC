@@ -1,3 +1,6 @@
+#include <stdlib.h>
+#include "memoryman.h"
+
 #ifndef DYNARRAY_DEFINED
 #define DYNARRAY_DEFINED
 

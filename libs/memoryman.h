@@ -1,5 +1,7 @@
+#include <stdlib.h>
 #ifndef MEMMAN
 #include <stdio.h>
+
 #define MEMMAN
 /*Defines convenience functions for allocating and dealing with memory*/
 

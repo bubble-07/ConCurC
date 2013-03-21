@@ -31,8 +31,4 @@ DEFINE_STATEFUL_TREE_OPS(lexid, path_set)
 
 file_depends_result det_file_deps(parse_result in);
 
-parse_result deps_test(parse_result in);
-
-
-
 #endif

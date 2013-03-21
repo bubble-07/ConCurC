@@ -24,12 +24,17 @@ static inline type##_graph type##_graph_init(size_t expectednumnodes) {\
     result.rsize = expectednumnodes;\
     return result;\
 }\
-static inline type##_graph type##_graph_addnode(type##_graph in, type toadd) {\
+static inline type type##_graph_getnode(type##_graph in, noderef current) {\
+    return in.nodes.begin[current]; \
+}\
+\
+static inline type##_graph type##_graph_addnode(type##_graph in, type toadd, noderef* loc) {\
     in.nodes = type##_dynarray_add(in.nodes, toadd);\
     if (!(in.size < in.rsize)) {\
         in.adjmat = flag_dynarray_dynarray_add(in.adjmat, flag_dynarray_zeroedrow(in.size));\
         in.rsize += 1;\
     }\
+    *loc = in.nodes.size - 1; \
     in.adjmat = flag_mat_addzeroedcolumn(in.adjmat);\
     in.size += 1;\
     return in;\

@@ -10,22 +10,21 @@ int hash_int(int in) {
     return in;
 }
 
+
+
 DEFINE_GRAPH(int)
 DEFINE_SET(int)
 
-int_set follow(int in) {
-    int_set result;
-    result = int_set_init(10);
+DEFINE_DICT(int, noderef)
+
+int_dynarray follow(int in) {
+    int_dynarray result;
+    result = int_dynarray_make(10);
     int i = (in + 1) % 5;
-    printf("%s", "starting... \n");
-    printf("%d", in);
     while (i != in) {
-        printf("%d", i);
-        printf("%s", "\n");
-        result = int_set_add(result, i);
+        result = int_dynarray_add(result, i);
         i = (int) (((int)i + 1) %  5);
     }
-    printf("%s", "done! \n");
     return result;
 }
 
@@ -36,7 +35,6 @@ noderef find(int_graph graph, int tofind) {
             return i;
         }
     }
-    printf("%s", "ERROR! NOT FOUND");
     return -1;
 }
 
@@ -59,32 +57,26 @@ void print_int_graph(int_graph graph) {
 
 //elems is the current set of all elements in the graph
 
-int_graph rec(int_graph part, noderef current) {
+int_graph rec(int_graph part, int_noderef_dict visited, noderef current) {
 
-    noderef_dynarray connections = int_graph_getchildren(part, current);
-    if (connections.size > 0) {
-        return part; //we must've already visited this node!
-    }
-    int currentval = int_graph_getnode(part, current);
-    int_set leads = follow(currentval);
-    int_dynarray leads_dynarray;
-    leads_dynarray = int_set_to_dynarray(leads);
+    int_dynarray leads_dynarray = follow(int_graph_getnode(part, current));
 
     noderef neighbor;
-    noderef tmp;
+    noderef tmpref;
+    int tmpval;
     size_t i;
     for (i=0; i < leads_dynarray.size; i++) {
-        neighbor = find(part, leads_dynarray.begin[i]);
-        if (neighbor == -1) {
-            part = int_graph_addnode(part, leads_dynarray.begin[i], &tmp);
-            part = int_graph_addedge(part, current, tmp);
+        neighbor = int_noderef_dict_get(visited, leads_dynarray.begin[i]);
+        if (neighbor == noderef_lookup_failure) {
+            tmpval = leads_dynarray.begin[i];
+            part = int_graph_addnode(part, tmpval, &tmpref);
+            part = int_graph_addedge(part, current, tmpref);
+            visited = int_noderef_dict_add(visited, int_noderef_bucket_make(tmpval, tmpref));
+            part = rec(part,visited, tmpref);
         }
         else {
             part = int_graph_addedge(part, current, neighbor);
         }
-    }
-    for (i=0; i < leads_dynarray.size; i++) {
-        part = rec(part, find(part, leads_dynarray.begin[i]));
     }
     return part;
 }
@@ -93,8 +85,10 @@ int main() {
     int_graph graph = int_graph_init(7);
     noderef tmp;
     graph = int_graph_addnode(graph, 3, &tmp);
-    graph = rec(graph, tmp);
-    flag_mat_print(graph.adjmat);
+    int_noderef_dict visited = int_noderef_dict_init(100);
+    visited = int_noderef_dict_add(visited, int_noderef_bucket_make(3, tmp));
+
+    graph = rec(graph, visited, tmp);
     print_int_graph(graph);
     return 0;
 }

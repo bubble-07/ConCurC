@@ -3,6 +3,7 @@
 #ifndef GRAPHDEFINED
 #define GRAPHDEFINED
 typedef size_t noderef;
+static const noderef noderef_lookup_failure = -1;
 DEFINE_DYNARRAY(noderef);
 #endif
 

@@ -122,6 +122,17 @@ static type##_tree type##_tree_stateful_dfmap(type##_tree in, \
     } \
     in.data = transform(in.data, in.children, initial); \
     return in; \
+} \
+\
+static type##_tree type##_tree_stateful_hfmap(type##_tree in, \
+                    type##_tree_dynarray (*transform) (type##_tree_dynarray, type, state_t), \
+                    state_t initial) { \
+    in.children = transform(in.children, in.data, initial); \
+    size_t i; \
+    for (i=0; i < in.children.size; i++) { \
+    in.children.begin[i] = type##_tree_stateful_hfmap(in.children.begin[i], transform, initial);\
+    } \
+    return in; \
 }
  
 #endif

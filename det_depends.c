@@ -1,18 +1,18 @@
 #include "det_depends.h"
 
-//FOR ALL OF THESE, see depends_t and remove_unused_t
-string_path_dict glob_file_roots; //Global dictionary of "Roots" for extra-file references
-string_dynarray glob_backtable; //Global backwards symbol table 
-path_set glob_extern_refs; //Global set of external references in the current file
-path main_path = NULL; //Path to the directory of the first file interpreted
-
-
 /* Transform the AST by replacing references to files [in identifiers] with FILEREF_LEXID's.
  * This transformation is intended to be carried out depth-first, so that folders can
  * be identified before the files they contain :P. Note: due to the nature of this as a
  * transformation to be used with tree_df_map(), global variables [above] needed to be defined
  * in order to fake extra parameters [no partial application in C!]. */
-lexid depends_t(lexid root, lexid_tree_dynarray children) {
+lexid depends_t(lexid root, lexid_tree_dynarray children, depends_t_state state) {
+
+    //Temporary fix for global variables...
+    string_path_dict glob_file_roots = state.file_roots;
+    string_dynarray glob_backtable = state.backtable;
+    path_set glob_extern_refs = state.extern_refs;
+    path main_path = state.main_path;
+
     if (isNonPrimID(root) && children.size == 0) {
         path test = string_path_dict_get(glob_file_roots, glob_backtable.begin[root.tokenval]);
         if (test != path_lookup_failure) {
@@ -77,7 +77,10 @@ lexid depends_t(lexid root, lexid_tree_dynarray children) {
 /* Since depends_t leaves unneeded children of FILEREFs, we need to remove them with a
  * breadth-first transformation. In addition, remove_unused_t adds paths to the global
  * glob_extern_refs to give a final set of external references */
-lexid_tree_dynarray remove_unused_t(lexid_tree_dynarray children, lexid root) {
+lexid_tree_dynarray remove_unused_t(lexid_tree_dynarray children, lexid root, depends_t_state state) {
+
+    path_set glob_extern_refs = state.extern_refs;
+
     if (lexid_eq(root, FILEREF_LEXID)) {
         lexid_tree_dynarray_recfree(children); //TODO: should really free lexid data.
         glob_extern_refs = path_set_add(glob_extern_refs, string_to_path(root.attr.stringval));
@@ -94,7 +97,8 @@ lexid_tree_dynarray remove_unused_t(lexid_tree_dynarray children, lexid root) {
 
 /* Given a file's path, return a dictionary of accessible external file reference "roots".
  * If this is the first file examined, set main_path */
-string_path_dict getroots(path file) {
+string_path_dict getroots(path file, depends_t_state state) {
+    path main_path = state.main_path;
     string tmpstring;
     string_path_dict result = string_path_dict_init(20); 
 
@@ -129,25 +133,29 @@ string_path_dict getroots(path file) {
     
 
 parse_result deps_test(parse_result in) {
+
+    depends_t_state state;
+    state.main_path = NULL; //Path to the directory of the first file interpreted
+
     path file = realpath(to_cstring(in.AST.data.loc.file), NULL);
-    glob_backtable = in.backsymtable;
-    glob_extern_refs = path_set_init(1);
-    glob_file_roots = getroots(file);
+    state.backtable = in.backsymtable;
+    state.extern_refs = path_set_init(1);
+    state.file_roots = getroots(file, state);
 
     size_t i;
     size_t j;
-    for (i=0; i < glob_file_roots.size; i++) {
-        for (j=0; j < glob_file_roots.begin[i].size; j++) {
-            printf("%s", to_cstring(glob_file_roots.begin[i].begin[j].key));
+    for (i=0; i < state.file_roots.size; i++) {
+        for (j=0; j < state.file_roots.begin[i].size; j++) {
+            printf("%s", to_cstring(state.file_roots.begin[i].begin[j].key));
             printf("%s", " ");
-            printf("%s", glob_file_roots.begin[i].begin[j].value);
+            printf("%s", state.file_roots.begin[i].begin[j].value);
             printf("%s", "\n");
         }
     }
 
 
-    in.AST = lexid_tree_dfmap(in.AST, &depends_t);
-    in.AST = lexid_tree_hfmap(in.AST, &remove_unused_t);
+    in.AST = lexid_tree_stateful_dfmap(in.AST, &depends_t, state);
+    in.AST = lexid_tree_stateful_hfmap(in.AST, &remove_unused_t, state);
     return in;
 }
 

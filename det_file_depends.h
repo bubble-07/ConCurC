@@ -19,6 +19,7 @@ typedef struct {
     lexid_tree AST;
     string_dynarray backsymtable;
     path_set filerefs;
+    path file;
 } file_depends_result;
 
 typedef struct {

@@ -157,6 +157,7 @@ file_depends_result det_file_deps(parse_result in) {
     result.AST = lexid_tree_path_set_hfmap(result.AST, &remove_unused_t, extern_refs);
 
     result.filerefs = extern_refs;
+    result.file = file;
 
     return result;
 }

@@ -126,6 +126,8 @@ type##_graph rec_construct_##type##_graph(type##_graph graph, \
     return graph;\
 }\
 \
+/* Constructs a directed graph from the given initial value, a generating function, and \
+ * the expected size of the resulting graph. */ \
 type##_graph construct_##type##_graph(type initial, type##_dynarray (*follow)(type), \
                                       size_t expectedsize) {\
     type##_graph result = type##_graph_init(expectedsize);\

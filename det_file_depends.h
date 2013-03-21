@@ -18,8 +18,8 @@ DEFINE_SET(path)
 typedef struct {
     lexid_tree AST;
     string_dynarray backsymtable;
-    string_dynarray filerefs;
-} depends_result;
+    path_set filerefs;
+} file_depends_result;
 
 typedef struct {
     string_path_dict file_roots;//  dictionary of "Roots" for extra-file references
@@ -29,7 +29,7 @@ typedef struct {
 DEFINE_STATEFUL_TREE_OPS(lexid, depends_t_state)
 DEFINE_STATEFUL_TREE_OPS(lexid, path_set)
 
-depends_result det_deps(parse_result in);
+file_depends_result det_file_deps(parse_result in);
 
 parse_result deps_test(parse_result in);
 

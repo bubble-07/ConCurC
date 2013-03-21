@@ -1,13 +1,12 @@
-#include "det_depends.h"
+#include "det_file_depends.h"
 
 /* Transform the AST by replacing references to files [in identifiers] with FILEREF_LEXID's.
  * This transformation is intended to be carried out depth-first, so that folders can
- * be identified before the files they contain :P. Note: due to the nature of this as a
- * transformation to be used with tree_df_map(), global variables [above] needed to be defined
- * in order to fake extra parameters [no partial application in C!]. */
+ * be identified before the files they contain. The "state" parameter is needed to
+ * determine the names of symbols and the potential root folders, as the AST doesn't
+ * contain this information [wrapped in depends_t_state] */
 lexid depends_t(lexid root, lexid_tree_dynarray children, depends_t_state state) {
 
-    //Temporary fix for global variables...
     string_path_dict glob_file_roots = state.file_roots;
     string_dynarray glob_backtable = state.backtable;
 
@@ -80,9 +79,9 @@ lexid_tree_dynarray remove_unused_t(lexid_tree_dynarray children, lexid root, pa
     if (lexid_eq(root, FILEREF_LEXID)) {
         lexid_tree_dynarray_recfree(children); //TODO: should really free lexid data.
         refs = path_set_add(refs, string_to_path(root.attr.stringval));
-        printf("%s", "\n here it is: ");
-        printf("%s", to_cstring(root.attr.stringval));
-        printf("%s", "\n");
+        //printf("%s", "\n here it is: ");
+        //printf("%s", to_cstring(root.attr.stringval));
+        //printf("%s", "\n");
         return lexid_tree_dynarray_make(1);
     }
     return children;
@@ -127,15 +126,20 @@ string_path_dict getroots(path file, path main_path) {
 }
     
 
-parse_result deps_test(parse_result in) {
+file_depends_result det_file_deps(parse_result in) {
+    file_depends_result result;
+    result.backsymtable = in.backsymtable;
+    result.AST = in.AST;
 
     depends_t_state state;
+
     path main_path = NULL; //Path to the directory of the first file interpreted
 
     path file = realpath(to_cstring(in.AST.data.loc.file), NULL);
     state.backtable = in.backsymtable;
     state.file_roots = getroots(file, main_path);
 
+    /*
     size_t i;
     size_t j;
     for (i=0; i < state.file_roots.size; i++) {
@@ -145,23 +149,14 @@ parse_result deps_test(parse_result in) {
             printf("%s", state.file_roots.begin[i].begin[j].value);
             printf("%s", "\n");
         }
-    }
+    } */
 
     path_set extern_refs = path_set_init(1);
 
-    in.AST = lexid_tree_depends_t_state_dfmap(in.AST, &depends_t, state);
-    in.AST = lexid_tree_path_set_hfmap(in.AST, &remove_unused_t, extern_refs);
-    return in;
-}
+    result.AST = lexid_tree_depends_t_state_dfmap(result.AST, &depends_t, state);
+    result.AST = lexid_tree_path_set_hfmap(result.AST, &remove_unused_t, extern_refs);
 
-
-
-depends_result det_depends(parse_result in) {
-    depends_result result;
-    result.backsymtable = in.backsymtable;
-    result.AST = in.AST;
+    result.filerefs = extern_refs;
 
     return result;
 }
-    
-

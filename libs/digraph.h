@@ -95,4 +95,44 @@ static inline type##_graph type##_graph_free(type##_graph in) {\
     return;\
 }
 
-
+//must first define type##_eq and hash##_type. 
+#define DEFINE_CONSTRUCT_GRAPH(type) \
+DEFINE_DICT(type, noderef) \
+\
+type##_graph rec_construct_##type##_graph(type##_graph graph, \
+                                  type##_dynarray (*follow)(type),\
+                                  type##_noderef_dict visited, \
+                                  noderef current) {\
+\
+    type##_dynarray leads_dynarray = follow(type##_graph_getnode(graph, current));\
+\
+    noderef neighbor;\
+    noderef tmpref;\
+    type tmpval;\
+    size_t i;\
+    for (i=0; i < leads_dynarray.size; i++) {\
+        neighbor = type##_noderef_dict_get(visited, leads_dynarray.begin[i]);\
+        if (neighbor == noderef_lookup_failure) {\
+            tmpval = leads_dynarray.begin[i];\
+            graph = type##_graph_addnode(graph, tmpval, &tmpref);\
+            graph = type##_graph_addedge(graph, current, tmpref);\
+           visited = type##_noderef_dict_add(visited, type##_noderef_bucket_make(tmpval, tmpref));\
+            graph = rec_construct_##type##_graph(graph,follow, visited, tmpref);\
+        }\
+        else {\
+            graph = type##_graph_addedge(graph, current, neighbor);\
+        }\
+    }\
+    return graph;\
+}\
+\
+type##_graph construct_##type##_graph(type initial, type##_dynarray (*follow)(type), \
+                                      size_t expectedsize) {\
+    type##_graph result = type##_graph_init(expectedsize);\
+    noderef tmp;\
+    result = type##_graph_addnode(result, initial, &tmp);\
+    type##_noderef_dict visited = type##_noderef_dict_init(expectedsize * 4);\
+    visited = type##_noderef_dict_add(visited, type##_noderef_bucket_make(initial, tmp));\
+    result = rec_construct_##type##_graph(result, follow, visited, tmp);\
+    return result;\
+}

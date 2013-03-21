@@ -1,14 +1,4 @@
 #include "det_depends.h"
-#include "libs/set.h"
-
-DEFINE_DICT(string, path)
-
-string string_lookup_failure = {0, 0, NULL};
-DEFINE_REVERSE_LOOKUP(string, path)
-DEFINE_GET_ALL_VALS(string, path)
-DEFINE_GET_ALL(string, path)
-
-DEFINE_SET(path)
 
 //FOR ALL OF THESE, see depends_t and remove_unused_t
 string_path_dict glob_file_roots; //Global dictionary of "Roots" for extra-file references

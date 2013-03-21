@@ -112,5 +112,16 @@ static type##_tree type##_tree_hfmap(type##_tree in, type##_tree_dynarray (*tran
     } \
     return in; \
 }
+#define DEFINE_STATEFUL_TREE_OPS(type, state_t) \
+static type##_tree type##_tree_stateful_dfmap(type##_tree in, \
+                                        type (*transform)(type, type##_tree_dynarray, state_t), \
+                                        state_t initial)  {\
+    size_t i; \
+    for (i=0; i < in.children.size; i++) { \
+    in.children.begin[i] = type##_tree_stateful_dfmap(in.children.begin[i], transform, initial); \
+    } \
+    in.data = transform(in.data, in.children, initial); \
+    return in; \
+}
  
 #endif

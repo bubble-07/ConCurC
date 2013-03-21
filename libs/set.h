@@ -1,11 +1,12 @@
 #include "dict.h"
 
-#define DEFINE_SET(type) \
+#define DEFINE_SET_FLAG \
 typedef int setflag; \
-setflag setflag_lookup_failure = 0; \
-int setflag_eq(setflag one, setflag two) { \
+static setflag setflag_lookup_failure = 0; \
+inline static int setflag_eq(setflag one, setflag two) { \
     return one == two; \
-} \
+}
+#define DEFINE_SET_METHODS(type) \
 DEFINE_DICT(type, setflag) \
 typedef type##_setflag_dict type##_set; \
 \
@@ -37,4 +38,4 @@ inline static type##_dynarray type##_set_to_dynarray(type##_set set) { \
     } \
     return result; \
 }
-
+#define DEFINE_SET(type) DEFINE_SET_FLAG DEFINE_SET_METHODS(type)

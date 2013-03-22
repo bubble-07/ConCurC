@@ -13,6 +13,7 @@ void display(lexid_tree in, string_dynarray backsymtable) {
     printf("%s", " ");
     printf("%s", " in file: ");
     printf("%s", to_cstring(in.data.loc.file));
+    printf("%s", "  ");
 
     if (in.data.tokenval == INT) {
         printf("%s", "integer: ");
@@ -53,6 +54,24 @@ void display(lexid_tree in, string_dynarray backsymtable) {
     return;
 }
 
+int main(int argc, const char* argv[]) {
+    fileLoc* file;
+    if (argc < 2) {
+        file = load_stdin();
+    }
+    else {
+        file = load_file(realpath(argv[1], NULL));
+    }
+    file_depends_result_graph programs = load_file_and_depends(file);
+    size_t i;
+    for (i=0; i < programs.nodes.size; i++) {
+        display(programs.nodes.begin[i].AST, programs.nodes.begin[i].backsymtable);
+    }
+
+    
+    return 0;
+}
+/*
 int main(int argc, const char * argv[]) {
     file_depends_result parseresult;
     fileLoc* file;
@@ -70,4 +89,4 @@ int main(int argc, const char * argv[]) {
     display(AST, parseresult.backsymtable);
     printf("%s", "\n");
     return 0;
-}
+} */

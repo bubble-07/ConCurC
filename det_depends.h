@@ -1,3 +1,4 @@
+#include <stdlib.h>
 #include "libs/digraph.h"
 #include "libs/dict.h"
 #include "libs/set.h"
@@ -14,3 +15,5 @@ static inline int hash_file_depends_result(file_depends_result in) {
 DEFINE_GRAPH(file_depends_result)
 
 DEFINE_CONSTRUCT_GRAPH(file_depends_result)
+
+file_depends_result_graph load_file_and_depends(fileLoc* in);

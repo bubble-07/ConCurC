@@ -21,9 +21,3 @@ file_depends_result_graph load_file_and_depends(fileLoc* in) {
     return result;
 }
 
-int main(int argc, const char* argv[]) {
-    fileLoc* file = load_file(realpath(argv[1], NULL));
-    load_file_and_depends(file);
-    return 0;
-}
-

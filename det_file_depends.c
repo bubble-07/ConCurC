@@ -126,14 +126,12 @@ string_path_dict getroots(path file, path main_path) {
 }
     
 
-file_depends_result det_file_deps(parse_result in) {
+file_depends_result det_file_deps(parse_result in, path main_path) {
     file_depends_result result;
     result.backsymtable = in.backsymtable;
     result.AST = in.AST;
 
     depends_t_state state;
-
-    path main_path = NULL; //Path to the directory of the first file interpreted
 
     path file = realpath(to_cstring(in.AST.data.loc.file), NULL);
     state.backtable = in.backsymtable;
@@ -157,7 +155,8 @@ file_depends_result det_file_deps(parse_result in) {
     result.AST = lexid_tree_path_set_hfmap(result.AST, &remove_unused_t, extern_refs);
 
     result.filerefs = extern_refs;
-    result.file = file;
+    result.file = realpath(to_cstring(in.AST.data.loc.file), NULL);
+    result.main_path = main_path;
 
     return result;
 }

@@ -20,6 +20,7 @@ typedef struct {
     string_dynarray backsymtable;
     path_set filerefs;
     path file;
+    path main_path;
 } file_depends_result;
 
 typedef struct {
@@ -30,6 +31,6 @@ typedef struct {
 DEFINE_STATEFUL_TREE_OPS(lexid, depends_t_state)
 DEFINE_STATEFUL_TREE_OPS(lexid, path_set)
 
-file_depends_result det_file_deps(parse_result in);
+file_depends_result det_file_deps(parse_result in, path main_path);
 
 #endif

@@ -1,6 +1,7 @@
 #include "parser.h"
 #include "primorder.h"
 #include "det_file_depends.h"
+#include "det_depends.h"
 
 #define GENPRINT(tok) else if (in.data.tokenval == tok) { printf("%s", #tok); }
 void display(lexid_tree in, string_dynarray backsymtable) {
@@ -57,11 +58,11 @@ int main(int argc, const char * argv[]) {
     fileLoc* file;
     if (argc < 2) {
         file = load_stdin();
-        parseresult = det_file_deps(primorder(parse(lex(load_stdin()))));
+        parseresult = det_file_deps(primorder(parse(lex(load_stdin()))), NULL);
     }
     else {
         file = load_file(argv[1]);
-        parseresult = det_file_deps(primorder(parse(lex(file))));
+        parseresult = det_file_deps(primorder(parse(lex(file))), NULL);
     }
     close_file(file);
     free(file);

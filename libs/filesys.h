@@ -50,7 +50,7 @@ static inline size_t hash_path(path in) {
 }
 
 /* Now for some operations */
-static inline path copy_path(path in) {
+static inline path copy_path(const_path in) {
     return strcpy(malloc(strlen(in) + 1), in);
 }
 

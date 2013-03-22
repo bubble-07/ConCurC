@@ -1,6 +1,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "dynstring.h"
+#include "error.h"
+#include "filesys.h"
 
 typedef struct {
     size_t lineno;
@@ -11,6 +13,11 @@ typedef struct {
 
 inline static fileLoc* load_file(const char* name) {
     fileLoc* result = memalloc(sizeof(fileLoc));
+    DIR* test = opendir(name);
+    if (test != NULL) {
+        printf("%s \n", name);
+        fatal_error("was attempted to be read as a file!");
+    }
     result->fileptr = fopen(name, "r");
     if (result->fileptr == NULL) {
         printf("%s", "WTF?");

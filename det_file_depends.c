@@ -58,14 +58,6 @@ lexid depends_t(lexid root, lexid_tree_dynarray children, depends_t_state state)
                     top_paths = path_dynarray_add(top_paths, testpath);
                 }
                 
-                path tmp_path;
-                size_t i;
-                for (i=0; i < top_paths.size; i++) {
-                    tmp_path = malloc(strlen(top_paths.begin[i] + 1));
-                    tmp_path = strcpy(tmp_path, top_paths.begin[i]);
-                    top_paths.begin[i] = tmp_path;
-                }
-
                 path sub_path = string_to_path(glob_backtable.begin[sub_lexid.tokenval]);
                 path within = rel_get_within(sub_path, top_paths);
                 if (!path_eq(within, path_lookup_failure)) {

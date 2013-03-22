@@ -111,7 +111,7 @@ static inline path get_file_extn(path file, path folder) {
 }
 
 /* gets the parent directory of an absolute path*/
-static inline path get_parent_dir(const_path file) {
+static inline path get_parent_dir(path file) {
     size_t i;
     for (i=strlen(file) - 1; i && (file[i] != '/'); i--);
     return strncpy(malloc(sizeof(char) * (i + 1)), file, i);
@@ -127,7 +127,9 @@ static inline path get_innermost_dir(const_path file) {
 
 /* gets if a given file [sans extension] is within a folder's path */
 static inline int rel_is_within(const_path file, path folder) {
+    folder = copy_path(folder); //need to copy for opendir() (working hypothesis)
     DIR* dirp = opendir(folder);
+    path_free(folder);
     path dotcur = cat_extn(file, "cur");
     path dotccur = cat_extn(file, "ccur");
     struct dirent* entry;

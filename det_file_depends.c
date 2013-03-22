@@ -57,6 +57,14 @@ lexid depends_t(lexid root, lexid_tree_dynarray children, depends_t_state state)
                     top_paths = path_dynarray_make(1);
                     top_paths = path_dynarray_add(top_paths, testpath);
                 }
+                
+                path tmp_path;
+                size_t i;
+                for (i=0; i < top_paths.size; i++) {
+                    tmp_path = malloc(strlen(top_paths.begin[i] + 1));
+                    tmp_path = strcpy(tmp_path, top_paths.begin[i]);
+                    top_paths.begin[i] = tmp_path;
+                }
 
                 path sub_path = string_to_path(glob_backtable.begin[sub_lexid.tokenval]);
                 path within = rel_get_within(sub_path, top_paths);
@@ -92,7 +100,7 @@ lexid_tree_dynarray remove_unused_t(lexid_tree_dynarray children, lexid root, pa
 
 /* Given a file's path, return a dictionary of accessible external file reference "roots".
  * If this is the first file examined, set main_path */
-string_path_dict getroots(path file, path main_path) {
+string_path_dict getroots(path file, path* main_path) {
     string tmpstring;
     string_path_dict result = string_path_dict_init(20); 
 
@@ -100,19 +108,25 @@ string_path_dict getroots(path file, path main_path) {
     QUICKADD("test", "/Users/bubble-07/Programmingstuff/test")
 
     //main_path will be "stdin" if we are REPL'ing
-    if (main_path == NULL) {
-        if (file == NULL) {
-            main_path = "stdin";
+    if (main_path != NULL) {
+        if (*main_path == NULL) {
+            if (file == NULL) {
+                *main_path = "stdin";
+            }
+            else {
+                *main_path = get_parent_dir(file);
+            }
         }
-        else {
-            main_path = get_parent_dir(file);
-        }
+    }
+    else {
+        //throw some kind of error...
+        return result;
     }
         
     //If main_path is "stdin", we shouldn't have to add anything extra to the "libs" namespace
-    if (main_path != "stdin") {
+    if (*main_path != "stdin") {
         //but if it isn't, we should add the main_path
-        QUICKADD( (get_innermost_dir(main_path)), (main_path))
+        QUICKADD( (get_innermost_dir(*main_path)), (*main_path))
     }
     path_dynarray stops = string_path_dict_get_all_values(result);
 
@@ -135,7 +149,8 @@ file_depends_result det_file_deps(parse_result in, path main_path) {
 
     path file = realpath(to_cstring(in.AST.data.loc.file), NULL);
     state.backtable = in.backsymtable;
-    state.file_roots = getroots(file, main_path);
+    state.file_roots = getroots(file, &main_path);
+
 
     /*
     size_t i;

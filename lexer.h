@@ -112,6 +112,7 @@ typedef struct {
     /*a "backwards" symbol table that is actually just a dynarray of strings, with the
     identifier's number cleverly represented in the index*/
     string_dynarray backsymtable;
+    string file;
 } lex_result; 
 
 /*lex() reads characters from stdin, and returns the above structure. Terminates upon EOF,

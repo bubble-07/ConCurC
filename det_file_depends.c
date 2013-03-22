@@ -139,7 +139,7 @@ file_depends_result det_file_deps(parse_result in, path main_path) {
 
     depends_t_state state;
 
-    path file = realpath(to_cstring(in.AST.data.loc.file), NULL);
+    path file = realpath(to_cstring(in.file), NULL);
     state.backtable = in.backsymtable;
     state.file_roots = getroots(file, &main_path);
 
@@ -162,7 +162,7 @@ file_depends_result det_file_deps(parse_result in, path main_path) {
     result.AST = lexid_tree_path_set_hfmap(result.AST, &remove_unused_t, extern_refs);
 
     result.filerefs = extern_refs;
-    result.file = realpath(to_cstring(in.AST.data.loc.file), NULL);
+    result.file = file;
     result.main_path = main_path;
 
     return result;

@@ -244,6 +244,7 @@ parse_result parse(lex_result in) {
      parse_result result;
      result.backsymtable = in.backsymtable;
      result.AST = parse_blocklines(parser_state_init(in.program, 0)).tree;
+     result.file = in.file;
      lexid_dynarray_free(in.program);
      return result;
 }

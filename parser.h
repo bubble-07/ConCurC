@@ -12,6 +12,7 @@ DEFINE_TREE(lexid)
 typedef struct {
     lexid_tree AST;
     string_dynarray backsymtable;
+    string file;
 } parse_result;
 
 /*a simple handle to the parser state [program, current index] -- used to pass around the current

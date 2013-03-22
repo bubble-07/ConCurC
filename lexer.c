@@ -266,6 +266,7 @@ lex_result lex(fileLoc* currentloc) {
     }
     lex_result result;
     result.program = program;
+    result.file = currentloc->file;
 
     //fill the "backsymtable" with entries
     //string_lexid_dict to string_dynarray

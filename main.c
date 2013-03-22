@@ -4,7 +4,7 @@
 #include "det_depends.h"
 
 #define GENPRINT(tok) else if (in.data.tokenval == tok) { printf("%s", #tok); }
-void display(lexid_tree in, string_dynarray backsymtable) {
+void display(lexid_tree in, string_dynarray backsymtable, path file) {
     string toprint;
     printf("%s", "\n on line: ");
     printf("%d", (int) in.data.loc.lineno);
@@ -12,7 +12,7 @@ void display(lexid_tree in, string_dynarray backsymtable) {
     printf("%d", (int) in.data.loc.linepos);
     printf("%s", " ");
     printf("%s", " in file: ");
-    printf("%s", to_cstring(in.data.loc.file));
+    printf("%s", file);
     printf("%s", "  ");
 
     if (in.data.tokenval == INT) {
@@ -27,7 +27,7 @@ void display(lexid_tree in, string_dynarray backsymtable) {
         printf("%s", "STRING CONSTANT");
     }
     else if (in.data.tokenval == FILEREF) {
-        printf("%s", "FILE REF");
+        printf("FILE REF: %s", to_cstring(in.data.attr.stringval));
     }
     GENPRINT(DEF)
     GENPRINT(LAMBDA)
@@ -40,7 +40,7 @@ void display(lexid_tree in, string_dynarray backsymtable) {
         printf("%s", "(");
         size_t i = 0;
         while (i < in.children.size) {
-            display(in.children.begin[i], backsymtable);
+            display(in.children.begin[i], backsymtable, file);
             i++;
         }
         printf("%s", ")");
@@ -65,7 +65,7 @@ int main(int argc, const char* argv[]) {
     file_depends_result_graph programs = load_file_and_depends(file);
     size_t i;
     for (i=0; i < programs.nodes.size; i++) {
-        display(programs.nodes.begin[i].AST, programs.nodes.begin[i].backsymtable);
+        display(programs.nodes.begin[i].AST, programs.nodes.begin[i].backsymtable, programs.nodes.begin[i].file);
     }
 
     

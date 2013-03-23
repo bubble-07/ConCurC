@@ -114,7 +114,9 @@ static inline path get_file_extn(path file, path folder) {
 static inline path get_parent_dir(path file) {
     size_t i;
     for (i=strlen(file) - 1; i && (file[i] != '/'); i--);
-    return strncpy(malloc(sizeof(char) * (i + 1)), file, i);
+    path tmp =  strncpy(malloc(sizeof(char) * (i + 1)), file, i);
+    tmp[i] = '\0';
+    return tmp;
 }
 
 /* gets the innermost directory of a path to a directory */

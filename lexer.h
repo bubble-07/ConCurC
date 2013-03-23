@@ -33,6 +33,7 @@ User-defined identifiers continue after EXPR */
 #define FLOAT 11
 #define INT 12
 #define FILEREF 13
+#define OUTOFFILE 14
 #define DEF 21
 #define LAMBDA 22
 #define NAMESPACE 23
@@ -48,6 +49,7 @@ User-defined identifiers continue after EXPR */
 D_LEX(NONE)
 D_LEX(LPAREN)
 D_LEX(RPAREN)
+D_LEX(OUTOFFILE)    
 
 D_LEX(DOT)
 D_LEX(BEGIN)

@@ -8,9 +8,19 @@ parser_state parser_state_init(lexid_dynarray prog, size_t i) {
     return result;
 }
 
+int boundsCheck(parser_state state) {
+    if (state.index < state.program.size && state.index) {
+        return 1;
+    }
+    return 0;
+}
 lexid getCurrent(parser_state state) {
+    if (!boundsCheck(state)) {
+        printf("%s", "ERRRRRORRRR");
+    }    
     return state.program.begin[state.index];
 }
+
 
 /*consumes one token from the stream*/
 parser_state consume(lexid toconsume, parser_state in) {
@@ -146,7 +156,9 @@ parse_part parse_listitems(parser_state state, int singleln) {
     state.index -= 1;
 
     lexid exprid = EXPR_LEXID;
-    exprid.loc = getCurrent(state).loc;
+    if (boundsCheck(state)) {
+        exprid.loc = getCurrent(state).loc;
+    }
 
     result.tree = lexid_tree_init(exprid);
     
@@ -186,6 +198,9 @@ parse_part parse_blockline(parser_state state) {
     result = parse_listitems(state,1);
     result.state = consume(NEWLINE_LEXID, result.state);
     //may have to protect against "end of program" bugs...
+    if (!boundsCheck(result.state)) {
+        return result;
+    }
     if (lexid_eq(getCurrent(result.state),BEGIN_LEXID)) {
         //parse block body
         header = result.tree;
@@ -221,7 +236,7 @@ parse_part parse_blocklines(parser_state state) {
     exprid.loc = getCurrent(state).loc;
 
     result.tree = lexid_tree_init(exprid);
-    while (!lexid_eq(getCurrent(state), END_LEXID) && state.index < state.program.size) {
+    while ( state.index < state.program.size ? !lexid_eq(getCurrent(state), END_LEXID) : 0) {
         tmp = parse_blockline(state);
         if (tmp.tree.children.size == 1) {
             tmp.tree = tmp.tree.children.begin[0];

@@ -20,56 +20,35 @@ typedef struct {
 
 /*macro definitions for the token values. EXPR is assumed to be last in the core token values.
 User-defined identifiers continue after EXPR */
-#define NONE 0
-#define LPAREN 1
-#define RPAREN 2
-#define DOT 3
-#define BEGIN 4
-#define END 5
-#define NEWLINE 6
-#define COMMA 7
-#define SPACE 8
-#define STRING 10
-#define FLOAT 11
-#define INT 12
-#define FILEREF 13
-#define OUTOFFILE 14
-#define DEF 21
-#define LAMBDA 22
-#define NAMESPACE 23
-#define IMPORT 24
-#define TYPE 25
-#define SUBS 26
-#define SUPS 27
-#define EXPR 28
 
 /*defines common lex identifier constants, to make it easier to declare them in code*/
-#define D_LEX(name) const static lexid name##_LEXID = {name, 0};
+#define D_LEX(name, value) const static int name = value; \
+                           const static lexid name##_LEXID = {value, 0};
 
-D_LEX(NONE)
-D_LEX(LPAREN)
-D_LEX(RPAREN)
-D_LEX(OUTOFFILE)    
+D_LEX(NONE, 0)
+D_LEX(LPAREN, 1)
+D_LEX(RPAREN, 2)
+D_LEX(OUTOFFILE, 14)    
 
-D_LEX(DOT)
-D_LEX(BEGIN)
-D_LEX(END)
-D_LEX(NEWLINE)
-D_LEX(COMMA)
-D_LEX(SPACE)
+D_LEX(DOT, 3)
+D_LEX(BEGIN, 4)
+D_LEX(END, 5)
+D_LEX(NEWLINE, 6)
+D_LEX(COMMA, 7)
+D_LEX(SPACE, 8)
 
-D_LEX(STRING)
-D_LEX(FLOAT)
-D_LEX(INT)
-D_LEX(FILEREF)
-D_LEX(DEF)
-D_LEX(LAMBDA)
-D_LEX(NAMESPACE)
-D_LEX(IMPORT)
-D_LEX(TYPE)
-D_LEX(SUBS)
-D_LEX(SUPS)
-D_LEX(EXPR)
+D_LEX(STRING, 10)
+D_LEX(FLOAT, 11)
+D_LEX(INT, 12)
+D_LEX(FILEREF, 13)
+D_LEX(DEF, 21)
+D_LEX(LAMBDA, 22)
+D_LEX(NAMESPACE, 23)
+D_LEX(IMPORT, 24)
+D_LEX(TYPE, 25)
+D_LEX(SUBS, 26)
+D_LEX(SUPS, 27)
+D_LEX(EXPR, 28)
 
 //Necessary to allow lookup failure in a dictionary. This is why LPAREN is 1, not 0*/
 const static lexid lexid_lookup_failure = {0, 0};

@@ -56,7 +56,7 @@ static inline path copy_path(const_path in) {
 
 /* Concatenate a path and a relative folder path [within the first arg]. */
 static inline path cat_paths(path one, path two) {
-    path result = strcat(strcpy(malloc(sizeof(char) * (strlen(one) + 2)), one), "/");
+  path result = strcat(strcpy(malloc(sizeof(char) * (strlen(one) + strlen(two) + 2)), one), "/");
     result = strcat(result, two);
     path resultpath = strcpy(malloc(strlen(result) + 1), result);
     free(result);
@@ -65,7 +65,7 @@ static inline path cat_paths(path one, path two) {
 
 /* Concatenate an extension onto a file path */
 static inline path cat_extn(const_path one, path extn) {
-    path result = strcat(strcpy(malloc(sizeof(char) * strlen(one)), one), ".");
+  path result = strcat(strcpy(malloc(sizeof(char) * (strlen(one) + strlen(extn) + 2)), one), ".");
     return strcat(result, extn);
 }
 
@@ -120,9 +120,12 @@ static inline path get_parent_dir(path file) {
 /* gets the innermost directory of a path to a directory */
 static inline path get_innermost_dir(const_path file) {
     size_t i;
+    if (file == NULL) {
+        return NULL;
+    }
     for (i=strlen(file) - 1; i && (file[i] != '/'); i--);
     i++;
-    return strcpy(malloc(strlen(file) - i), file + i);
+    return strcpy(malloc(strlen(file) - i + 2), file + i);
 }
 
 /* gets if a given file [sans extension] is within a folder's path */

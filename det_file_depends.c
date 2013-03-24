@@ -1,5 +1,10 @@
 #include "det_file_depends.h"
 
+lexid lexid_data_free_t(lexid root, lexid_tree_dynarray children) {
+    lexid_free(root);
+    return root;
+}
+
 /* Transform the AST by replacing references to files [in identifiers] with FILEREF_LEXID's.
  * This transformation is intended to be carried out depth-first, so that folders can
  * be identified before the files they contain. The "state" parameter is needed to
@@ -77,6 +82,10 @@ lexid depends_t(lexid root, lexid_tree_dynarray children, depends_t_state state)
 lexid_tree_dynarray remove_unused_t(lexid_tree_dynarray children, lexid root, path_set refs) {
 
     if (lexid_eq(root, FILEREF_LEXID)) {
+        size_t i;
+        for (i=0; i < children.size; i++) {
+            children.begin[i] = lexid_tree_dfmap(children.begin[i], &lexid_data_free_t);
+        }
         lexid_tree_dynarray_recfree(children); //TODO: should really free lexid data.
         refs = path_set_add(refs, string_to_path(root.attr.stringval));
         //printf("%s", "\n here it is: ");

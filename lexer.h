@@ -60,6 +60,14 @@ inline static int lexid_eq(lexid one, lexid two) {
     }
     return 0;
 }
+inline static void lexid_free(lexid in) {
+    if (lexid_eq(in, STRING_LEXID) | lexid_eq(in, FILEREF_LEXID)) {
+        char_dynarray_free(in.attr.stringval);
+        return;
+    }
+    return;
+}
+
 
 //Predicate that determines whether a given lexid is a primitive or not*/
 inline static int isPrim(lexid in) {

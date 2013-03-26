@@ -239,10 +239,11 @@ parse_part parse_blocklines(parser_state state) {
     while ( state.index < state.program.size ? !lexid_eq(getCurrent(state), END_LEXID) : 0) {
         tmp = parse_blockline(state);
         if (tmp.tree.children.size == 1) {
-            tmp.tree = tmp.tree.children.begin[0];
-            result.tree = lexid_tree_addchild(result.tree, tmp.tree);
+            result.tree = lexid_tree_addchild(result.tree, tmp.tree.children.begin[0]);
+            lexid_tree_free(tmp.tree);
         }
         else if (tmp.tree.children.size == 0) {
+            lexid_tree_free(tmp.tree);
         }
         else {
             result.tree = lexid_tree_addchild(result.tree, tmp.tree);

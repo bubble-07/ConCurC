@@ -15,9 +15,6 @@ int boundsCheck(parser_state state) {
     return 0;
 }
 lexid getCurrent(parser_state state) {
-    if (!boundsCheck(state)) {
-        printf("%s", "ERRRRRORRRR");
-    }    
     return state.program.begin[state.index];
 }
 

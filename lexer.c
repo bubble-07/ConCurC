@@ -275,13 +275,21 @@ lex_result lex(fileLoc* currentloc) {
     //string_lexid_dict to string_dynarray
     //remember, string_lexid_dict is actually string_lexid_bucket_dynarray_dynarray
     result.backsymtable = string_dynarray_make(newlex + 1);
+    for (i=0; i < newlex + 1; i++) {
+        result.backsymtable = string_dynarray_add(result.backsymtable,char_dynarray_make(1));
+    }
+
+    //Now, correlate the entries correctly
     result.backsymtable.size = newlex + 1;
     int j = 0;
+    size_t index;
     string_lexid_bucket_dynarray tmp;
     for (i=0; i < symtable.size; i++) {
         tmp = symtable.begin[i];
         for (j=0; j < tmp.size; j++) {
-            result.backsymtable.begin[tmp.begin[j].value.tokenval] = tmp.begin[j].key;
+            index = tmp.begin[j].value.tokenval;
+            char_dynarray_free(result.backsymtable.begin[index]);
+            result.backsymtable.begin[index] = tmp.begin[j].key;
         }
     } 
     string_lexid_dict_free(symtable);

@@ -1,3 +1,4 @@
+#include <stdlib.h>
 #include "det_depends.h"
 
 file_depends_result_dynarray load_deps(file_depends_result in) {

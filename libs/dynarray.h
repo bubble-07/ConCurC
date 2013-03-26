@@ -19,7 +19,6 @@ struct type##_dynarray { \
     type * begin; \
 }; 
 
-
 /*Declares the methods of a dynarray*/
  #define DEFINE_DYNARRAY_METHODS(type) \
  /*Creates a dynarray with a given initial virtual size*/ \

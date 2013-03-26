@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <string.h>
 #include "libs/digraph.h"
 #include "libs/dict.h"
 #include "libs/set.h"

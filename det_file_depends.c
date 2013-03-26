@@ -108,8 +108,8 @@ string_path_dict getroots(path file, path* main_path) {
     string tmpstring;
     string_path_dict result = string_path_dict_init(20); 
 
-    QUICKADD("libs", "/usr/local/concur/libs")
-    QUICKADD("test", "/Users/bubble-07/Programmingstuff/test")
+    QUICKADD("libs", copy_path("/usr/local/concur/libs"))
+    QUICKADD("test", copy_path("/Users/bubble-07/Programmingstuff/test"))
 
     //main_path will be "stdin" if we are REPL'ing
     if (main_path != NULL) {
@@ -130,7 +130,7 @@ string_path_dict getroots(path file, path* main_path) {
     //If main_path is "stdin", we shouldn't have to add anything extra to the "libs" namespace
     if (*main_path != "stdin") {
         //but if it isn't, we should add the main_path
-        QUICKADD( (get_innermost_dir(*main_path)), (*main_path))
+        QUICKADD( (get_innermost_dir(*main_path)), copy_path(*main_path))
     }
     path_dynarray stops = string_path_dict_get_all_values(result);
 
@@ -149,9 +149,11 @@ void freeroots(string_path_dict in) {
     for (i=0; i < in.size; i++) {
         for (j=0; j < in.begin[i].size; j++) {
             char_dynarray_free(in.begin[i].begin[j].key);
-            //free(in.begin[i].begin[j].value);
+            free(in.begin[i].begin[j].value);
         }
+        string_path_bucket_dynarray_free(in.begin[i]);
     }
+    string_path_bucket_dynarray_dynarray_free(in);
     return;
 }
     
@@ -163,7 +165,9 @@ file_depends_result det_file_deps(parse_result in, path main_path) {
 
     depends_t_state state;
 
-    path file = realpath(to_cstring(in.file), NULL);
+    path tmppath = to_cstring(in.file);
+    path file = realpath(tmppath, NULL);
+    free(tmppath);
     state.backtable = in.backsymtable;
     state.file_roots = getroots(file, &main_path);
 

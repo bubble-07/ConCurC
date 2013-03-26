@@ -11,7 +11,9 @@ file_depends_result_dynarray load_deps(file_depends_result in) {
         file = load_file(filerefs.begin[i]);
         tmp = det_file_deps(primorder(parse(lex(file))), in.main_path);
         result = file_depends_result_dynarray_add(result, tmp);
+        free(filerefs.begin[i]);
     }
+    path_dynarray_free(filerefs);
     return result;
 }
 

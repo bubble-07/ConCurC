@@ -84,6 +84,9 @@ lexid lexIdentifier(char current, string_lexid_dict symtable, int* newlex, fileL
         lookupval = tmpid;
         *newlex = *newlex + 1;
     }
+    else {
+        char_dynarray_free(id);
+    }
     return lookupval;
 }
 
@@ -122,13 +125,13 @@ lex_result lex(fileLoc* currentloc) {
     ADDCONST_SYM("import", IMPORT_LEXID);
     ADDCONST_SYM("type", TYPE_LEXID);
 
-    ADDCONST_SYM("<:", SUBS_LEXID);
-    ADDCONST_SYM("subs", SUBS_LEXID);
-    ADDCONST_SYM("subtypes", SUBS_LEXID);
+    ADDCONST_SYM("<:", SUBS_LEXID); 
+//    ADDCONST_SYM("subs", SUBS_LEXID);//TODO: Fix shadowing of those with same lexid
+//    ADDCONST_SYM("subtypes", SUBS_LEXID);
 
-    ADDCONST_SYM("sups", SUPS_LEXID);
+//    ADDCONST_SYM("sups", SUPS_LEXID);
     ADDCONST_SYM(":>", SUPS_LEXID);
-    ADDCONST_SYM("supertypes", SUPS_LEXID);
+//    ADDCONST_SYM("supertypes", SUPS_LEXID);
 
     /*Meat of the actual lexer. Conceptually, it does this by predictive decisions using the 
     current character as a reference.*/

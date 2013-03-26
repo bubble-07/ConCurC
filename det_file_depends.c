@@ -66,10 +66,13 @@ lexid depends_t(lexid root, lexid_tree_dynarray children, depends_t_state state)
                 path sub_path = string_to_path(glob_backtable.begin[sub_lexid.tokenval]);
                 path within = rel_get_within(sub_path, top_paths);
                 if (!path_eq(within, path_lookup_failure)) {
-                    path resulting = cat_paths(within, get_file_extn(sub_path, within));
+                    path withextn = get_file_extn(sub_path, within);
+                    path resulting = cat_paths(within, withextn);
                     root.attr.stringval = path_to_string(resulting);
+                    free(withextn);
                     root.tokenval = FILEREF;
                 }
+                free(sub_path);
             }
         }
     }
@@ -139,6 +142,18 @@ string_path_dict getroots(path file, path* main_path) {
     
     return result;
 }
+
+void freeroots(string_path_dict in) {
+    size_t i;
+    size_t j;
+    for (i=0; i < in.size; i++) {
+        for (j=0; j < in.begin[i].size; j++) {
+            char_dynarray_free(in.begin[i].begin[j].key);
+            //free(in.begin[i].begin[j].value);
+        }
+    }
+    return;
+}
     
 
 file_depends_result det_file_deps(parse_result in, path main_path) {
@@ -151,7 +166,6 @@ file_depends_result det_file_deps(parse_result in, path main_path) {
     path file = realpath(to_cstring(in.file), NULL);
     state.backtable = in.backsymtable;
     state.file_roots = getroots(file, &main_path);
-
 
     /*
     size_t i;
@@ -169,6 +183,10 @@ file_depends_result det_file_deps(parse_result in, path main_path) {
 
     result.AST = lexid_tree_depends_t_state_dfmap(result.AST, &depends_t, state);
     result.AST = lexid_tree_path_set_hfmap(result.AST, &remove_unused_t, extern_refs);
+
+    //need to free state.file_roots
+    freeroots(state.file_roots);
+
 
     result.filerefs = extern_refs;
     result.file = file;

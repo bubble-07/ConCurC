@@ -65,6 +65,7 @@ lexid depends_t(lexid root, lexid_tree_dynarray children, depends_t_state state)
                 
                 path sub_path = string_to_path(glob_backtable.begin[sub_lexid.tokenval]);
                 path within = rel_get_within(sub_path, top_paths);
+                path_dynarray_free(top_paths);
                 if (!path_eq(within, path_lookup_failure)) {
                     path withextn = get_file_extn(sub_path, within);
                     path resulting = cat_paths(within, withextn);
@@ -130,15 +131,21 @@ string_path_dict getroots(path file, path* main_path) {
     //If main_path is "stdin", we shouldn't have to add anything extra to the "libs" namespace
     if (*main_path != "stdin") {
         //but if it isn't, we should add the main_path
-        QUICKADD( (get_innermost_dir(*main_path)), copy_path(*main_path))
+        path innerpath = get_innermost_dir(*main_path);
+        QUICKADD( (innerpath), copy_path(*main_path))
+        free(innerpath);
     }
     path_dynarray stops = string_path_dict_get_all_values(result);
 
     path_dynarray roots = get_parent_dirs_to_root(file, stops);
     size_t i;
     for (i=0; i < roots.size; i++) {
-        QUICKADD( (get_innermost_dir(roots.begin[i])) , (roots.begin[i]))
+        path innerpath = get_innermost_dir(roots.begin[i]);
+        QUICKADD( (innerpath) , (roots.begin[i]))
+        free(innerpath);
     }
+    path_dynarray_free(roots);
+    path_dynarray_free(stops); //TODO: free the data
     
     return result;
 }

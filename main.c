@@ -63,6 +63,7 @@ int main(int argc, const char* argv[]) {
         file = load_file(realpath(argv[1], NULL));
     }
     file_depends_result_graph programs = load_file_and_depends(file);
+    flag_mat_print(programs.adjmat);
     size_t i;
     for (i=0; i < programs.nodes.size; i++) {
         display(programs.nodes.begin[i].AST, programs.nodes.begin[i].backsymtable, programs.nodes.begin[i].file);

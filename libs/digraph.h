@@ -1,10 +1,12 @@
 /* Implementation of an unweighted graph -- n^3 transitive closure, etc */
 #include "flagmat.h"   
+#include "set.h"
 #ifndef GRAPHDEFINED
 #define GRAPHDEFINED
 typedef size_t noderef;
 static const noderef noderef_lookup_failure = -1;
-DEFINE_DYNARRAY(noderef);
+DEFINE_DYNARRAY(noderef)
+DEFINE_SET(noderef)
 #endif
 
 #define DEFINE_GRAPH(type) \
@@ -71,13 +73,12 @@ static inline type##_graph type##_graph_floydwarshall(type##_graph in) {\
     for (k=0; k < in.size; k++) {\
         for (i=0; i < in.size; i++) {\
             for (j=0; j < in.size; j++) {\
-                /*\
                 if (type##_graph_testedge(in, i, k) & type##_graph_testedge(in, k, j)) {\
                     in = type##_graph_addedge(in, i, j);\
-                } */\
+                } /* \
                 in.adjmat.begin[i].begin[j] = \
                     in.adjmat.begin[i].begin[k] & in.adjmat.begin[k].begin[j] | \
-                    in.adjmat.begin[i].begin[j];\
+                    in.adjmat.begin[i].begin[j];\ */ \
             }\
         }\
     }\
@@ -87,6 +88,27 @@ static inline type##_graph type##_graph_transitiveclosure(type##_graph in) {\
     in = type##_graph_floydwarshall(in);\
     return in;\
 }\
+static inline noderef_dynarray type##_graph_topo_sort(type##_graph in) {\
+    /* create a "starting set" of nodes with nothing pointing to them */ \
+    noderef_set starts = noderef_set_init((in.size / 8) + 1); \
+    noderef_set visited = noderef_set_init((in.size)); \
+    /* this is gonna be super-inefficient -- later, try cascading or caching */ \
+    size_t i; \
+    size_t j; \
+    int isedge; \
+    for (i=0; i < in.adjmat.size; i++) { \
+        isedge = 0; \
+        for (j=0; j < in.adjmat.size; j++) { \
+            if (type##_graph_testedge(in, j, i)) { \
+                isedge = 1; \
+            } \
+        } \
+        if (!isedge) { \
+            starts = noderef_set_add(starts, i); \
+        }\
+    } \
+    return noderef_set_to_dynarray(starts); /*todo: add stuff*/ \
+} \
 \
 \
 static inline type##_graph type##_graph_free(type##_graph in) {\

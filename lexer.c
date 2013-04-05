@@ -1,4 +1,5 @@
 #include "lexer.h"
+#include "libs/error.h"
 #include "math.h"
 //LEXER -- lex() gets you a stream of tokens. First, some helper functions.
 
@@ -110,6 +111,8 @@ string_lexid_dict_add(symtable, string_lexid_bucket_make(to_dynstring(nstring), 
 
 
 lex_result lex(fileLoc* currentloc) {
+    int INDENT_TYPE = 0; //0 if not set, 1 if spaces for the file, 2 if tabs
+                        //used later to throw an error for mixing tabs and spaces
     string_lexid_dict symtable = string_lexid_dict_init(100);
     lexid_dynarray program = lexid_dynarray_make(100);
     
@@ -173,9 +176,21 @@ lex_result lex(fileLoc* currentloc) {
                 for (tmpindent = 0; 
                      current == ' ' || current == '\t'; current = get_char(currentloc)) {
                     if (current == '\t') {
+                        if (INDENT_TYPE == 0) {
+                            INDENT_TYPE = 1; //tabs
+                        }
+                        else if (INDENT_TYPE == 2) {
+                            fatal_error("You awful person -- mixing tabs and spaces...");
+                        }
                         tmpindent = tmpindent + 1.0000;
                     }
                     if (current == ' ') {
+                        if (INDENT_TYPE == 0) {
+                            INDENT_TYPE = 2; //spaces
+                        }
+                        else if (INDENT_TYPE == 1) {
+                            fatal_error("You awful person -- mixing tabs and spaces...");
+                        }
                         tmpindent = tmpindent + 0.2500;
                     }
                 }

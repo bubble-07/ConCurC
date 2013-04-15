@@ -116,7 +116,7 @@ static inline topo_partial type##_graph_topo_sort_r(type##_graph in, noderef cur
     return state; \
 } \
 static inline noderef_dynarray type##_graph_get_roots(type##_graph in) {\
-    noderef_dynarray result = noderef_dynarray_make(in.size >> 4 + 1); \
+    noderef_dynarray result = noderef_dynarray_make(1); \
     noderef from; \
     noderef to; \
     for (to = 0; to < in.size; to++) { \

@@ -123,7 +123,17 @@ inline static type type##_dynarray_foldl(type##_dynarray in, type (*f)(type, typ
         i++; \
     } \
     return start; \
-} 
+} \
+/*Gets the subsequence of the dynarray */ \
+inline static type##_dynarray type##_dynarray_get_subsequence(type##_dynarray in,  \
+                                                              size_t lbound, size_t rbound) { \
+    type##_dynarray result = type##_dynarray_make((rbound - lbound) + 1); \
+    for (lbound = lbound; lbound < (rbound + 1); lbound++) { \
+        result = type##_dynarray_add(result, in.begin[lbound]); \
+    } \
+    return result; \
+}
+
 /*Convenient macro to define both the type and methods of a given dynarray */
 #define DEFINE_DYNARRAY(type) \
 DEFINE_DYNARRAY_TYPE(type) \

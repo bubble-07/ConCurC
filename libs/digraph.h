@@ -277,4 +277,5 @@ static noderef_set type##_graph_condense_r(type##_graph in, type (*merge)(type##
                 noderef_dynarray tmp = type##_graph_find_cycle_elems(stack, children.begin[i]); \
                 in = type##_graph_collapse(in, merge, tmp); \
                  \
+                 \
     }

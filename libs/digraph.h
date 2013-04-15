@@ -133,14 +133,18 @@ static inline noderef_dynarray type##_graph_get_roots(type##_graph in) {\
     return result; \
 } \
  \
- \
-     \
 static inline noderef_dynarray type##_graph_topo_sort(type##_graph in) {\
-    topo_partial initial; \
-    initial.result = noderef_dynarray_make(in.size); \
-    initial.marks = colorflag_dynarray_make(in.size); \
-    initial.marks = colorflag_dynarray_fill(initial.marks, WHITE, in.size); \
-    return initial.result; \
+    topo_partial state; \
+    state.result = noderef_dynarray_make(in.size); \
+    state.marks = colorflag_dynarray_make(in.size); \
+    state.marks = colorflag_dynarray_fill(state.marks, WHITE, in.size); \
+    noderef_dynarray roots = type##_graph_get_roots(in); \
+    size_t i; \
+    for (i = 0; i < roots.size; i++) { \
+        state = type##_graph_topo_sort_r(in, roots.begin[i], state); \
+    } \
+    colorflag_dynarray_free(state.marks); \
+    return state.result; \
 } \
 \
 \

@@ -25,13 +25,4 @@ Dependency-determination: general:
         c. Recursively call the dependency-determination procedure on its dependencies
     II. Return
 
-Macro type resolution:
-    I. Resolve all macro type declarations at top level in the first file in the 
-    reverse-topological ordering of the dependency graph of files. (construct a graph)
-    II. Transfer macro types to usable format
-    III. 
-
-Resulting structure we want:
-    
-
-
+    Need to have a way to merge two files into the same file.

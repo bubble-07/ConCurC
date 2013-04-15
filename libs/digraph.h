@@ -43,6 +43,10 @@ static inline type##_graph type##_graph_init(size_t expectednumnodes) {\
 static inline type type##_graph_getnode(type##_graph in, noderef current) {\
     return in.nodes.begin[current]; \
 }\
+static inline type##_graph type##_graph_setnode(type##_graph in, noderef current, type val) {\
+    in.nodes.begin[current] = val; \
+    return in; \
+} \
 \
 static inline type##_graph type##_graph_addnode(type##_graph in, type toadd, noderef* loc) {\
     in.nodes = type##_dynarray_add(in.nodes, toadd);\
@@ -59,6 +63,10 @@ static inline type##_graph type##_graph_addedge(type##_graph in, noderef n1, nod
     in.adjmat.begin[n1].begin[n2] = FLAG_TRUE;\
     return in;\
 }\
+static inline type##_graph type##_graph_remove_edge(type##_graph in, noderef n1, noderef n2) {\
+    in.adjmat.begin[n1].begin[n2] = FLAG_FALSE;\
+    return in;\
+} \
 static inline int type##_graph_testedge(type##_graph in, noderef n1, noderef n2) {\
     return in.adjmat.begin[n1].begin[n2];\
 }\
@@ -78,6 +86,26 @@ static inline type##_graph type##_graph_copy(type##_graph in) {\
     result.nodes = type##_dynarray_copy(in.nodes);\
     return result;\
 }\
+/* the following function switches the numbering/position of a given node -- WARNING: breaks \
+ * references */ \
+static inline type##_graph type##_graph_switch(type##_graph in, noderef one, noderef two) { \
+    /*swap the data in the nodes array*/ \
+    type tmp = type##_graph_getnode(in, one); \
+    in = type##_graph_setnode(in, one, type##_graph_getnode(in, two)); \
+    in = type##_graph_setnode(in, two, tmp); \
+    in.adjmat = flag_mat_swapboth(in.adjmat, one, two); \
+    return in; \
+} \
+/* the following "detaches" a node, disconnecting it completely */ \
+static inline type##_graph type##_graph_detach(type##_graph in, noderef one) { \
+    noderef i; \
+    for (i=0; i < in.size; i++) { \
+        in = type##_graph_remove_edge(in, i, one); \
+        in = type##_graph_remove_edge(in, one, i); \
+    } \
+    return in; \
+} \
+         \
 \
 static inline type##_graph type##_graph_floydwarshall(type##_graph in) {\
     size_t i;\
@@ -197,3 +225,56 @@ static type##_graph construct_##type##_graph(type initial, type##_dynarray (*fol
     result = rec_construct_##type##_graph(result, follow, visited, tmp);\
     return result;\
 }
+
+#define DEFINE_MERGE_CYCLES(type) \
+static type##_graph type##_graph_collapse(type##_graph in, type (*merge)(type##_dynarray), \
+                                                           noderef_dynarray tocollapse) { \
+    if (tocollapse.size < 2) { \
+        return in; \
+    } \
+    type##_dynarray args = type##_dynarray_make(tocollapse.size); \
+    args = type##_dynarray_add(args, in.nodes[tocollapse.begin[0]]); \
+    size_t i; \
+    for (i=1; i < tocollapse.size; i++) { \
+        args = type##_dynarray_add(args, in.nodes[tocollapse.begin[i]]); \
+        in = type##_graph_detach(in, tocollapse.begin[i]); \
+    } \
+    in.nodes[tocollapse.begin[0]] = merge(args);  \
+    return in; \
+} \
+/*Returns a sub-list of the incoming nodes that only contains the cycle referenced by the last \
+ * element*/ \
+static noderef_dynarray type##_graph_find_cycle_elems(noderef_dynarray in) { \
+    if (in.size < 2) { \
+        return in; \
+    } \
+    noderef_dynarray result = noderef_dynarray_make(1); \
+    noderef root = in.begin[in.size - 1]; \
+    size_t i; \
+    for (i = in.size - 2; i > -1; i--) { \
+        if (in.begin[i] == root) { \
+            i = -1; \
+        } \
+        else { \
+            result = noderef_dynarray_add(result, in.begin[i]); \
+        } \
+    } \
+    return result; \
+} \
+ \
+ \
+static type##_graph type##_graph_condense_r(type##_graph in, type (*merge)(type##_dynarray), \
+                                                noderef current, colorflag_dynarray marks \
+                                                noderef_dynarray stack) {\
+    stack = noderef_dynarray_add(stack, current);  \
+    marks.begin[current] = GREY; \
+    noderef_dynarray children = type##_graph_getchildren(in, current); \
+    size_t i; \
+    for (i = 0; i < children.size; i++) { \
+        switch (marks.begin[children.begin[i]]) { \
+            case WHITE: \
+                in = type##_graph_condense_r(in, merge, children.begin[i], marks, stack); \
+                break; \
+            default: \
+                /* there's some kind of cycle*/ \
+    }

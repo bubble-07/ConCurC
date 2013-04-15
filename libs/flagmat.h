@@ -73,4 +73,31 @@ static inline flag_mat flag_mat_copy(flag_mat in) {
     }
     return result;
 }
+static inline flag_mat flag_mat_swaprows(flag_mat in, size_t one, size_t two) {
+    flag_dynarray tmp = in.begin[one];
+    in.begin[one] = in.begin[two];
+    in.begin[two] = tmp;
+    return in;
+}
+static inline flag_mat flag_mat_swapflags(flag_mat in, size_t rowone, size_t colone,
+                                                       size_t rowtwo, size_t coltwo) {
+    flag tmp = in.begin[rowone].begin[colone];
+    in.begin[rowone].begin[colone] = in.begin[rowtwo].begin[coltwo];
+    in.begin[rowtwo].begin[coltwo] = tmp;
+    return in;
+}
+static inline flag_mat flag_mat_swapcols(flag_mat in, size_t one, size_t two) {
+    size_t i;
+    for (i=0; i < in.size; i++) {
+        in = flag_mat_swapflags(in, i, one, i, two);
+    }
+    return in;
+}
+static inline flag_mat flag_mat_swapboth(flag_mat in, size_t one, size_t two) {
+    in = flag_mat_swaprows(in, one, two);
+    in = flag_mat_swapcols(in, one, two);
+    return in;
+}
+    
+
 #endif 

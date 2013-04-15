@@ -9,6 +9,19 @@ DEFINE_DYNARRAY(noderef)
 DEFINE_SET(noderef)
 #endif
 
+#ifndef COLORFLAG_DEFINED
+#define COLORFLAG_DEFINED
+typedef char colorflag;
+static const colorflag BLACK = 0;
+static const colorflag GREY = 1;
+static const colorflag WHITE = 2;
+DEFINE_DYNARRAY(colorflag)
+typedef struct {
+    colorflag_dynarray marks;
+    noderef_dynarray result;
+} topo_partial;
+#endif
+
 #define DEFINE_GRAPH(type) \
 DEFINE_DYNARRAY(type) \
 \
@@ -88,26 +101,46 @@ static inline type##_graph type##_graph_transitiveclosure(type##_graph in) {\
     in = type##_graph_floydwarshall(in);\
     return in;\
 }\
-static inline noderef_dynarray type##_graph_topo_sort(type##_graph in) {\
-    /* create a "starting set" of nodes with nothing pointing to them */ \
-    noderef_set starts = noderef_set_init((in.size / 8) + 1); \
-    noderef_set visited = noderef_set_init((in.size)); \
-    /* this is gonna be super-inefficient -- later, try cascading or caching */ \
+static inline topo_partial type##_graph_topo_sort_r(type##_graph in, noderef current, \
+                                                                    topo_partial state) { \
+    noderef_dynarray tmpchildren = type##_graph_getchildren(in, current); \
     size_t i; \
-    size_t j; \
-    int isedge; \
-    for (i=0; i < in.adjmat.size; i++) { \
-        isedge = 0; \
-        for (j=0; j < in.adjmat.size; j++) { \
-            if (type##_graph_testedge(in, j, i)) { \
-                isedge = 1; \
+    for (i=0; i < tmpchildren.size; i++) { \
+        if (state.marks.begin[tmpchildren.begin[i]] == WHITE) { \
+            state.marks.begin[tmpchildren.begin[i]] = GREY; \
+            state = type##_graph_topo_sort_r(in, tmpchildren.begin[i], state); \
+        } \
+    } \
+    state.marks.begin[current] = BLACK; \
+    state.result = noderef_dynarray_add(state.result, current); \
+    return state; \
+} \
+static inline noderef_dynarray type##_graph_get_roots(type##_graph in) {\
+    noderef_dynarray result = noderef_dynarray_make(in.size >> 4 + 1); \
+    noderef from; \
+    noderef to; \
+    for (to = 0; to < in.size; to++) { \
+        int can_be_root = 1; /*by default, assume it can be root*/ \
+        for (from = 0; from < in.size && can_be_root; from++) { \
+            if (type##_graph_testedge(in, from, to)) { \
+                can_be_root = 0; /*can't be a root!*/ \
             } \
         } \
-        if (!isedge) { \
-            starts = noderef_set_add(starts, i); \
-        }\
+        if (can_be_root) { \
+            result = noderef_dynarray_add(result, to); /* it is a root! */ \
+        } \
     } \
-    return noderef_set_to_dynarray(starts); /*todo: add stuff*/ \
+    return result; \
+} \
+ \
+ \
+     \
+static inline noderef_dynarray type##_graph_topo_sort(type##_graph in) {\
+    topo_partial initial; \
+    initial.result = noderef_dynarray_make(in.size); \
+    initial.marks = colorflag_dynarray_make(in.size); \
+    initial.marks = colorflag_dynarray_fill(initial.marks, WHITE, in.size); \
+    return initial.result; \
 } \
 \
 \

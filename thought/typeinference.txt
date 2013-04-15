@@ -1,0 +1,36 @@
+Type Inference:
+
+APP(Λ(x <: n).(x -> y), a) GIVEN (a <: n) => y
+                           OTHERWISE ERROR
+
+APP(Λ(x >: n).(x -> y), a) GIVEN (a :> n) => y
+                           OTHERWISE ERROR
+
+APP(Λ(c a <: n).((c a) -> y) GIVEN ((c a) <: n) => y
+                           OTHERWISE ERROR
+
+APP(Λ( (a -> b) <: (c -> d)). ((a -> b) -> d), (Int -> Int))
+                            in context where (c -> d) : (Num -> Num) => 
+                                    Num
+
+map :: (a -> b) -> ((Listof a) -> (Listof a))
+map :: Λ(c <: a).(a -> b) -> ((Listof c) -> (Listof b))
+    //do we really mean this?
+    //yes, probably.
+
+Λ(a >: n)(b >: n).(a -> (b -> c)) -> n -> c
+
+as soon as we fill one of the type parameters, the annotation lasts.
+
+
+APP(Λ(n >: a)(n >: b).(n -> c), x) GIVEN ((x >: a) and (x >: b)) => c
+                                   OTHERWISE ERROR
+
+
+def (Listof(b) map) ((a -> b) f) (Listof(a) input)
+    (f (head input)) : (map f (tail input))
+
+: :: a -> Listof(a) -> Listof(a)
+
+: :: Λ(a <: n)(b <: n).a -> (Listof(b) -> Listof(n))
+    

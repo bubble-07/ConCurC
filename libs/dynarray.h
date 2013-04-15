@@ -105,7 +105,16 @@ inline static type##_dynarray type##_dynarray_map(type##_dynarray in, type (*f)(
     } \
     return in; \
 } \
-/*Left-folds on dynarrays. Takes a dynarray, a function to fold over it, and the "starting" or 
+/* append "len" number of "val" to "in" */ \
+inline static type##_dynarray type##_dynarray_fill(type##_dynarray in, type val, size_t len) { \
+    size_t i; \
+    for (i = 0; i < len; i++) { \
+        in = type##_dynarray_add(in, val); \
+    } \
+    return in; \
+} \
+\
+/*Left-folds on dynarrays. Takes a dynarray, a function to fold over it, and the "starting" or \
 "zero" element. Returns the value obtained by carrying out a higher-order left fold*/\
 inline static type type##_dynarray_foldl(type##_dynarray in, type (*f)(type, type), type start) { \
     size_t i = 0; \

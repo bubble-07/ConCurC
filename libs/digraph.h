@@ -243,15 +243,12 @@ static type##_graph type##_graph_collapse(type##_graph in, type (*merge)(type##_
     return in; \
 } \
 /*Returns a sub-list of the incoming nodes that only contains the cycle referenced by the last \
- * element*/ \
-static noderef_dynarray type##_graph_find_cycle_elems(noderef_dynarray in) { \
-    if (in.size < 2) { \
-        return in; \
-    } \
+ * arg*/ \
+static noderef_dynarray type##_graph_find_cycle_elems(noderef_dynarray in, noderef root) { \
     noderef_dynarray result = noderef_dynarray_make(1); \
-    noderef root = in.begin[in.size - 1]; \
+    result = noderef_dynarray_add(result, root); \
     size_t i; \
-    for (i = in.size - 2; i > -1; i--) { \
+    for (i = in.size - 1; i > -1; i--) { \
         if (in.begin[i] == root) { \
             i = -1; \
         } \
@@ -263,9 +260,9 @@ static noderef_dynarray type##_graph_find_cycle_elems(noderef_dynarray in) { \
 } \
  \
  \
-static type##_graph type##_graph_condense_r(type##_graph in, type (*merge)(type##_dynarray), \
+static noderef_set type##_graph_condense_r(type##_graph in, type (*merge)(type##_dynarray), \
                                                 noderef current, colorflag_dynarray marks \
-                                                noderef_dynarray stack) {\
+                                                noderef_dynarray stack, noderef_set toremove) {\
     stack = noderef_dynarray_add(stack, current);  \
     marks.begin[current] = GREY; \
     noderef_dynarray children = type##_graph_getchildren(in, current); \
@@ -273,8 +270,11 @@ static type##_graph type##_graph_condense_r(type##_graph in, type (*merge)(type#
     for (i = 0; i < children.size; i++) { \
         switch (marks.begin[children.begin[i]]) { \
             case WHITE: \
-                in = type##_graph_condense_r(in, merge, children.begin[i], marks, stack); \
+                toremove = type##_graph_condense_r(in, merge, children.begin[i], marks, stack); \
                 break; \
             default: \
                 /* there's some kind of cycle*/ \
+                noderef_dynarray tmp = type##_graph_find_cycle_elems(stack, children.begin[i]); \
+                in = type##_graph_collapse(in, merge, tmp); \
+                 \
     }

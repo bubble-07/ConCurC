@@ -39,4 +39,14 @@ inline static type##_dynarray type##_set_to_dynarray(type##_set set) { \
         } \
     } \
     return result; \
+} \
+inline static type##_set type##_set_union(type##_set one, type##_set two) { \
+    type##_dynarray dyntwo = type##_set_to_dynarray(two); \
+    size_t i = 0; \
+    for (i = 0; i < dyntwo.size; i++) { \
+        one = type##_set_add(one, dyntwo.begin[i]); \
+    } \
+    type##_dynarray_free(dyntwo); \
+    return one; \
 }
+    

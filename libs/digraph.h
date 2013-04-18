@@ -105,6 +105,33 @@ static inline type##_graph type##_graph_detach(type##_graph in, noderef one) { \
     } \
     return in; \
 } \
+/* finds all of the nodes with no incoming/outgoing connections, removes them */ \
+static inline type##_graph type##_graph_gc(type##_graph in, void (*destructor)(type)) { \
+    noderef i; \
+    noderef j; \
+    int zeroed; \
+    size_t initsize = in.size; \
+    for (i=0; i < in.size; i++) { \
+        zeroed = 1; \
+        for (j = 0; j < in.size && zeroed; j++) { \
+            if (type##_graph_testedge(in, i, j) || type##_graph_testedge(in, j, i)) { \
+                zeroed = 0; \
+            } \
+        } \
+        if (zeroed) {  \
+            /*Hey, look -- node i is one that can be gc'ed*/ \
+            in = type##_graph_switch(in, i, in.size - 1); \
+            in.size -= 1; \
+            i -= 1; \
+        } \
+    } \
+    for (i=(in.size - 1); i < initsize; i++) { \
+        destructor(in.nodes.begin[i]); \
+    } \
+    return in; \
+} \
+ \
+ \
          \
 \
 static inline type##_graph type##_graph_floydwarshall(type##_graph in) {\

@@ -3,6 +3,8 @@
 #include "det_file_depends.h"
 #include "det_depends.h"
 
+extern char* realpath(const char* path, char* resolved_path);
+
 #define GENPRINT(tok) else if (in.data.tokenval == tok) { printf("%s", #tok); }
 void display(lexid_tree in, string_dynarray backsymtable, path file) {
     string toprint;

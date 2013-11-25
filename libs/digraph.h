@@ -203,7 +203,7 @@ static inline noderef_dynarray type##_graph_topo_sort(type##_graph in) {\
 } \
 \
 \
-static inline type##_graph type##_graph_free(type##_graph in) {\
+static inline void type##_graph_free(type##_graph in) {\
     type##_dynarray_free(in.nodes);\
     flag_mat_free(in.adjmat);\
     return;\

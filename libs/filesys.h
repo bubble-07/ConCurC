@@ -9,6 +9,8 @@
 //define a handy macro that replaces a c string with one that has been newly allocated
 #define MUTATE(type, var, val) type type##_tmp = val; free(var); var = type##_tmp;
 
+extern char* realpath(const char *path, char* resolved_path);
+
 //Yep, keeping it real simple
 typedef char* path;
 typedef const char* const_path;
@@ -200,7 +202,7 @@ static inline path_dynarray get_parent_dirs_to_root(const_path file, path_dynarr
     path currentpath = realpath(file, NULL);
     if (currentpath == NULL) {
         //PANIC!
-        return;
+        return result;
     }
     MUTATE(path, currentpath, get_parent_dir(currentpath))
     while (abs_is_within_anyof(currentpath, folders)) {

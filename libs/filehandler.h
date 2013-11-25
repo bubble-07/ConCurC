@@ -12,6 +12,7 @@ typedef struct {
 } fileLoc;
 
 inline static fileLoc* load_file(const char* name) {
+    printf("%s", name);
     fileLoc* result = memalloc(sizeof(fileLoc));
     DIR* test = opendir(name);
     if (test != NULL) {
@@ -20,7 +21,7 @@ inline static fileLoc* load_file(const char* name) {
     }
     result->fileptr = fopen(name, "r");
     if (result->fileptr == NULL) {
-        printf("%s", "WTF?");
+        printf("%s", "WTFONE?");
     }
     result->lineno = 1;
     result->linepos = 0;

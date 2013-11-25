@@ -260,17 +260,18 @@ static type##_graph type##_graph_collapse(type##_graph in, type (*merge)(type##_
         return in; \
     } \
     type##_dynarray args = type##_dynarray_make(tocollapse.size); \
-    args = type##_dynarray_add(args, in.nodes[tocollapse.begin[0]]); \
+    args = type##_dynarray_add(args, in.nodes.begin[tocollapse.begin[0]]); \
     size_t i; \
     for (i=1; i < tocollapse.size; i++) { \
-        args = type##_dynarray_add(args, in.nodes[tocollapse.begin[i]]); \
+        args = type##_dynarray_add(args, in.nodes.begin[tocollapse.begin[i]]); \
         in = type##_graph_detach(in, tocollapse.begin[i]); \
     } \
-    in.nodes[tocollapse.begin[0]] = merge(args);  \
+    in.nodes.begin[tocollapse.begin[0]] = merge(args);  \
     return in; \
-} \
+}
+#define DEFINE_BLAH \
 /*Returns a sub-list of the incoming nodes that only contains the cycle referenced by the last \
- * arg*/ \
+* arg. TODO: Change test for equality to be overloadable. */ \
 static noderef_dynarray type##_graph_find_cycle_elems(noderef_dynarray in, noderef root) { \
     noderef_dynarray result = noderef_dynarray_make(1); \
     result = noderef_dynarray_add(result, root); \

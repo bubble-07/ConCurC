@@ -1,95 +1,81 @@
-#include "parser.h"
-#include "primorder.h"
-#include "det_file_depends.h"
-#include "det_depends.h"
+#include "libs/dynstring.h"
+#include "libs/digraph.h"
 
-extern char* realpath(const char* path, char* resolved_path);
+typedef string Type;
 
-#define GENPRINT(tok) else if (in.data.tokenval == tok) { printf("%s", #tok); }
-void display(lexid_tree in, string_dynarray backsymtable, path file) {
-    string toprint;
-    printf("%s", "\n on line: ");
-    printf("%d", (int) in.data.loc.lineno);
-    printf("%s", " col: ");
-    printf("%d", (int) in.data.loc.linepos);
-    printf("%s", " ");
-    printf("%s", " in file: ");
-    printf("%s", file);
-    printf("%s", "  ");
+DEFINE_GRAPH(Type)
 
-    if (in.data.tokenval == INT) {
-        printf("%s", "integer: ");
-        printf("%d", in.data.attr.intval);
-    }
-    else if (in.data.tokenval == FLOAT) {
-        printf("%s", "float: ");
-        printf("%.20f", in.data.attr.floatval);
-    }
-    else if (in.data.tokenval == STRING) {
-        printf("%s", "STRING CONSTANT");
-    }
-    else if (in.data.tokenval == FILEREF) {
-        printf("FILE REF: %s", to_cstring(in.data.attr.stringval));
-    }
-    GENPRINT(DEF)
-    GENPRINT(LAMBDA)
-    GENPRINT(NAMESPACE)
-    GENPRINT(IMPORT)
-    GENPRINT(TYPE)
-    GENPRINT(SUBS)
-    GENPRINT(SUPS)
-    else if (in.data.tokenval == EXPR) {
-        printf("%s", "(");
-        size_t i = 0;
-        while (i < in.children.size) {
-            display(in.children.begin[i], backsymtable, file);
-            i++;
+Type_graph Universe;
+
+#define AddType(name) noderef name; Universe = Type_graph_addnode(Universe, to_dynstring(#name), &name);
+#define Subs(one, two) Universe = Type_graph_addedge(Universe, two, one);
+
+//TODO: Write method to print the current type graph
+
+typedef struct {
+    noderef input;
+    noderef output;
+} Function;
+
+void Type_graph_print(Type_graph in) {
+    size_t i, j;
+    for (i = 0; i < in.size; i++) {
+        for (j = 0; j < in.size; j++) {
+            if (Type_graph_testedge(in, i, j)) {
+                printf("%s <: %s \n", to_cstring(Type_graph_getnode(in, j)), to_cstring(Type_graph_getnode(in, i)));
+            }
         }
-        printf("%s", ")");
     }
-    else {
-        toprint = char_dynarray_copy(backsymtable.begin[in.data.tokenval]);
-        toprint = char_dynarray_add(toprint, (char) 0);
-        printf("%s", toprint.begin);
-    }
-    printf("%s", "   ");
     return;
 }
 
-int main(int argc, const char* argv[]) {
-    fileLoc* file;
-    if (argc < 2) {
-        file = load_stdin();
-    }
-    else {
-        file = load_file(realpath(argv[1], NULL));
-    }
-    file_depends_result_graph programs = load_file_and_depends(file);
-    flag_mat_print(programs.adjmat);
+Function make_function(noderef in, noderef out) {
+    Function result;
+    result.input = in;
+    result.output = out;
+    return result;
+}
+
+DEFINE_DYNARRAY(Function)
+
+Function_dynarray FunctionChain;
+
+int typecheck() {
     size_t i;
-    for (i=0; i < programs.nodes.size; i++) {
-        display(programs.nodes.begin[i].AST, programs.nodes.begin[i].backsymtable, programs.nodes.begin[i].file);
+    for (i = 0; i < FunctionChain.size - 1; i++) {
+        if (!Type_graph_testedge(Universe, FunctionChain.begin[i + 1].input, FunctionChain.begin[i].output)) {
+            return 0;
+        }
+    }
+    return 1;
+}
+
+
+int main() {
+    Universe = Type_graph_init(2);
+    AddType(Any)
+    AddType(String)
+    AddType(Number)
+    AddType(Int)
+    Subs(String, Any)
+    Subs(Number, Any)
+    Subs(Int, Number)
+    Universe = Type_graph_transitiveclosure(Universe);
+    Universe = Type_graph_reflexiveclosure(Universe);
+    Type_graph_print(Universe);
+
+    FunctionChain = Function_dynarray_make(1);
+    FunctionChain = Function_dynarray_add(FunctionChain, make_function(String, Any));
+    FunctionChain = Function_dynarray_add(FunctionChain, make_function(Any, Number));
+    FunctionChain = Function_dynarray_add(FunctionChain, make_function(Int, Int));
+
+    if (typecheck()) {
+        printf("All well \n");
     }
 
-    
+
     return 0;
 }
-/*
-int main(int argc, const char * argv[]) {
-    file_depends_result parseresult;
-    fileLoc* file;
-    if (argc < 2) {
-        file = load_stdin();
-        parseresult = det_file_deps(primorder(parse(lex(load_stdin()))), NULL);
-    }
-    else {
-        file = load_file(argv[1]);
-        parseresult = det_file_deps(primorder(parse(lex(file))), NULL);
-    }
-    close_file(file);
-    free(file);
-    lexid_tree AST = parseresult.AST;
-    display(AST, parseresult.backsymtable);
-    printf("%s", "\n");
-    return 0;
-} */
+    
+
+

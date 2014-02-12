@@ -134,6 +134,13 @@ static inline type##_graph type##_graph_gc(type##_graph in, void (*destructor)(t
  \
          \
 \
+static inline type##_graph type##_graph_reflexiveclosure(type##_graph in) { \
+    size_t i; \
+    for (i=0; i < in.size; i++) {\
+        in = type##_graph_addedge(in, i, i);\
+    }\
+    return in;\
+}\
 static inline type##_graph type##_graph_floydwarshall(type##_graph in) {\
     size_t i;\
     size_t j;\

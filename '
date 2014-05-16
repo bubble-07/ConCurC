@@ -1,0 +1,120 @@
+#ifndef TYPEDEFINED
+typedef char Type; //For now, we'll have the Types actually contain no info
+
+//Define a directed graph on types
+DEFINE_GRAPH(Type)
+
+typedef noderef TypeRef;
+
+//Define a dictionary allowing us to look up nodes in the dictionary
+//based upon the name of a type
+DEFINE_DICT(string, TypeRef)
+
+//Define a global type universe containing everything we want
+Type_graph UniverseGraph;
+//And define a global dictionary for looking up types
+string_TypeRef_dict UniverseDict;
+//Give a reference to the "Any" or "Top" type
+TypeRef Top;
+
+#endif
+#ifdef TYPEDEFINED
+extern Type_graph UniverseGraph; //Give access to the type universe
+extern string_TypeRef_dict UniverseDict;
+extern TypeRef Top;
+#endif
+#ifndef TYPEDEFINED
+#define TYPEDEFINED
+
+DEFINE_DYNARRAY(TypeRef)
+
+typedef struct {
+    TypeRef_dynarray options; //List of potential types
+} TypeInfo;
+
+//Macro for adding a type to the graph with the given name
+#define AddType(name) noderef name; UniverseGraph = Type_graph_addnode(UniverseGraph, ' ', &name); \
+                      UniverseDict = string_TypeRef_dict_add(UniverseDict, \
+                                    string_TypeRef_bucket_make(to_dynstring(#name), &name));
+
+//Macro for denoting that one type subtypes another in the graph
+//Note that the arrow always points from supertype to subtype
+#define Subs(one, two) UniverseGraph = Type_graph_addedge(UniverseGraph, two, one);
+
+
+inline static void init_type_universe() {
+    UniverseGraph = Type_graph_init(2);
+    
+    AddType(Any); //Add the ever-prevalent "Any" type
+
+    Top = Any;
+
+    //For now, we add the following. TODO: Move somewhere less hard-coded!
+    AddType(String)
+    AddType(Number)
+    AddType(Int)
+    AddType(Float)
+    Subs(String, Any)
+    Subs(Number, Any)
+    Subs(Int, Number)
+    Subs(Float, Number)
+
+    //Great, let's fill out the rest automatically
+    UniverseGraph = Type_graph_transitiveclosure(UniverseGraph);
+    UniverseGraph = Type_graph_reflexiveclosure(UniverseGraph);
+    return;
+}
+
+//Creates a new type that could be anything.
+inline static TypeInfo make_unknown_type() {
+    TypeInfo result;
+    result.options = TypeRef_dynarray_make(1);
+    result.options = TypeRef_dynarray_add(result.options, Top);
+    return result;
+}
+
+
+
+//Note: we assume each TypeInfo reference is always unique.
+
+//Finds the set of all types that are subtypes of a and b.
+//Note that this version assumes we have the transitive closure
+//TODO: Have this operate on the transitive reduction or a user-supplied graph,
+//and make it based on a traversal instead! [For probably greater efficiency]
+
+inline static TypeInfo intersect_types(TypeRef a, TypeRef b) {
+    TypeInfo result;
+    result.options = TypeRef_dynarray_make(1);
+    size_t i;
+    //Go through all subtypes of a, and add only those types
+    //that are also subtypes of b.
+    for (i=0; i < UniverseGraph.size; i++) {
+        if (Type_graph_testedge(UniverseGraph, a, i) && 
+            Type_graph_testedge(UniverseGraph, b, i)) {
+            //Add the type at i to option list
+            result.options = TypeRef_dynarray_add(result.options, i);
+        }
+    }
+    return result;
+}
+
+//Takes some TypeInfo, eliminates redundant options,
+//[types that turn out to be subtypes of other types in the typeinfo]
+//and returns some new TypeInfo representing the simplified result.
+//While inefficient as hell (O(n*n)), it's a necessary operation.
+//NOTE: this operation destroys the TypeInfo passed in.
+
+inline static TypeInfo simplify(TypeInfo in) {
+    size_t i;
+    size_t j;
+    for (i=0; i < in.options.size; i++) {
+        //Determine if i is a subtype of any j s.t. i != j
+        //If so, i is not included in the result.
+        for (j=0; j < in.options.size; j++) {
+
+
+
+    
+
+
+#endif

@@ -132,7 +132,25 @@ inline static type##_dynarray type##_dynarray_get_subsequence(type##_dynarray in
         result = type##_dynarray_add(result, in.begin[lbound]); \
     } \
     return result; \
-}
+} \
+/*Takes a dynarray and a predicate function, and returns a new dynarray of \
+elements that satisfy the predicate. */ \
+inline static type##_dynarray type##_dynarray_filter(type##_dynarray in, int(*P)(type)) { \
+    type##_dynarray result = type##_dynarray_make(1); \
+    size_t i; \
+    for (i=0; i < in.size; i++) { \
+        if (P(in.begin[i])) { \
+            result = type##_dynarray_add(result, in.begin[i]); \
+        } \
+    } \
+    return result; \
+} \
+/* Same thing, but the original dynarray is replaced, and all references to the original will go bad */ \
+inline static type##_dynarray type##_dynarray_filter_inplace(type##_dynarray in, int(*P)(type)) { \
+    type##_dynarray tmp = type##_dynarray_filter(in, P); \
+    type##_dynarray_free(in); \
+    return tmp; \
+} 
 
 /*Convenient macro to define both the type and methods of a given dynarray */
 #define DEFINE_DYNARRAY(type) \

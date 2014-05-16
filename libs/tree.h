@@ -82,8 +82,8 @@ inline static type##_dynarray type##_tree_get_childarray(type##_tree in) { \
     return result; \
 } \
  \
- /*Same thing as type##_tree_dfmap, except it instead takes a function to conceptually "fold"
- over dynamic array of the children's data with the root's data as the "zero element" 
+ /*Same thing as type##_tree_dfmap, except it instead takes a function to conceptually "fold" \
+ over dynamic array of the children's data with the root's data as the "zero element"  \
  The function pointer passed follows the same format as dynarray_foldl's second arg */\
 static type##_tree type##_tree_dfmap_foldl(type##_tree in, type (*transform)(type, type)) { \
     type##_dynarray tmp; \

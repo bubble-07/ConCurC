@@ -1,0 +1,14 @@
+Goal: Interpreter lexes, parses, type-checks, and interprets some basic code by "semester" end.
+
+Sub-goals:
+Implement "toy" type-checker [from scratch, in-vitro]
+Implement DAG conversion/lexical scoping
+Integrate into language as full type-checker [type-annotate DAG]
+Create primitive "eval" function handling core forms [get at least to here]
+Extend with basic core library
+Implement FFI mechanism
+Implement FRP mechanism
+Polish, extend core libraries, play, have fun
+Publish
+
+ 

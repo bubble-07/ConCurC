@@ -1,0 +1,3 @@
+5/14/2014 - Determined necessary structure for cells
+5/15/2014 - Created the beginnings of "type.h", added "filter" to dynarray
+5/16/2014 - Created "intersect" and "simplify" for "type.h"

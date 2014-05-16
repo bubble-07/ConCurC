@@ -10,7 +10,7 @@ to define keyT##_eq to test key equivalence before being able to define a dictio
 In addition, it is also necessary for the user to define valT##_eq [for addNoDup], 
 and valT##_lookup_failure [for a default value a lookup failure]*/
 
-/*O(1) add, O(1) row retrieval, O(n) lookup [although rarely an issue in practice],
+/*O(1) add, O(1) row retrieval, O(1) amortized lookup,
 resizing is not implemented -- choose your initial size carefully */
 
 #ifndef DICT_DEFINED

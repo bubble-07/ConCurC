@@ -1,3 +1,6 @@
+#include "libs/dynstring.h"
+#include "libs/dict.h"
+#include "libs/digraph.h"
 #ifndef TYPEDEFINED
 typedef char Type; //For now, we'll have the Types actually contain no info
 
@@ -6,9 +9,18 @@ DEFINE_GRAPH(Type)
 
 typedef noderef TypeRef;
 
+static noderef TypeRef_lookup_failure = -1; //define -1 to be failure
+
 //Define a dictionary allowing us to look up nodes in the dictionary
 //based upon the name of a type
 DEFINE_DICT(string, TypeRef)
+
+int TypeRef_eq(TypeRef a, TypeRef b) {
+    return a == b;
+}
+
+
+DEFINE_REVERSE_LOOKUP(string, TypeRef)
 
 //Define a global type universe containing everything we want
 Type_graph UniverseGraph;
@@ -35,7 +47,7 @@ typedef struct {
 //Macro for adding a type to the graph with the given name
 #define AddType(name) noderef name; UniverseGraph = Type_graph_addnode(UniverseGraph, ' ', &name); \
                       UniverseDict = string_TypeRef_dict_add(UniverseDict, \
-                                    string_TypeRef_bucket_make(to_dynstring(#name), &name));
+                                    string_TypeRef_bucket_make(to_dynstring( #name ), name));
 
 //Macro for denoting that one type subtypes another in the graph
 //Note that the arrow always points from supertype to subtype
@@ -44,6 +56,7 @@ typedef struct {
 
 inline static void init_type_universe() {
     UniverseGraph = Type_graph_init(2);
+    UniverseDict = string_TypeRef_dict_init(2);
     
     AddType(Any); //Add the ever-prevalent "Any" type
 
@@ -51,19 +64,55 @@ inline static void init_type_universe() {
 
     //For now, we add the following. TODO: Move somewhere less hard-coded!
     AddType(String)
-    AddType(Number)
+    AddType(Num)
     AddType(Int)
     AddType(Float)
+
+
     Subs(String, Any)
-    Subs(Number, Any)
-    Subs(Int, Number)
-    Subs(Float, Number)
+    Subs(Num, Any)
+    Subs(Int, Num)
+    Subs(Float, Num)
 
     //Great, let's fill out the rest automatically
     UniverseGraph = Type_graph_transitiveclosure(UniverseGraph);
     UniverseGraph = Type_graph_reflexiveclosure(UniverseGraph);
     return;
 }
+
+TypeRef get_TypeRef(string s) {
+    return string_TypeRef_dict_get(UniverseDict, s);
+}
+
+
+//Will return string_lookup_failure if couldn't find it
+string get_type_name(TypeRef r) {
+    return string_TypeRef_dict_reverse_get(UniverseDict, r);
+}
+
+void print_TypeRef(TypeRef r) {
+    string name = get_type_name(r);
+    //If we were able to find it
+    if (!string_eq(name, string_lookup_failure)) {
+        printf("%s", to_cstring(name));
+    }
+    //TODO: if not, print some kind of error
+    return;
+}
+
+void print_type(TypeInfo in) {
+    int i;
+    printf("Option[ ");
+    for (i=0; i < in.options.size; i++) {
+        print_TypeRef(in.options.begin[i]);
+        printf(" ,");
+    }
+    printf("] ");
+    return;
+}
+
+        
+
 
 //Creates a new type that can't be anything.
 inline static TypeInfo make_empty_type() {
@@ -120,8 +169,8 @@ inline static TypeInfo intersect_types(TypeRef a, TypeRef b) {
 //NOTE: this operation destroys the TypeInfo passed in.
 
 inline static TypeInfo simplify_TypeInfo(TypeInfo in) {
-    size_t i; //Will be used for indexing the source
-    size_t j; //Will be used for the destination
+    int i; //Will be used for indexing the source
+    int j; //Will be used for the destination
     int included; //Flag indicating that the current elem will be added
 
     //Pass 1: Copy into a buffer from left to right, and enforce 
@@ -133,20 +182,19 @@ inline static TypeInfo simplify_TypeInfo(TypeInfo in) {
         included = 1;
         for (j=0; j < buf.options.size; j++) {
             //If elem at i is a subtype of anything in the buf
-            if (Type_graph_testedge(UniverseGraph, buf.options[j], in.options[i])) {
+            if (Type_graph_testedge(UniverseGraph, buf.options.begin[j], in.options.begin[i])) {
                 included = 0; //don't include it
                 break;
             }
         }
         if (included) {
-            buf = add_type(buf, in.options[i]);
+            buf = add_type(buf, in.options.begin[i]);
         }
     }
-    
+
     //Delete "in", and make it into a new TypeInfo
     free_type(in);
     in = make_empty_type();
-
 
     //Pass 2: Copy back into "in" from right to left, which
     //will reverse the options and enforce that any element can't
@@ -157,13 +205,14 @@ inline static TypeInfo simplify_TypeInfo(TypeInfo in) {
         included = 1;
         for (j=0; j < in.options.size; j++) {
             //If elem at i is a subtype of anything in "in"
-            if (Type_graph_testedge(UniverseGraph, in.options[j], buf.options[i])) {
+            if (Type_graph_testedge(UniverseGraph, in.options.begin[j], buf.options.begin[i])) {
+                printf("Won't be included \n");
                 included = 0; //don't include it
                 break;
             }
         }
         if (included) {
-            in = add_type(in, buf.options[i]);
+            in = add_type(in, buf.options.begin[i]);
         }
     }
 

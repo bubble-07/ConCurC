@@ -8,7 +8,6 @@
 
 DEFINE_DICT(string, path)
 
-static string string_lookup_failure = {0, 0, NULL};
 DEFINE_REVERSE_LOOKUP(string, path)
 DEFINE_GET_ALL_VALS(string, path)
 DEFINE_GET_ALL(string, path)

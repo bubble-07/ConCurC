@@ -45,6 +45,10 @@ inline static int string_eq(string one, string two) {
     if (one.size != two.size) {
         return 0;
     }
+    if (one.size == 0 && two.size == 0) {
+        return 1; //two empty strings are equal
+        //(here to handle the null string)
+    }
     while (i < one.size) {
         if (one.begin[i] != two.begin[i]) {
             return 0;
@@ -53,4 +57,7 @@ inline static int string_eq(string one, string two) {
     }
     return 1;
 }
+
+static string string_lookup_failure = {0,0,NULL}; //Define as empty, unallocated dynarray
+
 #endif

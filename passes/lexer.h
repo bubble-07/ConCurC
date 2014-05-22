@@ -2,7 +2,7 @@
 #define LEXER_DEFINED
 
 #include <stdlib.h>
-#include "libs/filehandler.h"
+#include "../libs/filehandler.h"
 typedef union {
     double floatval;
     string stringval;

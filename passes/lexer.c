@@ -1,5 +1,5 @@
 #include "lexer.h"
-#include "libs/error.h"
+#include "../libs/error.h"
 #include "math.h"
 //LEXER -- lex() gets you a stream of tokens. First, some helper functions.
 

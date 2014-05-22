@@ -1,7 +1,7 @@
 #include "primorder.h"
-#include "libs/filesys.h"
-#include "libs/dynstring.h"
-#include "libs/set.h"
+#include "../libs/filesys.h"
+#include "../libs/dynstring.h"
+#include "../libs/set.h"
 
 #ifndef DET_DEPENDS_DEFINED
 #define DET_DEPENDS_DEFINED

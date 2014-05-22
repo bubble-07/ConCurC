@@ -1,8 +1,8 @@
 #include <stdlib.h>
 #include <string.h>
-#include "libs/digraph.h"
-#include "libs/dict.h"
-#include "libs/set.h"
+#include "../libs/digraph.h"
+#include "../libs/dict.h"
+#include "../libs/set.h"
 #include "det_file_depends.h"
 
 //determine if two of the file_depends_reults came from the same file

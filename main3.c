@@ -1,7 +1,7 @@
-#include "parser.h"
-#include "primorder.h"
-#include "det_file_depends.h"
-#include "det_depends.h"
+#include "passes/parser.h"
+#include "passes/primorder.h"
+#include "passes/det_file_depends.h"
+#include "passes/det_depends.h"
 
 extern char* realpath(const char* path, char* resolved_path);
 

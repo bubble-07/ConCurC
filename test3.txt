@@ -1,0 +1,4 @@
+def (int add) (int a) (int b)
+    a + b
+def (int mul) (int a) (int b)
+    a * b

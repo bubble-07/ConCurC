@@ -1,3 +1,5 @@
 5/14/2014 - Determined necessary structure for cells
 5/15/2014 - Created the beginnings of "type.h", added "filter" to dynarray
 5/16/2014 - Created "intersect" and "simplify" for "type.h"
+5/20/2014 - Created simple test of typing functions.
+5/21/2014 - Came up with better structures for cells, logistical work for AST conversion

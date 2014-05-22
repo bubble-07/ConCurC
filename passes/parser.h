@@ -2,7 +2,7 @@
 #define PARSERDEFINED
 
 #include "lexer.h"
-#include "libs/tree.h"
+#include "../libs/tree.h"
 
 /*The parser takes the token stream from lexing and turns it into an abstract syntax tree
 of lexids, where EXPR_LEXID as the root data represents that the children form an expression*/

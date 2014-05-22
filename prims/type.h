@@ -1,6 +1,6 @@
-#include "libs/dynstring.h"
-#include "libs/dict.h"
-#include "libs/digraph.h"
+#include "../libs/dynstring.h"
+#include "../libs/dict.h"
+#include "../libs/digraph.h"
 #ifndef TYPEDEFINED
 typedef char Type; //For now, we'll have the Types actually contain no info
 
@@ -139,6 +139,15 @@ inline static void free_type(TypeInfo in) {
     return;
 }
 
+//Concatenates [adds] the types of one to the types of two
+//Then invalidates all references to two
+inline static TypeInfo concat_types(TypeInfo one, TypeInfo two) {
+    one.options = TypeRef_dynarray_cat(one.options, two.options);
+    free_type(two);
+    return one;
+}
+
+
 //Note: we assume each TypeInfo reference is always unique.
 
 //Finds the set of all types that are subtypes of a and b.
@@ -221,7 +230,27 @@ inline static TypeInfo simplify_TypeInfo(TypeInfo in) {
     return in;
 }
 
+//Intersects a with all elements of in, sums them, and simplifies
+TypeInfo restrict_type(TypeInfo in, TypeRef a) {
+    TypeInfo result = make_empty_type();
+    int i;
+    for (i=0; i < in.options.size; i++) {
+        result = concat_types(result, intersect_types(in.options.begin[i], a));
+    }
+    return simplify_TypeInfo(result);
+}
 
+//Concats the result of running restrict_type on "in" with the elements of "by"
+//and then returns the simplified result
+TypeInfo restrict_sum(TypeInfo in, TypeInfo by) {
+    TypeInfo result = make_empty_type();
+    int i;
+    for (i=0; i < by.options.size; i++) {
+        result = concat_types(result, restrict_type(in, by.options.begin[i]));
+    }
+    return simplify_TypeInfo(result);
+}
+    
 
 
 

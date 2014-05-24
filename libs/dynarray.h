@@ -17,7 +17,8 @@ struct type##_dynarray { \
     int rsize; \
     int size; \
     type * begin; \
-}; 
+}; \
+static type##_dynarray empty_##type##_dynarray = {0, 0, NULL};
 
 /*Declares the methods of a dynarray*/
  #define DEFINE_DYNARRAY_METHODS(type) \

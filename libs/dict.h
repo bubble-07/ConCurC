@@ -81,11 +81,14 @@ inline static valT keyT##_##valT##_dict_get(keyT##_##valT##_dict in, keyT key) {
      valT result = valT##_lookup_failure; \
      return result; \
 } \
+/* Returns 1 if the given key already exists in the table */ \
+inline static int keyT##_##valT##_dict_exists(keyT##_##valT##_dict in, keyT key) { \
+    return !valT##_eq(valT##_lookup_failure, keyT##_##valT##_dict_get(in, key)); \
+} \
 /* The following method adds a bucket if there isn't already an existing duplicate. To be able \
 to use this, valT##_eq needs to be defined as well */ \
 inline static keyT##_##valT##_dict keyT##_##valT##_dict_addNoDup(keyT##_##valT##_dict in, keyT##_##valT##_bucket to_add) { \
-    valT lookupval = keyT##_##valT##_dict_get(in, to_add.key); \
-    if (! valT##_eq(lookupval, valT##_lookup_failure)) { \
+    if (keyT##_##valT##_dict_exists(in, to_add.key)) { \
         return in; \
     } \
     in = keyT##_##valT##_dict_add(in, to_add); \

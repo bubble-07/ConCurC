@@ -1,7 +1,16 @@
 #include "../libs/dynstring.h"
 #include "../libs/dict.h"
 #include "../libs/digraph.h"
+
+#ifdef TYPEDEFINED
+extern Type_graph UniverseGraph; //Give access to the type universe
+extern string_TypeRef_dict UniverseDict;
+extern TypeRef Top;
+#endif
+
 #ifndef TYPEDEFINED
+#define TYPEDEFINED
+
 typedef char Type; //For now, we'll have the Types actually contain no info
 
 //Define a directed graph on types
@@ -11,13 +20,14 @@ typedef noderef TypeRef;
 
 static noderef TypeRef_lookup_failure = -1; //define -1 to be failure
 
+static int TypeRef_eq(TypeRef a, TypeRef b) {
+    return a == b;
+}
+
 //Define a dictionary allowing us to look up nodes in the dictionary
 //based upon the name of a type
 DEFINE_DICT(string, TypeRef)
 
-int TypeRef_eq(TypeRef a, TypeRef b) {
-    return a == b;
-}
 
 
 DEFINE_REVERSE_LOOKUP(string, TypeRef)
@@ -28,15 +38,6 @@ Type_graph UniverseGraph;
 string_TypeRef_dict UniverseDict;
 //Give a reference to the "Any" or "Top" type
 TypeRef Top;
-
-#endif
-#ifdef TYPEDEFINED
-extern Type_graph UniverseGraph; //Give access to the type universe
-extern string_TypeRef_dict UniverseDict;
-extern TypeRef Top;
-#endif
-#ifndef TYPEDEFINED
-#define TYPEDEFINED
 
 DEFINE_DYNARRAY(TypeRef)
 
@@ -80,17 +81,17 @@ inline static void init_type_universe() {
     return;
 }
 
-TypeRef get_TypeRef(string s) {
+static TypeRef get_TypeRef(string s) {
     return string_TypeRef_dict_get(UniverseDict, s);
 }
 
 
 //Will return string_lookup_failure if couldn't find it
-string get_type_name(TypeRef r) {
+static string get_type_name(TypeRef r) {
     return string_TypeRef_dict_reverse_get(UniverseDict, r);
 }
 
-void print_TypeRef(TypeRef r) {
+static void print_TypeRef(TypeRef r) {
     string name = get_type_name(r);
     //If we were able to find it
     if (!string_eq(name, string_lookup_failure)) {
@@ -100,7 +101,7 @@ void print_TypeRef(TypeRef r) {
     return;
 }
 
-void print_type(TypeInfo in) {
+static void print_type(TypeInfo in) {
     int i;
     printf("Option[ ");
     for (i=0; i < in.options.size; i++) {
@@ -231,7 +232,7 @@ inline static TypeInfo simplify_TypeInfo(TypeInfo in) {
 }
 
 //Intersects a with all elements of in, sums them, and simplifies
-TypeInfo restrict_type(TypeInfo in, TypeRef a) {
+static TypeInfo restrict_type(TypeInfo in, TypeRef a) {
     TypeInfo result = make_empty_type();
     int i;
     for (i=0; i < in.options.size; i++) {
@@ -242,7 +243,7 @@ TypeInfo restrict_type(TypeInfo in, TypeRef a) {
 
 //Concats the result of running restrict_type on "in" with the elements of "by"
 //and then returns the simplified result
-TypeInfo restrict_sum(TypeInfo in, TypeInfo by) {
+static TypeInfo restrict_sum(TypeInfo in, TypeInfo by) {
     TypeInfo result = make_empty_type();
     int i;
     for (i=0; i < by.options.size; i++) {
@@ -251,10 +252,4 @@ TypeInfo restrict_sum(TypeInfo in, TypeInfo by) {
     return simplify_TypeInfo(result);
 }
     
-
-
-
-    
-
-
 #endif

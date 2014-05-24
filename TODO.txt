@@ -1,0 +1,2 @@
+-Rename everything to "phi"
+-At some point, actually stop being lazy and make proper header files and .c files

@@ -3,3 +3,4 @@
 5/16/2014 - Created "intersect" and "simplify" for "type.h"
 5/20/2014 - Created simple test of typing functions.
 5/21/2014 - Came up with better structures for cells, logistical work for AST conversion
+5/22/2014 - Restructured project directories, added beginning of function_table

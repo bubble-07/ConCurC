@@ -11,4 +11,7 @@ Implement FRP mechanism
 Polish, extend core libraries, play, have fun
 Publish
 
- 
+NOTE: Language should be renamed to "Phi" to avoid conflict with "Concur" -- 
+will also make for a much cleaner logo (because it's just typographic)
+
+Then, ensure that all public references [google-able] is to "phi-lang"

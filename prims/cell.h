@@ -1,12 +1,14 @@
+#include "../libs/tree.h"
+
 #ifndef CELL_DEFINED
 #define CELL_DEFINED
 
 typedef enum {
     FUNCTION, //A single function
     POLYMORPH, //Multiple functions with the same name
-    INTEGER,
-    STRING,
-    FLOAT,
+    INTEGERCELL,
+    STRINGCELL,
+    FLOATCELL,
     VARIABLE, //Param used within the body of a function (references parameter)
 } CellType;
 
@@ -26,6 +28,8 @@ typedef struct {
 } cell;
 
 DEFINE_DYNARRAY(cell)
+
 DEFINE_TREE(cell)
+
 
 #endif

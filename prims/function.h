@@ -1,3 +1,4 @@
+#include "cell.h"
 #include "parameter.h"
 
 #ifndef FUNCTION_DEFINED

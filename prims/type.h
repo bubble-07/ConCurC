@@ -43,6 +43,7 @@ DEFINE_DYNARRAY(TypeRef)
 
 typedef struct {
     TypeRef_dynarray options; //List of potential types
+    int known; //1 if we know what the type is, 0 if not yet solidified.
 } TypeInfo;
 
 //Macro for adding a type to the graph with the given name
@@ -119,6 +120,7 @@ static void print_type(TypeInfo in) {
 inline static TypeInfo make_empty_type() {
     TypeInfo result;
     result.options = TypeRef_dynarray_make(1);
+    result.known = 0;
     return result;
 }
 
@@ -126,6 +128,13 @@ inline static TypeInfo make_empty_type() {
 inline static TypeInfo add_type(TypeInfo in, TypeRef a) {
     in.options = TypeRef_dynarray_add(in.options, a);
     return in;
+}
+
+//Makes a finalized type with only one option
+inline static TypeInfo make_known_type(TypeRef in) {
+    TypeInfo result = add_type(make_empty_type(), in);
+    result.known = 1;
+    return result;
 }
 
 
@@ -250,6 +259,11 @@ static TypeInfo restrict_sum(TypeInfo in, TypeInfo by) {
         result = concat_types(result, restrict_type(in, by.options.begin[i]));
     }
     return simplify_TypeInfo(result);
+}
+
+static TypeInfo finalize_type(TypeInfo in) {
+    in.known = 1;
+    return in;
 }
     
 #endif

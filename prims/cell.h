@@ -10,6 +10,7 @@ typedef enum {
     STRINGCELL,
     FLOATCELL,
     VARIABLE, //Param used within the body of a function (references parameter)
+    DUMMY
 } CellType;
 
 /* Overview of basic cell kinds:
@@ -30,6 +31,13 @@ typedef struct {
 DEFINE_DYNARRAY(cell)
 
 DEFINE_TREE(cell)
+
+static cell get_dummy_cell() {
+    cell result;
+    result.kind = DUMMY;
+    result.data = NULL;
+    return result;
+}
 
 
 #endif

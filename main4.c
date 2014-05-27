@@ -1,5 +1,7 @@
 #include "passes/primorder.h"
 #include "passes/collectnames.h"
+#include "passes/to_cells.h"
+#include "prims/type.h"
 
 //Being used to test function name collection on single file
 
@@ -62,8 +64,13 @@ int main(int argc, const char* argv[]) {
         file = load_file(realpath(argv[1], NULL));
     }
     parse_result program = collectnames(primorder(parse(lex(file))));
+
+    //Initialize the type universe so we can do things.
+    init_type_universe();
     
     display(program.AST, program.backsymtable);
+    //Attempt to print out the loaded functions.
+    to_cells(program);
 
     
     return 0;

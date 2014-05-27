@@ -4,3 +4,5 @@
 5/20/2014 - Created simple test of typing functions.
 5/21/2014 - Came up with better structures for cells, logistical work for AST conversion
 5/22/2014 - Restructured project directories, added beginning of function_table
+5/24/2014 - Added a really basic pass to collect function names
+5/27/2014 - Added the beginnings of the function definition collection pass

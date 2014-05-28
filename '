@@ -66,6 +66,20 @@ inline static keyT##_##valT##_dict keyT##_##valT##_dict_add(keyT##_##valT##_dict
      in.begin[i] = keyT##_##valT##_bucket_dynarray_add(in.begin[i], to_add); \
      return in; \
 } \
+/* Carries out a lookup operation and if the bucket exists, returns a pointer to the value */ \
+inline static valT * keyT##_##valT##_dict_getptr(keyT##_##valT##_dict in, keyT key) { \
+     size_t i = hash_##keyT(key) % in.size; \
+     keyT##_##valT##_bucket_dynarray row = in.begin[i]; \
+     i = 0; \
+     while (i < row.size) { \
+         if (keyT##_eq(row.begin[i].key, key)) { \
+             return &row.begin[i].value; \
+         } \
+         i++; \
+     } \
+     valT * result = &##valT##_lookup_failure; \
+     return result; \
+} \
 /* Carries out a lookup operation. If the bucket exists, it returns its value. Otherwise, \
 it returns valT##_lookup_failure (user-defined) */ \
 inline static valT keyT##_##valT##_dict_get(keyT##_##valT##_dict in, keyT key) { \
@@ -135,21 +149,6 @@ inline static valT##_dynarray  keyT##_##valT##_dict_get_all(keyT##_##valT##_dict
          } \
          i++; \
      } \
-     return result; \
-}
-#define DEFINE_GET_PTR(keyT, valT) \
-/* Carries out a lookup operation and if the bucket exists, returns a pointer to the value */ \
-inline static valT * keyT##_##valT##_dict_getptr(keyT##_##valT##_dict in, keyT key) { \
-     size_t i = hash_##keyT(key) % in.size; \
-     keyT##_##valT##_bucket_dynarray row = in.begin[i]; \
-     i = 0; \
-     while (i < row.size) { \
-         if (keyT##_eq(row.begin[i].key, key)) { \
-             return &row.begin[i].value; \
-         } \
-         i++; \
-     } \
-     valT * result = & valT##_lookup_failure; \
      return result; \
 }
 

@@ -4,6 +4,7 @@
 //function bodies.
 
 #include "parser.h"
+#include "collectnames.h"
 
 #ifndef TOCELLS_DEFINED
 #define TOCELLS_DEFINED

@@ -20,6 +20,13 @@ static polymorph make_empty_polymorph() {
     return result;
 }
 
+//adds the given function pointer to the polymorph
+static polymorph add_to_polymorph(polymorph in, function_ptr f) {
+    //TODO: Update the most general type returned when you do this!
+    in.options = function_ptr_dynarray_add(in.options, f);
+    return in;
+}
+
 static polymorph polymorph_lookup_failure = {{0,0,NULL}, {{0,0,NULL}}, 1};
 
 static int polymorph_eq(polymorph a, polymorph b) {

@@ -66,6 +66,11 @@ inline static keyT##_##valT##_dict keyT##_##valT##_dict_add(keyT##_##valT##_dict
      in.begin[i] = keyT##_##valT##_bucket_dynarray_add(in.begin[i], to_add); \
      return in; \
 } \
+/* Faster way to add elements to a dict. TODO: Use this more often */ \
+inline static keyT##_##valT##_dict keyT##_##valT##_dict_quickadd(keyT##_##valT##_dict in, keyT key, valT val) { \
+    keyT##_##valT##_bucket toadd = keyT##_##valT##_bucket_make(key, val); \
+    return keyT##_##valT##_dict_add(in, toadd); \
+} \
 /* Carries out a lookup operation. If the bucket exists, it returns its value. Otherwise, \
 it returns valT##_lookup_failure (user-defined) */ \
 inline static valT keyT##_##valT##_dict_get(keyT##_##valT##_dict in, keyT key) { \

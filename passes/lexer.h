@@ -68,6 +68,10 @@ inline static void lexid_free(lexid in) {
     return;
 }
 
+inline static int hash_lexid(lexid in) {
+    return in.tokenval;
+}
+
 
 //Predicate that determines whether a given lexid is a primitive or not*/
 inline static int isPrim(lexid in) {

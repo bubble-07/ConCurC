@@ -53,6 +53,15 @@ inline static type##_dynarray type##_dynarray_add(type##_dynarray in, type val) 
     in.size++; \
     return in; \
 } \
+/* Gets an element of a dynarray TODO: maybe add error handling and use this more often*/ \
+inline static type type##_dynarray_get(type##_dynarray in, int i) { \
+    return in.begin[i]; \
+}\
+/*Gets a pointer to an element of a dynarray. UNSAFE if the dynarray is modified while \
+the pointer is still kept, so ensure you're done mutating it when you use this*/ \
+inline static type * type##_dynarray_getptr(type##_dynarray in, int i) { \
+    return &in.begin[i]; \
+} \
 /*concatenates the second dynarray onto the first*/ \
 inline static type##_dynarray type##_dynarray_cat(type##_dynarray one, type##_dynarray two) { \
     int i = 0; \

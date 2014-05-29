@@ -58,7 +58,7 @@ typedef struct {
 
 inline static void init_type_universe() {
     UniverseGraph = Type_graph_init(2);
-    UniverseDict = string_TypeRef_dict_init(2);
+    UniverseDict = string_TypeRef_dict_init(100);
     
     AddType(Any); //Add the ever-prevalent "Any" type
 

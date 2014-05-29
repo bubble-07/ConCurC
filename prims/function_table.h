@@ -20,7 +20,7 @@ typedef struct {
 
 static function_table init_function_table() {
     function_table result;
-    result.dict = string_polymorph_dict_init(2);
+    result.dict = string_polymorph_dict_init(50);
     return result;
 }
 //Add an empty polymorph with the given name

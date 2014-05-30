@@ -48,7 +48,7 @@ D_LEX(IMPORT, 24)
 D_LEX(TYPE, 25)
 D_LEX(SUBS, 26)
 D_LEX(SUPS, 27)
-D_LEX(EXPR, 28)
+D_LEX(EXPR, 28) //Somewhat special -- see NOTE below
 
 //Necessary to allow lookup failure in a dictionary. This is why LPAREN is 1, not 0*/
 const static lexid lexid_lookup_failure = {0, 0};
@@ -60,6 +60,18 @@ inline static int lexid_eq(lexid one, lexid two) {
     }
     return 0;
 }
+
+//NOTE: EXPR_LEXID denotes an __expression__ -- it has an attribute that takes on
+//an integer value, which is 1 if the expression has a well-defined function location
+//(termed "strict" ordering) and 0 if the expression can be reordered.
+//Example of a non-strict expression: (1 + 2) example of a strict one: +(1,2)
+
+//Returns 1 if the passed EXPR_LEXID is strict, 0 otherwise
+inline static int EXPR_LEXID_strict(lexid in) {
+    return in.attr.intval;
+}
+
+
 inline static void lexid_free(lexid in) {
     if (lexid_eq(in, STRING_LEXID) | lexid_eq(in, FILEREF_LEXID)) {
         char_dynarray_free(in.attr.stringval);

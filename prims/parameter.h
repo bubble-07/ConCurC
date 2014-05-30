@@ -12,7 +12,7 @@ typedef struct {
 //Define a pointer type for parameters.
 typedef parameter* parameter_ptr;
 
-const parameter_ptr parameter_ptr_lookup_failure = NULL;
+static const parameter_ptr parameter_ptr_lookup_failure = NULL;
 
 //Define it so that parameter pointers are equal iff same address
 static int parameter_ptr_eq(parameter_ptr one, parameter_ptr two) {

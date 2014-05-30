@@ -1,4 +1,4 @@
-def (Int add) (Int a) (Int b)
+def (int add) (Int a) (Int b)
     a + b
 def (Int mul) (Int a) (Int b)
     a * b

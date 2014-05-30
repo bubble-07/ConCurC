@@ -30,16 +30,18 @@ inline static char* to_cstring(string in) {
 /*Methods to allow them to be used in dictionaries*/
 
 //FIXME: Better hash function, please!
+//NOTE: hashes are CASE-INSENSITIVE
 inline static size_t hash_string(string in) {
     size_t result = 0;
     size_t i = 0;
     while (i < in.size) {
-        result += in.begin[i];
+        result += tolower(in.begin[i]);
         i++;
     }
     return result;
 }
 
+//NOTE: String equality is CASE-INSENSITIVE on purpose.
 inline static int string_eq(string one, string two) {
     size_t i = 0;
     if (one.size != two.size) {
@@ -50,7 +52,8 @@ inline static int string_eq(string one, string two) {
         //(here to handle the null string)
     }
     while (i < one.size) {
-        if (one.begin[i] != two.begin[i]) {
+        //Compare both characters converted to lowercase
+        if (tolower(one.begin[i]) != tolower(two.begin[i])) {
             return 0;
         }
         i++;

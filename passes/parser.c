@@ -65,10 +65,16 @@ parse_part parse_dotitem(parser_state state) {
     return result;
 }
 
+//Parses a function application form (f(a,b,c))
 parse_part parse_funapp(parser_state state) {
     parse_part result;
     parse_part tmp;
+
+    //The expr_lexid returned from this should be strict, since the function application form 
+    //clearly defines where the function is in the expression (see lexer.h)
     lexid exprid = EXPR_LEXID;
+    exprid.attr.intval = 1; //Set strictness attribute to 1
+
     exprid.loc = getCurrent(state).loc;
     result.tree = lexid_tree_init(exprid);
     result.tree = lexid_tree_addchild(result.tree, lexid_tree_init(getCurrent(state)));
@@ -94,11 +100,16 @@ parse_part parse_funapp(parser_state state) {
     return result;
 }
 
+//Parse something of the form a.b.c
 parse_part parse_dotapp(parser_state state) {
     parse_part result;
     parse_part temp;
    
+    //All expressions created with this will have a strict ordering
+    //So ensure that we set the strictness attribute of the expr_lexid
     lexid exprid = EXPR_LEXID;
+    exprid.attr.intval = 1; //Strict expression
+
     exprid.loc = getCurrent(state).loc;
 
     lexid_tree_dynarray dotsepvals = lexid_tree_dynarray_make(5); 
@@ -146,6 +157,7 @@ parse_part parse_sexpr(parser_state state) {
 /*Parses list items out of the token stream. Takes the current parser state, and returns a partial
 result*/
 //if singleline is non-zero, then parsing is for a single line
+//All expressions using this are not strictly ordered (as in, a + b will be reordered to + a b)
 parse_part parse_listitems(parser_state state, int singleln) {
     parse_part result;
     parse_part tmp;
@@ -153,6 +165,9 @@ parse_part parse_listitems(parser_state state, int singleln) {
     state.index -= 1;
 
     lexid exprid = EXPR_LEXID;
+    exprid.attr.intval = 0; //Set strictness property to 0
+
+
     if (boundsCheck(state)) {
         exprid.loc = getCurrent(state).loc;
     }
@@ -181,6 +196,8 @@ parse_part parse_listitems(parser_state state, int singleln) {
     return result;
 }
 
+//Parse a "block" -- ex: canonical "if" expression formatting
+//This always has strict ordering
 parse_part parse_blockline(parser_state state) {
     parse_part result;
     
@@ -190,6 +207,7 @@ parse_part parse_blockline(parser_state state) {
     int i;
 
     lexid exprid = EXPR_LEXID;
+    exprid.attr.intval = 1; //The resulting expr will have strict formatting
     exprid.loc = getCurrent(state).loc;
 
     result = parse_listitems(state,1);
@@ -207,7 +225,11 @@ parse_part parse_blockline(parser_state state) {
 
         //assemble the formatting correctly
         //Format the header
+        //NOTE: everything in the header after the first item
+        //is NOT strictly ordered
         tmp = lexid_tree_init(exprid);
+        tmp.data.attr.intval = 0; //Set the rest of the header to be non-strict
+
         for (i=1; i < header.children.size; i++) {
             tmp = lexid_tree_addchild(tmp, header.children.begin[i]);
         }
@@ -225,11 +247,14 @@ parse_part parse_blockline(parser_state state) {
 }
 
 //parse blocklines until we hit an "end"
+//This always has strict ordering
 parse_part parse_blocklines(parser_state state) {
     parse_part result;
     parse_part tmp;
 
     lexid exprid = EXPR_LEXID;
+    exprid.attr.intval = 1; //Set it to strict
+
     exprid.loc = getCurrent(state).loc;
 
     result.tree = lexid_tree_init(exprid);

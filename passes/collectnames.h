@@ -7,7 +7,7 @@
 /* This will populate the global function table with empty entries
 as a side-effect. [TODO: modularize!] */
 
-string get_name_from_def(lexid_tree_dynarray def_expr, string_dynarray backsymtable);
+lexid get_name_from_def(lexid_tree_dynarray def_expr);
 parse_result collectnames(parse_result in);
 
 #endif

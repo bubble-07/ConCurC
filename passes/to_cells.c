@@ -135,9 +135,9 @@ function load_function_def(lexid_tree in, string_dynarray backsymtable) {
 }
 
 //Create a simple wrapper around what we previously defined in collectnames
-//to get the name of a defined function.
-string load_function_name(lexid_tree def, string_dynarray backsymtable) {
-    return get_name_from_def(def.children, backsymtable);
+//to get the name (lexid) of a defined function.
+lexid load_function_name(lexid_tree def) {
+    return get_name_from_def(def.children);
 }
 
 //For now, just print out every function we make
@@ -149,11 +149,11 @@ void to_cells(parse_result in) {
     for (i = 0; i < in.AST.children.size; i++) {
         //Convert it to a function
         function current = load_function_def(in.AST.children.begin[i], in.backsymtable);
-        string name = load_function_name(in.AST.children.begin[i], in.backsymtable);
+        lexid name = load_function_name(in.AST.children.begin[i]);
         //Add it to the global function table
         global_table = add_function(global_table, name, current);
         printf("\nFunction definition: ");
-        printf(to_cstring(name));
+        printf(to_cstring(in.backsymtable.begin[name.tokenval]));
         printf(" ");
         //Print it
         print_function(current, in.backsymtable);

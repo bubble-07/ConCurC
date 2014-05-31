@@ -8,3 +8,4 @@
 5/27/2014 - Added the beginnings of the function definition collection pass
 5/28/2014 - Made it so to_cells adds to the global polymorph table
 5/29/2014 - Added definition and methods associated with environments
+5/30/2014 - Figured out what is necessary for translating the lexid_tree

@@ -10,7 +10,8 @@ typedef enum {
     STRINGCELL,
     FLOATCELL,
     VARIABLE, //Param used within the body of a function (references parameter)
-    DUMMY
+    DUMMY,
+    EXPRCELL //Compound expression cell
 } CellType;
 
 /* Overview of basic cell kinds:

@@ -2,3 +2,5 @@ def (int add) (Int a) (Int b)
     a + b
 def (Int mul) (Int a) (Int b)
     a * b
+def test f a b
+    f(a, b)

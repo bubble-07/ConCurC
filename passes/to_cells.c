@@ -1,5 +1,6 @@
 #include "../prims/function.h"
 #include "to_cells.h"
+#include "../prims/env.h"
 
 //Returns 1 if the given expression is a function definition
 //Assumes in.data is "EXPR_LEXID"
@@ -15,19 +16,10 @@ int is_function_def(lexid_tree in) {
     return 0;
 }
 
-//For now, make "env" a dummy.
-//TODO: flesh this out and move into prims
-typedef int env;
-
-//Takes a dynamic array of parameters and makes an environment from them
-env params_to_env(parameter_dynarray in) {
-    return 1;
-}
 //Takes a lexid_tree and a given environment, and converts it to a cell_tree
-//TODO: actually implement this.
+//(recursive procedure)
 cell_tree convert_to_cells(lexid_tree in, env environ) {
-    cell dummy = get_dummy_cell();
-    return cell_tree_init(dummy);
+    //If the tree we recieve has no children, must be a leaf
 }
 
 

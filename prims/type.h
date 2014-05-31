@@ -1,6 +1,7 @@
 #include "../libs/dynstring.h"
 #include "../libs/dict.h"
 #include "../libs/digraph.h"
+#include "../prims/lexid.h"
 
 #ifdef TYPEDEFINED
 extern Type_graph UniverseGraph; //Give access to the type universe

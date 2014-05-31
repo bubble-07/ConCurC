@@ -68,7 +68,24 @@ cell_tree convert_to_cells(lexid_tree in, env e) {
         //TODO: Throw a nicer error, and actually abort nicely!
         printf("\n ERROR! Expected an expression \n");
     }
-    //TODO: Add support for "lambda" special form here
+/*
+    //Handle the "lambda" special form
+    if (lexid_eq(in.children.begin[0].data, LABMDA_LEXID)) {
+        if (in.children.size < 3) {
+            //TODO: Throw a nicer error
+            printf("\n ERROR! Malformed lambda expression \n");
+        }
+        //Handle the case where it takes 3 args [including return type]
+        if (in.children.size == 4) {
+            //TODO: Throw an error if the type isn't in the symbol table!
+            string type = backsymtable.begin[in.children.begin[1]
+            
+        }
+        //Handle the case where it takes 2 args [no return type]
+*/
+        
+
+
 
     //Must be a simple expression, so make an expression subtree
     cell_tree result = cell_tree_init(make_expr_cell());

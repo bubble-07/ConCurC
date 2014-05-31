@@ -13,8 +13,8 @@ typedef enum {
     STRINGCELL,
     FLOATCELL,
     PARAMETER, //Param used within the body of a function (references parameter)
-    DUMMY,
-    EXPRCELL //Compound expression cell
+    EXPRCELL, //Compound expression cell
+    LAMBDACELL //Cell representing a lambda expression (children in the tree comprise the body)
 } CellType;
 
 /* Overview of basic cell kinds:
@@ -35,13 +35,6 @@ typedef struct {
 DEFINE_DYNARRAY(cell)
 
 DEFINE_TREE(cell)
-
-static cell get_dummy_cell() {
-    cell result;
-    result.kind = DUMMY;
-    result.data = NULL;
-    return result;
-}
 
 static cell make_expr_cell() {
     cell result;

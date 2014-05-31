@@ -1,14 +1,18 @@
-#include "function.h"
 
 #ifndef POLYMORPH_DEFINED
 #define POLYMORPH_DEFINED
 
-typedef struct {
+#include "function.h"
+
+struct polymorph {
     function_ptr_dynarray options; //List of functions that may work
     TypeInfo type; //most general type that can be returned
     int isNull; //integer that is set to 1 if the given polymorph is actually null
                 //this is used for expressing the results of lookup failures
-} polymorph;
+};
+typedef struct polymorph polymorph;
+
+typedef polymorph* polymorph_ptr;
 
 DEFINE_DYNARRAY(polymorph)
 

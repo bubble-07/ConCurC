@@ -67,7 +67,13 @@ static polymorph get_polymorph(function_table in, lexid name) {
     return lexid_polymorph_dict_get(in.dict, name);
 }
 
-    
+//Gets us a pointer to the polymorph with the given name (assumes it exists)
+//NOTE: this is inherently UNSAFE if the pointed-to polymorph moves.
+static polymorph_ptr get_polymorph_ptr(function_table in, lexid name) {
+    return lexid_polymorph_dict_getptr(in.dict, name);
+}
+
+   
 
 
 #endif

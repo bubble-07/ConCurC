@@ -5,6 +5,7 @@
 
 #include "parser.h"
 #include "collectnames.h"
+#include "../prims/cell.h"
 
 #ifndef TOCELLS_DEFINED
 #define TOCELLS_DEFINED

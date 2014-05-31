@@ -1,7 +1,7 @@
 #include "../libs/tree.h"
 #include "../libs/memoryman.h"
 #include "../libs/dynstring.h"
-#include "../prims/parameter.h"
+#include "parameter.h"
 
 #ifndef CELL_DEFINED
 #define CELL_DEFINED
@@ -43,6 +43,13 @@ static cell get_dummy_cell() {
     return result;
 }
 
+static cell make_expr_cell() {
+    cell result;
+    result.kind = EXPRCELL;
+    result.data = NULL;
+    return result;
+}
+
 //Define a handy macro to make cells containing primitive datatypes.
 //Cell kind is the kind of cell that stores the datatype, and type is
 //the type it's internally represented by
@@ -61,11 +68,20 @@ DEF_MAKE_CELL(INTCELL, int)
 DEF_MAKE_CELL(FLOATCELL, float)
 DEF_MAKE_CELL(STRINGCELL, string)
 
-static cell make_parameter_cell(parameter_ptr in) {
-    cell result; 
-    result.kind = PARAMETER;
-    result.data = (void*) in;
-    return result;
+//Define a handy macro for cells we make by their pointers
+//And give the resulting function "name"
+#define DEF_MAKE_CELL_FROM_REF(cellkind, type, name) \
+static cell make_##name##_cell(type * in) { \
+    cell result;  \
+    result.kind = cellkind; \
+    result.data = (void*) in; \
+    return result; \
 }
+
+//NOTE: in order to avoid circular reference, we have to define a polymorph prototype here
+struct polymorph;
+
+DEF_MAKE_CELL_FROM_REF(POLYMORPH, struct polymorph, polymorph)
+DEF_MAKE_CELL_FROM_REF(PARAMETER, parameter, parameter)
 
 #endif

@@ -1,4 +1,3 @@
-#include "../prims/function.h"
 #include "to_cells.h"
 #include "../prims/env.h"
 #include "../libs/memoryman.h"
@@ -18,11 +17,10 @@ int is_function_def(lexid_tree in) {
     return 0;
 }
 
-/*
-
-//Takes a lexid_tree and a given environment, and converts it to a cell_tree
+//Takes a lexid_tree and a given environment pointer, and converts it to a cell_tree
 //(recursive procedure)
-cell_tree convert_to_cells(lexid_tree in, env environ) {
+//NOTE: For fun, rename "e" to "environ", and see the wacky error gcc gives!
+cell_tree convert_to_cells(lexid_tree in, env e) {
 
     //If the tree we recieve has no children, must be a leaf
     if (in.children.size == 0) {
@@ -45,22 +43,46 @@ cell_tree convert_to_cells(lexid_tree in, env environ) {
             //Our input expression must be some kind of identifier,
             //Variable, or function name
             //We look it up in the environment first, then in the function table
-            parameter_ptr envlookup = env_lookup(environ, in.data);
-            if (!parameter_ptr_eq(result, parameter_ptr_lookup_failure)) {
+            parameter_ptr envlookup = env_lookup(e, in.data);
+            if (!parameter_ptr_eq(envlookup, parameter_ptr_lookup_failure)) {
                 //We must have found our parameter in the environment!
                 result = make_parameter_cell(envlookup);
             }
             else {
-                //It's not in the environment -- look in the global function table
-
-
+                //It's not in the environment -- look in the global polymorph table
+                if (has_polymorph(global_table, in.data)) {
+                    //Great, it registers with some known polymorph
+                    result = make_polymorph_cell(get_polymorph_ptr(global_table, in.data));
+                }
+                else {
+                    //TODO: Throw an error saying the identifier isn't in scope
+                    printf("\n Error! Identifier not in scope. \n");
+                }
             }
+        }
+        //Return our leaf node
+        return cell_tree_init(result);
+    }
+    //The tree we recieved must be an expression, since it has children.
+    if (!lexid_eq(in.data, EXPR_LEXID)) {
+        //TODO: Throw a nicer error, and actually abort nicely!
+        printf("\n ERROR! Expected an expression \n");
+    }
+    //TODO: Add support for "lambda" special form here
 
-
-
-
+    //Must be a simple expression, so make an expression subtree
+    cell_tree result = cell_tree_init(make_expr_cell());
+    
+    //recursively convert children
+    int i;
+    for (i = 0; i < in.children.size; i++) {
+        //Add the results of converting each child under the same environment
+        cell_tree converted = convert_to_cells(in.children.begin[i], e);
+        result = cell_tree_addchild(result, converted);
+    }
+    return result;
 }
-*/
+
 
 //Takes something of the form "name" or "(type name)",
 //and if a type was specified, returns the type, but if
@@ -128,7 +150,7 @@ function load_function_def(lexid_tree in, string_dynarray backsymtable) {
 
     //Set the body of the function to the result of converting it to cells
     //With the environment given by the parameters of the function.
-    //result.body = convert_to_cells(in.children.begin[2], params_to_env(result.params));
+    result.body = convert_to_cells(in.children.begin[2], params_to_env(result.params));
     
     //We're done
     return result;

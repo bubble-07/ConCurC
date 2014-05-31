@@ -10,14 +10,12 @@
 
 DEFINE_DICT(lexid, parameter_ptr)
 
-typedef struct env env;
-
-struct env {
+typedef struct env {
     //Lookup table for bindings within the immediately-enclosing scope
     lexid_parameter_ptr_dict binds;
     //Reference to the parent (null for no parent)
-    env* parent;
-};
+    struct env* parent;
+} env;
 
 //Creates an environment with the specified parent
 env make_new_env(env* p) {

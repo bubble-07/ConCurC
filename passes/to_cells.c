@@ -1,6 +1,8 @@
 #include "../prims/function.h"
 #include "to_cells.h"
 #include "../prims/env.h"
+#include "../libs/memoryman.h"
+#include "../prims/global_function_table.h"
 
 //Returns 1 if the given expression is a function definition
 //Assumes in.data is "EXPR_LEXID"
@@ -16,12 +18,49 @@ int is_function_def(lexid_tree in) {
     return 0;
 }
 
+/*
+
 //Takes a lexid_tree and a given environment, and converts it to a cell_tree
 //(recursive procedure)
 cell_tree convert_to_cells(lexid_tree in, env environ) {
-    //If the tree we recieve has no children, must be a leaf
-}
 
+    //If the tree we recieve has no children, must be a leaf
+    if (in.children.size == 0) {
+
+        cell result; //This will be used to store the resulting cell
+
+        //Since it's a leaf, there are only a few things it could be
+        if (lexid_eq(in.data, INT_LEXID)) {
+            //Must be an integer, so make an integer cell
+            result = make_int_cell(in.data.attr.intval);
+        }
+        if (lexid_eq(in.data, FLOAT_LEXID)) {
+            result = make_float_cell(in.data.attr.floatval);
+        }
+        if (lexid_eq(in.data, STRING_LEXID)) {
+            result = make_string_cell(in.data.attr.stringval);
+        }
+
+        if (isNonPrimID(in.data)) {
+            //Our input expression must be some kind of identifier,
+            //Variable, or function name
+            //We look it up in the environment first, then in the function table
+            parameter_ptr envlookup = env_lookup(environ, in.data);
+            if (!parameter_ptr_eq(result, parameter_ptr_lookup_failure)) {
+                //We must have found our parameter in the environment!
+                result = make_parameter_cell(envlookup);
+            }
+            else {
+                //It's not in the environment -- look in the global function table
+
+
+            }
+
+
+
+
+}
+*/
 
 //Takes something of the form "name" or "(type name)",
 //and if a type was specified, returns the type, but if

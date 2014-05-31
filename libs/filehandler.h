@@ -4,6 +4,9 @@
 #include "error.h"
 #include "filesys.h"
 
+#ifndef FILEHANDLER_DEFINED
+#define FILEHANDLER_DEFINED
+
 typedef struct {
     size_t lineno;
     string file;
@@ -45,3 +48,5 @@ inline static void close_file(fileLoc* in) {
 }
 
 #define LINE_END 1000
+
+#endif

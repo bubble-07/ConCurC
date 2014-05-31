@@ -1,7 +1,7 @@
 //Implements environments for the sake of determining
 //which parameter a given lexid corresponds to [lexical scoping]
 
-#include "../passes/lexer.h"
+#include "../prims/lexid.h"
 #include "parameter.h"
 #include "../libs/dict.h"
 

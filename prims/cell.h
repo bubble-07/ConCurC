@@ -43,6 +43,12 @@ static cell make_expr_cell() {
     return result;
 }
 
+//Returns 1 if the given cell is some kind of function. 0 otherwise
+static int cell_is_callable(cell in) {
+    return (in.kind == LAMBDACELL || in.kind == POLYMORPH || in.kind == FUNCTION);
+}
+
+
 //Define a handy macro to make cells containing primitive datatypes.
 //Cell kind is the kind of cell that stores the datatype, and type is
 //the type it's internally represented by

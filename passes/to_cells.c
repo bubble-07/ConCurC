@@ -97,6 +97,21 @@ cell_tree convert_to_cells(lexid_tree in, env e) {
         cell_tree converted = convert_to_cells(in.children.begin[i], e);
         result = cell_tree_addchild(result, converted);
     }
+    //Not quite done yet -- if the original expression had non-strict ordering,
+    //We need to check to see if we can move things to the beginning.
+
+    if (!EXPR_LEXID_strict(in.data)) {
+        //Loop through, and move the first callable cell to the beginning
+        for (i=0; i < result.children.size; i++) {
+            if (cell_is_callable(result.children.begin[i].data)) {
+                //Move the first callable element to position 0
+                result.children = cell_tree_dynarray_moveToBegin(i, result.children);
+                //Return immediately
+                return result;
+            }
+        }
+    }
+
     return result;
 }
 

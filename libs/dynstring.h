@@ -63,4 +63,6 @@ inline static int string_eq(string one, string two) {
 
 static string string_lookup_failure = {0,0,NULL}; //Define as empty, unallocated dynarray
 
+DEFINE_DYNARRAY(string)
+
 #endif

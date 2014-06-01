@@ -5,7 +5,7 @@
 
 #ifdef TYPEDEFINED
 extern Type_graph UniverseGraph; //Give access to the type universe
-extern string_TypeRef_dict UniverseDict;
+extern lexid_TypeRef_dict UniverseDict;
 extern TypeRef Top;
 #endif
 
@@ -27,16 +27,16 @@ static int TypeRef_eq(TypeRef a, TypeRef b) {
 
 //Define a dictionary allowing us to look up nodes in the dictionary
 //based upon the name of a type
-DEFINE_DICT(string, TypeRef)
+DEFINE_DICT(lexid, TypeRef)
 
 
 
-DEFINE_REVERSE_LOOKUP(string, TypeRef)
+DEFINE_REVERSE_LOOKUP(lexid, TypeRef)
 
 //Define a global type universe containing everything we want
 Type_graph UniverseGraph;
 //And define a global dictionary for looking up types
-string_TypeRef_dict UniverseDict;
+lexid_TypeRef_dict UniverseDict;
 //Give a reference to the "Any" or "Top" type
 TypeRef Top;
 
@@ -47,10 +47,11 @@ typedef struct {
     int known; //1 if we know what the type is, 0 if not yet solidified.
 } TypeInfo;
 
-//Macro for adding a type to the graph with the given name
-#define AddType(name) noderef name; UniverseGraph = Type_graph_addnode(UniverseGraph, ' ', &name); \
-                      UniverseDict = string_TypeRef_dict_add(UniverseDict, \
-                                    string_TypeRef_bucket_make(to_dynstring( #name ), name));
+//Macro for adding a type to the graph with the given internal name (for reference to the node)
+//and the given value for the LEXID (probably hardcoded into lexer.c and lexid.h)
+#define AddType(name, id) noderef name; UniverseGraph = Type_graph_addnode(UniverseGraph, ' ', &name); \
+                      UniverseDict = lexid_TypeRef_dict_add(UniverseDict, \
+                                    lexid_TypeRef_bucket_make(id, name));
 
 //Macro for denoting that one type subtypes another in the graph
 //Note that the arrow always points from supertype to subtype
@@ -59,17 +60,17 @@ typedef struct {
 
 inline static void init_type_universe() {
     UniverseGraph = Type_graph_init(2);
-    UniverseDict = string_TypeRef_dict_init(100);
+    UniverseDict = lexid_TypeRef_dict_init(100);
     
-    AddType(Any); //Add the ever-prevalent "Any" type
+    AddType(Any, ANYID_LEXID); //Add the ever-prevalent "Any" type
 
     Top = Any;
 
     //For now, we add the following. TODO: Move somewhere less hard-coded!
-    AddType(String)
-    AddType(Num)
-    AddType(Int)
-    AddType(Float)
+    AddType(String, STRINGID_LEXID)
+    AddType(Num, NUMID_LEXID)
+    AddType(Int, INTID_LEXID)
+    AddType(Float, FLOATID_LEXID)
 
 
     Subs(String, Any)
@@ -83,18 +84,19 @@ inline static void init_type_universe() {
     return;
 }
 
-static TypeRef get_TypeRef(string s) {
-    return string_TypeRef_dict_get(UniverseDict, s);
+static TypeRef get_TypeRef(lexid s) {
+    return lexid_TypeRef_dict_get(UniverseDict, s);
 }
 
 
-//Will return string_lookup_failure if couldn't find it
-static string get_type_name(TypeRef r) {
-    return string_TypeRef_dict_reverse_get(UniverseDict, r);
+//TODO: Write this better.
+static string get_type_name(TypeRef r, string_dynarray backsymtable) {
+    lexid name = lexid_TypeRef_dict_reverse_get(UniverseDict, r);
+    return backsymtable.begin[name.tokenval];
 }
 
-static void print_TypeRef(TypeRef r) {
-    string name = get_type_name(r);
+static void print_TypeRef(TypeRef r, string_dynarray backsymtable) {
+    string name = get_type_name(r, backsymtable);
     //If we were able to find it
     if (!string_eq(name, string_lookup_failure)) {
         printf("%s", to_cstring(name));
@@ -103,11 +105,11 @@ static void print_TypeRef(TypeRef r) {
     return;
 }
 
-static void print_type(TypeInfo in) {
+static void print_type(TypeInfo in, string_dynarray backsymtable) {
     int i;
     printf("Option[ ");
     for (i=0; i < in.options.size; i++) {
-        print_TypeRef(in.options.begin[i]);
+        print_TypeRef(in.options.begin[i], backsymtable);
         printf(" ,");
     }
     printf("] ");

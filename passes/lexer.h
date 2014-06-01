@@ -10,7 +10,6 @@ DEFINE_DICT(string, lexid)
 
 //LEXER: Input -- a string
 //Output -- a dynamic array of lexids [program text] AND a dynarray of strings [symbols to names]
-DEFINE_DYNARRAY(string)
 typedef struct {
     lexid_dynarray program;
     /*a "backwards" symbol table that is actually just a dynarray of strings, with the

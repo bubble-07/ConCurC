@@ -136,11 +136,19 @@ lex_result lex(fileLoc* currentloc) {
     ADDCONST_SYM(":>", SUPS_LEXID);
 //    ADDCONST_SYM("supertypes", SUPS_LEXID);
 
+
+    //Add constant symbols corresponding to core [hardcoded] types
+    ADDCONST_SYM("Int", INTID_LEXID);
+    ADDCONST_SYM("Num", NUMID_LEXID);
+    ADDCONST_SYM("String", STRINGID_LEXID);
+    ADDCONST_SYM("Float", FLOATID_LEXID);
+    ADDCONST_SYM("Any", ANYID_LEXID);
+
     /*Meat of the actual lexer. Conceptually, it does this by predictive decisions using the 
     current character as a reference.*/
     int i = 0;
     int currentindent = 0;
-    int newlex = EXPR + 1;
+    int newlex = LAST_PRIM_ID_VAL + 1; //Start generating new entries after the last primitive
     char current = get_char(currentloc);
 
     while (isNotGlobTerm(current) || (!repl && isNewline(current))) {

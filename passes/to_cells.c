@@ -110,7 +110,7 @@ TypeInfo name_decl_to_type(lexid_tree in, string_dynarray backsymtable) {
         //type must've been specified
         lexid type_lexid = in.children.begin[0].data;
         //Look up the type corresponding to the lexid
-        TypeRef result = get_TypeRef(backsymtable.begin[type_lexid.tokenval]);
+        TypeRef result = get_TypeRef(type_lexid);
         //Finalize and return
         return make_known_type(result);
     }

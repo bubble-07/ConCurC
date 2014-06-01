@@ -21,7 +21,7 @@ static int parameter_ptr_eq(parameter_ptr one, parameter_ptr two) {
 
 static void print_parameter(parameter in, string_dynarray backsymtable) {
     printf("( ");
-    print_type(in.type);
+    print_type(in.type, backsymtable);
     printf(to_cstring(backsymtable.begin[in.name.tokenval]));
     printf(" )");
     return;

@@ -53,6 +53,17 @@ D_LEX(SUBS, 26)
 D_LEX(SUPS, 27)
 D_LEX(EXPR, 28) //Somewhat special -- see NOTE below
 
+//Define some core type lexids to get ourselves started
+D_LEX(INTID, 29)
+D_LEX(NUMID, 30)
+D_LEX(STRINGID, 31)
+D_LEX(FLOATID, 32)
+D_LEX(ANYID, 33)
+
+
+//Set the value of the last primitive lexid (so all non-hardcoded identifiers come after)
+#define LAST_PRIM_ID_VAL 33
+
 //Necessary to allow lookup failure in a dictionary. This is why LPAREN is 1, not 0*/
 const static lexid lexid_lookup_failure = {0, 0};
 

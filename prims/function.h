@@ -14,7 +14,7 @@ typedef struct {
 
 static void print_function(function in, string_dynarray backsymtable) {
     printf("Return type: ");
-    print_type(in.retType);
+    print_type(in.retType, backsymtable);
     printf(" Parameters: ");
     int i;
     for (i = 0; i < in.params.size; i++) {

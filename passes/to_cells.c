@@ -17,14 +17,100 @@ int is_function_def(lexid_tree in) {
     return 0;
 }
 
-//cell_tree make_lambda_expr(lexid_tree params, lexid_tree body);
+
+//Takes something of the form "name" or "(type name)",
+//and if a type was specified, returns the type, but if
+//it wasn't, return an unknown type
+TypeInfo name_decl_to_type(lexid_tree in) {
+    //TODO: fail gracefully in the case of a lookup failure
+    if (lexid_eq(in.data, EXPR_LEXID)) {
+        //type must've been specified
+        lexid type_lexid = in.children.begin[0].data;
+        //Look up the type corresponding to the lexid
+        TypeRef result = get_TypeRef(type_lexid);
+        //Finalize and return
+        return make_known_type(result);
+    }
+    else {
+        //Otherwise, the type must still be unknown
+        return make_unknown_type();
+    }
+}
+
+//Gets the name associated with (type name) or name
+lexid name_decl_to_name(lexid_tree in) {
+    if (lexid_eq(in.data, EXPR_LEXID)) {
+        //must be of format (type name)
+        return in.children.begin[1].data;
+    }
+    //otherwise, must be right there
+    return in.data;
+}
+
+parameter name_decl_to_param(lexid_tree in) {
+    parameter result;
+    result.name = name_decl_to_name(in);
+    result.type = name_decl_to_type(in);
+    return result;
+}
+
+
+//Makes a lambda form cell_tree from the given exprs for params and body
+//(Return type is left unspecified)
+cell_tree make_lambda_expr(lexid_tree paramtree, lexid_tree body, env e) {
+    lambda* head = memalloc(sizeof(lambda));
+    head->params = parameter_dynarray_make(1);
+
+    if (!lexid_eq(paramtree.data, EXPR_LEXID)) {
+        //Must be a single parameter without a type given (right there)
+        head->params = parameter_dynarray_add(head->params, name_decl_to_param(paramtree));
+    }
+    else {
+        //Must have multiple parameters
+        int i;
+        for (i=0; i < paramtree.children.size; i++) {
+            parameter current = name_decl_to_param(paramtree.children.begin[i]);
+            head->params = parameter_dynarray_add(head->params, current);
+        }
+    }
+    
+    //Initialize the resulting tree with the lambda header we constructed
+    cell_tree result = cell_tree_init(make_lambda_cell(head));
+
+    //Fork off an environment from the one passed in to be used for converting the body
+    env innerenv = fork_env(&e, head->params);
+
+    //Add the converted body directly below the header
+    result = cell_tree_addchild(result, convert_to_cells(body, innerenv));
+    return result;
+}
+
+
+    
+    
+    
 
 //Converts the line of a lambda expression to a cell_tree
-//cell_tree convert_lambda_expr(lexid_tree_dynarray in, env e) {
- //   cell_tree result;
-  //  if (in.size == 3) {
-   //     //Must not have specified a return type
-    //    result = make_lambda_expr(
+cell_tree convert_lambda_expr(lexid_tree_dynarray in, env e) {
+    cell_tree result;
+    if (in.size == 3) {
+        //Must not have specified a return type
+        result = make_lambda_expr(in.begin[1], in.begin[2], e);
+        //Get a pointer to the record for the lambda
+        lambda_ptr ptr = result.data.data;
+        ptr->retType = make_unknown_type();
+        return result;
+    }
+    if (in.size == 4) {
+        //Return type must be specified for the first arg
+        result = make_lambda_expr(in.begin[2], in.begin[3], e);
+        lambda_ptr ptr = result.data.data;
+        ptr->retType = make_known_type(get_TypeRef(in.begin[1].data));
+        return result;
+    }
+    return result; //TODO: THROW AN ERROR! (must be malformed)
+}
+
 
 //Converts a leaf lexid to a cell_tree
 cell_tree convert_to_singleton_cell(lexid in, env e) {
@@ -89,7 +175,7 @@ cell_tree convert_to_cells(lexid_tree in, env e) {
 
     //Handle the "lambda" special form
     if (lexid_eq(in.children.begin[0].data, LAMBDA_LEXID)) {
-        //return convert_lambda_expr(in.children, e);
+        return convert_lambda_expr(in.children, e);
     }
 
     //Must be a simple expression, so make an expression subtree
@@ -121,51 +207,11 @@ cell_tree convert_to_cells(lexid_tree in, env e) {
     return result;
 }
 
-
-//Takes something of the form "name" or "(type name)",
-//and if a type was specified, returns the type, but if
-//it wasn't, return an unknown type
-TypeInfo name_decl_to_type(lexid_tree in, string_dynarray backsymtable) {
-    //TODO: fail gracefully in the case of a lookup failure
-    if (lexid_eq(in.data, EXPR_LEXID)) {
-        //type must've been specified
-        lexid type_lexid = in.children.begin[0].data;
-        //Look up the type corresponding to the lexid
-        TypeRef result = get_TypeRef(type_lexid);
-        //Finalize and return
-        return make_known_type(result);
-    }
-    else {
-        //Otherwise, the type must still be unknown
-        return make_unknown_type();
-    }
-}
-
-//Gets the name associated with (type name) or name
-lexid name_decl_to_name(lexid_tree in) {
-    if (lexid_eq(in.data, EXPR_LEXID)) {
-        //must be of format (type name)
-        return in.children.begin[1].data;
-    }
-    //otherwise, must be right there
-    return in.data;
-}
-
-parameter name_decl_to_param(lexid_tree in, string_dynarray backsymtable) {
-    parameter result;
-    result.name = name_decl_to_name(in);
-    result.type = name_decl_to_type(in, backsymtable);
-    return result;
-}
-
-
-
-
 //Returns a function generated from a top-level definition representing one
 //[expression of format def ((type function) (type arg1)...) (body)
 //or of format def (function arg1 arg2) (body)
 //Assumption: the argument passed is already looking like a valid function.
-function load_function_def(lexid_tree in, string_dynarray backsymtable) {
+function load_function_def(lexid_tree in) {
     function result;
     
     //Gets the part of the definition corresponding to the definition
@@ -173,7 +219,7 @@ function load_function_def(lexid_tree in, string_dynarray backsymtable) {
     lexid_tree_dynarray typeline = in.children.begin[1].children;
 
     //Assign the function's return type
-    result.retType = name_decl_to_type(typeline.begin[0], backsymtable);
+    result.retType = name_decl_to_type(typeline.begin[0]);
 
     //All that remains are the parameters
     result.params = parameter_dynarray_make(1);
@@ -181,7 +227,7 @@ function load_function_def(lexid_tree in, string_dynarray backsymtable) {
     //for each parameter
     for (i = 1; i < typeline.size; i++) {
         //Convert the current name/type declaration to a parameter
-        parameter current = name_decl_to_param(typeline.begin[i], backsymtable);
+        parameter current = name_decl_to_param(typeline.begin[i]);
         //Add it to the function's parameter list
         result.params = parameter_dynarray_add(result.params, current);
     }
@@ -208,7 +254,7 @@ void to_cells(parse_result in) {
     //For every top-level definition
     for (i = 0; i < in.AST.children.size; i++) {
         //Convert it to a function
-        function current = load_function_def(in.AST.children.begin[i], in.backsymtable);
+        function current = load_function_def(in.AST.children.begin[i]);
         lexid name = load_function_name(in.AST.children.begin[i]);
         //Add it to the global function table
         global_table = add_function(global_table, name, current);

@@ -6,6 +6,7 @@
 #include "parser.h"
 #include "collectnames.h"
 #include "../prims/cell.h"
+#include "../prims/env.h"
 
 #ifndef TOCELLS_DEFINED
 #define TOCELLS_DEFINED
@@ -13,6 +14,7 @@
 //For now, conceptually represent everything in the global function
 //table.
 void to_cells(parse_result in);
+cell_tree convert_to_cells(lexid_tree in, env e);
 
 
 #endif

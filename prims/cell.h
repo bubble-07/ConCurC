@@ -3,6 +3,7 @@
 #include "../libs/dynstring.h"
 #include "parameter.h"
 #include "../libs/filehandler.h"
+#include "lambda.h"
 
 #ifndef CELL_DEFINED
 #define CELL_DEFINED
@@ -84,9 +85,10 @@ struct polymorph;
 
 DEF_MAKE_CELL_FROM_REF(POLYMORPH, struct polymorph, polymorph)
 DEF_MAKE_CELL_FROM_REF(PARAMETER, parameter, parameter)
+DEF_MAKE_CELL_FROM_REF(LAMBDACELL, lambda, lambda)
 
 static void print_cell_tree(cell_tree in, string_dynarray backsymtable) {
-    if (in.data.kind == EXPRCELL) {
+    if (in.data.kind == EXPRCELL || in.data.kind == LAMBDACELL) {
         printf("( ");
         int i;
         for(i=0; i < in.children.size; i++) {

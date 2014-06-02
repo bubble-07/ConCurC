@@ -18,7 +18,7 @@ typedef struct env {
 } env;
 
 //Creates an environment with the specified parent
-env make_new_env(env* p) {
+static env make_new_env(env* p) {
     env result;
     result.binds = lexid_parameter_ptr_dict_init(5);
     result.parent = p;
@@ -27,7 +27,7 @@ env make_new_env(env* p) {
 
 //Adds a single parameter pointer to the environment
 //Assumption: Non-null pointer, and name already given in p
-env add_param_to_env(env in, parameter_ptr p) {
+static env add_param_to_env(env in, parameter_ptr p) {
     lexid name = p->name;
     in.binds = lexid_parameter_ptr_dict_quickadd(in.binds, name, p);
     return in;
@@ -37,7 +37,7 @@ env add_param_to_env(env in, parameter_ptr p) {
 //Adds a dynamic array of parameters one-by-one to the environment
 //Note: this internally uses parameter_dynarray_getptr, which is UNSAFE
 //if the dynamic array of parameters is mutated at any point after calling this
-env add_params_to_env(env in, parameter_dynarray toadd) {
+static env add_params_to_env(env in, parameter_dynarray toadd) {
     int i;
     for (i=0; i < toadd.size; i++) {
         //Add a pointer to the current element in the dynarray to the environment
@@ -46,14 +46,21 @@ env add_params_to_env(env in, parameter_dynarray toadd) {
     return in;
 }
 
+//Creates a fork of the environment passed with the requested params
+static env fork_env(env* in, parameter_dynarray toadd) {
+    env result = make_new_env(in);
+    result = add_params_to_env(result, toadd);
+    return result;
+}
+
 //Creates a new environment from a dynamic array of params
-env params_to_env(parameter_dynarray in) {
+static env params_to_env(parameter_dynarray in) {
     return add_params_to_env(make_new_env(NULL), in);
 }
 
 //Finds the parameter in the innermost scope corresponding to the environment in
 //associated with the lexid name
-parameter_ptr env_lookup(env in, lexid name) {
+static parameter_ptr env_lookup(env in, lexid name) {
     //Get the result of looking in the enclosing scope
     parameter_ptr result = lexid_parameter_ptr_dict_get(in.binds, name);
     //If we successfully found the parameter

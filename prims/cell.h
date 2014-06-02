@@ -85,4 +85,28 @@ struct polymorph;
 DEF_MAKE_CELL_FROM_REF(POLYMORPH, struct polymorph, polymorph)
 DEF_MAKE_CELL_FROM_REF(PARAMETER, parameter, parameter)
 
+static void print_cell_tree(cell_tree in, string_dynarray backsymtable) {
+    if (in.data.kind == EXPRCELL) {
+        printf("( ");
+        int i;
+        for(i=0; i < in.children.size; i++) {
+            print_cell_tree(in.children.begin[i], backsymtable);
+            printf(" ");
+        }
+        printf(")");
+        return;
+    }
+    if (in.data.kind == INTCELL) {
+        int* ptr = in.data.data;
+        int val = *ptr;
+        printf("%d", val);
+        return;
+    }
+    if (in.data.kind == PARAMETER) {
+        parameter* toprint = in.data.data;
+        print_parameter_ptr(toprint, backsymtable);
+        return;
+    }
+}
+
 #endif

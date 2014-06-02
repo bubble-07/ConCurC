@@ -20,6 +20,8 @@ static void print_function(function in, string_dynarray backsymtable) {
     for (i = 0; i < in.params.size; i++) {
         print_parameter(in.params.begin[i], backsymtable);
     }
+    printf("\nBody:");
+    print_cell_tree(in.body, backsymtable);
     return;
 }
 

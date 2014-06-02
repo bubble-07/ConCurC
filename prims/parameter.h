@@ -26,6 +26,11 @@ static void print_parameter(parameter in, string_dynarray backsymtable) {
     printf(" )");
     return;
 }
+static void print_parameter_ptr(parameter_ptr in, string_dynarray backsymtable) {
+    parameter toprint = *in;
+    print_parameter(toprint, backsymtable);
+    return;
+}
 
 DEFINE_DYNARRAY(parameter)
 

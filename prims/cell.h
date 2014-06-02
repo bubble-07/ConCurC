@@ -2,6 +2,7 @@
 #include "../libs/memoryman.h"
 #include "../libs/dynstring.h"
 #include "parameter.h"
+#include "../libs/filehandler.h"
 
 #ifndef CELL_DEFINED
 #define CELL_DEFINED
@@ -30,6 +31,7 @@ Variable: A node that references a parameter
 typedef struct {
     CellType kind;
     void* data;
+    fileLoc loc;
 } cell;
 
 DEFINE_DYNARRAY(cell)

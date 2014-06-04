@@ -1,6 +1,6 @@
 #include "../libs/dynarray.h"
 #include "parameter.h"
-#include "cell.h"
+#include "cell_tree.h"
 
 #ifndef FUNCTION_DEFINED
 #define FUNCTION_DEFINED

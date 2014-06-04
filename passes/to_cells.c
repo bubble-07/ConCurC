@@ -100,14 +100,16 @@ cell_tree convert_lambda_expr(lexid_tree_dynarray in, env e) {
         //Must not have specified a return type
         result = make_lambda_expr(in.begin[1], in.begin[2], e);
         //Get a pointer to the record for the lambda
-        lambda_ptr ptr = result.data.data;
+        cell lambdahead = cell_tree_data(result);
+        lambda_ptr ptr = lambdahead.data;
         ptr->retType = make_unknown_type();
         return result;
     }
     if (in.size == 4) {
         //Return type must be specified for the first arg
         result = make_lambda_expr(in.begin[2], in.begin[3], e);
-        lambda_ptr ptr = result.data.data;
+        cell lambdahead = cell_tree_data(result);
+        lambda_ptr ptr = lambdahead.data;
         ptr->retType = make_known_type(get_TypeRef(in.begin[1].data));
         return result;
     }
@@ -182,8 +184,9 @@ cell_tree convert_to_cells(lexid_tree in, env e) {
     }
 
     //Must be a simple expression, so make an expression subtree
-    cell_tree result = cell_tree_init(make_expr_cell());
-    result.data.loc = in.data.loc; //Set file location of expression
+    cell head = make_expr_cell();
+    head.loc = in.data.loc; //Set the file location accordingly
+    cell_tree result = cell_tree_init(head);
     
     //recursively convert children
     int i;
@@ -197,10 +200,10 @@ cell_tree convert_to_cells(lexid_tree in, env e) {
 
     if (!EXPR_LEXID_strict(in.data)) {
         //Loop through, and move the first callable cell to the beginning
-        for (i=0; i < result.children.size; i++) {
-            if (cell_is_callable(result.children.begin[i].data)) {
-                //Move the first callable element to position 0
-                result.children = cell_tree_dynarray_moveToBegin(i, result.children);
+        for (i=0; i < cell_tree_numchildren(result); i++) {
+            if (cell_is_callable(cell_tree_child_data(result, i))) {
+                //Move the first callable element to the applicative position
+                result = cell_tree_make_child_applicative(result, i);
                 //Return immediately
                 return result;
             }

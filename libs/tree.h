@@ -18,6 +18,7 @@ DEFINE_DYNARRAY_TYPE(type##_tree); \
 struct type##_tree { \
     type data; \
     type##_tree_dynarray children; \
+    type##_tree* parent; \
 }; \
  \
 DEFINE_DYNARRAY_METHODS(type##_tree); \

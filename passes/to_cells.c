@@ -82,6 +82,9 @@ cell_tree make_lambda_expr(lexid_tree paramtree, lexid_tree body, env e) {
 
     //Add the converted body directly below the header
     result = cell_tree_addchild(result, convert_to_cells(body, innerenv));
+    //Clean up the environment we created
+    free_env(innerenv);
+
     return result;
 }
 
@@ -234,7 +237,12 @@ function load_function_def(lexid_tree in) {
 
     //Set the body of the function to the result of converting it to cells
     //With the environment given by the parameters of the function.
-    result.body = convert_to_cells(in.children.begin[2], params_to_env(result.params));
+    env innerenv = params_to_env(result.params);
+
+    result.body = convert_to_cells(in.children.begin[2], innerenv);
+
+    //Free the temporary environment we created
+    free_env(innerenv);
     
     //We're done
     return result;

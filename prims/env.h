@@ -24,6 +24,12 @@ static env make_new_env(env* p) {
     result.parent = p;
     return result;
 }
+//Frees the data referenced by the immediate scope
+//of the passed environment
+static void free_env(env in) {
+    lexid_parameter_ptr_dict_free(in.binds);
+    return;
+}
 
 //Adds a single parameter pointer to the environment
 //Assumption: Non-null pointer, and name already given in p

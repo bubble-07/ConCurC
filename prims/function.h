@@ -12,6 +12,24 @@ typedef struct {
     parameter_dynarray params; //Parameters of the function
 } function;
 
+
+
+typedef function* function_ptr;
+
+DEFINE_DYNARRAY(function_ptr)
+
+DEFINE_DYNARRAY(function)
+
+
+//Gets the type of the parameter in the given position
+//Returns an empty type if outside of bounds
+static TypeInfo function_ptr_get_parameter_type(function_ptr in, int pos) {
+    if (in->params.size > pos) {
+        return get_parameter_type(in->params.begin[pos]);
+    }
+    return make_empty_type();
+}
+
 static void print_function(function in, string_dynarray backsymtable) {
     printf("Return type: ");
     print_type(in.retType, backsymtable);
@@ -24,13 +42,4 @@ static void print_function(function in, string_dynarray backsymtable) {
     print_cell_tree(in.body, backsymtable);
     return;
 }
-
-
-
-typedef function* function_ptr;
-
-DEFINE_DYNARRAY(function_ptr)
-
-DEFINE_DYNARRAY(function)
-
 #endif

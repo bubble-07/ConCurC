@@ -13,6 +13,7 @@ DEFINE_DICT(lexid, polymorph)
 //Define something that lets us get all stored polymorphs
 DEFINE_GET_ALL_VALS(lexid, polymorph)
 DEFINE_GET_PTR(lexid, polymorph)
+DEFINE_GET_ALL_VAL_PTRS(lexid, polymorph)
 
 
 typedef struct {
@@ -36,6 +37,11 @@ static function_table add_empty_polymorph(function_table in, lexid s) {
 static polymorph_dynarray get_all_polymorphs(function_table in) {
     return lexid_polymorph_dict_get_all_values(in.dict);
 }
+//Returns a dynamic array of pointers to all store polymorphs
+static polymorph_ptr_dynarray get_all_polymorph_ptrs(function_table in) {
+    return lexid_polymorph_dict_get_all_val_ptrs(in.dict);
+}
+
 
 //Returns 1 if a given function name has already been registered
 static int has_polymorph(function_table in, lexid s) {

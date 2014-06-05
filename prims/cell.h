@@ -2,6 +2,7 @@
 #include "../libs/dynstring.h"
 #include "parameter.h"
 #include "../libs/filehandler.h"
+#include "type.h"
 #include "lambda.h"
 
 #ifndef CELL_DEFINED
@@ -30,6 +31,7 @@ Variable: A node that references a parameter
 
 typedef struct {
     CellType kind;
+    TypeInfo type;
     void* data;
     fileLoc loc;
 } cell;
@@ -40,6 +42,7 @@ static cell make_expr_cell() {
     cell result;
     result.kind = EXPRCELL;
     result.data = NULL;
+    result.type = make_unknown_type();
     return result;
 }
 
@@ -48,17 +51,23 @@ static int cell_is_callable(cell in) {
     return (in.kind == LAMBDACELL || in.kind == POLYMORPH || in.kind == FUNCTION);
 }
 
+static cell update_cell_type(cell in, TypeInfo i) {
+    in.type = i;
+    return in;
+}
+
 
 //Define a handy macro to make cells containing primitive datatypes.
 //Cell kind is the kind of cell that stores the datatype, and type is
 //the type it's internally represented by
-#define DEF_MAKE_CELL(cellkind, type) \
-static cell make_##type##_cell(type in) { \
+#define DEF_MAKE_CELL(cellkind, t) \
+static cell make_##t##_cell(t in) { \
     cell result; \
     result.kind = cellkind; \
     /*Copy the input to a new memory location*/ \
-    type * ptr = memalloc(sizeof(type)); \
+    t * ptr = memalloc(sizeof(t)); \
     *ptr = in; \
+    result.type = make_unknown_type(); \
     result.data = (void*) ptr; \
     return result; \
 }
@@ -69,11 +78,12 @@ DEF_MAKE_CELL(STRINGCELL, string)
 
 //Define a handy macro for cells we make by their pointers
 //And give the resulting function "name"
-#define DEF_MAKE_CELL_FROM_REF(cellkind, type, name) \
-static cell make_##name##_cell(type * in) { \
+#define DEF_MAKE_CELL_FROM_REF(cellkind, t, name) \
+static cell make_##name##_cell(t * in) { \
     cell result;  \
     result.kind = cellkind; \
     result.data = (void*) in; \
+    result.type = make_unknown_type(); \
     return result; \
 }
 
@@ -82,6 +92,16 @@ struct polymorph;
 
 DEF_MAKE_CELL_FROM_REF(POLYMORPH, struct polymorph, polymorph)
 DEF_MAKE_CELL_FROM_REF(PARAMETER, parameter, parameter)
+
+//If the given cell is a parameter, gives a pointer to the referenced param
+static parameter_ptr cell_get_parameter_ptr(cell in) {
+    return (parameter*) in.data;
+}
+
+static struct polymorph* cell_get_polymorph_ptr(cell in) {
+    return (struct polymorph*) in.data;
+}
+
 DEF_MAKE_CELL_FROM_REF(LAMBDACELL, lambda, lambda)
 
 #endif

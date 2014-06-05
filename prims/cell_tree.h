@@ -18,6 +18,13 @@ cell_tree cell_tree_child(cell_tree in, size_t i);
 cell_tree_dynarray cell_tree_children(cell_tree in);
 cell cell_tree_child_data(cell_tree in, size_t i);
 cell_tree cell_tree_parent(cell_tree in);
+
+//Returns the offset [position] of the current cell tree in its parent
+int cell_tree_get_offset(cell_tree in);
+
+int cell_tree_isleaf(cell_tree in);
+int cell_tree_isroot(cell_tree in);
+
 cell cell_tree_data(cell_tree in);
 cell_tree cell_tree_setdata(cell_tree in, cell data);
 size_t cell_tree_height(cell_tree in);

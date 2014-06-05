@@ -15,6 +15,7 @@ typedef struct polymorph polymorph;
 typedef polymorph* polymorph_ptr;
 
 DEFINE_DYNARRAY(polymorph)
+DEFINE_DYNARRAY(polymorph_ptr)
 
 static polymorph make_empty_polymorph() {
     polymorph result;
@@ -30,6 +31,26 @@ static polymorph add_to_polymorph(polymorph in, function_ptr f) {
     in.options = function_ptr_dynarray_add(in.options, f);
     return in;
 }
+
+static function_ptr_dynarray polymorph_get_options(polymorph in) {
+    return in.options;
+}
+
+//Gets a sum type of all possible types the parameter in position pos could be
+static TypeInfo polymorph_ptr_get_parameter_type(polymorph_ptr in, int pos) {
+    function_ptr_dynarray options = polymorph_get_options(*in);
+    TypeInfo result = make_empty_type();
+    int i;
+    for (i=0; i < options.size; i++) {
+        //Add another function option
+        result = concat_types(result, function_ptr_get_parameter_type(options.begin[i], pos));
+    }
+    return result;
+}
+
+
+
+
 
 static polymorph polymorph_lookup_failure = {{0,0,NULL}, {{0,0,NULL}}, 1};
 

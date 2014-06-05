@@ -10,3 +10,5 @@
 5/29/2014 - Added definition and methods associated with environments
 5/30/2014 - Figured out what is necessary for translating the lexid_tree
 6/01/2014 - Made type.h use lexids, added reordering pass
+6/02/2014 - Lambda expressions now converted
+6/04/2014 - Created cell_tree (different structure) and implemented bottom-up traversal

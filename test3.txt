@@ -1,6 +1,7 @@
-def (int add) (Int a) (Int b)
-    a + a
-def (Int mul) (Int a) (Int b)
-    a * b
-def test f a b
-    lambda c (c b)
+def (int +) (int a) (int b)
+    ( )
+def (int *) (int a) (int b)
+    ( )
+def test a b
+    a + b
+    

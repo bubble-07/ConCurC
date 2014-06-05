@@ -49,6 +49,30 @@ cell_tree cell_tree_addleaf(cell_tree in, cell leaf) {
     return cell_tree_addchild(in, leaftree);
 }
 
+//Returns true if the given cell is a leaf
+int cell_tree_isleaf(cell_tree in) {
+    return (cell_tree_numchildren(in) == 0);
+}
+//Returns true if the given cell is the root
+int cell_tree_isroot(cell_tree in) {
+    return (cell_tree_parent(in) == NULL);
+}
+
+int cell_tree_get_offset(cell_tree in) {
+    cell_tree parent = cell_tree_parent(in);
+    int i;
+    for (i=0; i < cell_tree_numchildren(in); i++) {
+        //If the current child of the parent is our input
+        if (cell_tree_child(parent, i) == in) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+
+
+
 //Gets the number of children of the current cell_tree
 size_t cell_tree_numchildren(cell_tree in) {
     return in->children.size;
@@ -115,7 +139,7 @@ int heightcompare(const void* one, const void* two) {
 }
     
 //Traverse nodes in increasing order of height and transform
-cell_tree cell_tree_bottom_up_traversal(cell_tree in, cell (*transform)(cell_tree)) {
+cell_tree cell_tree_bottom_up_transform(cell_tree in, cell (*transform)(cell_tree)) {
     cell_tree_dynarray treenodes = cell_tree_flatten(in);
     //Sort all of the nodes in the tree in increasing order of height
     treenodes = cell_tree_dynarray_sort(treenodes, &heightcompare);

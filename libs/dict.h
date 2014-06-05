@@ -126,6 +126,19 @@ inline static valT##_dynarray keyT##_##valT##_dict_get_all_values(keyT##_##valT#
     } \
     return result; \
 }
+//Gets pointers to EVERY value stored in dictionary. Be careful.
+#define DEFINE_GET_ALL_VAL_PTRS(keyT, valT) \
+inline static valT##_ptr_dynarray keyT##_##valT##_dict_get_all_val_ptrs(keyT##_##valT##_dict in) { \
+    valT##_ptr_dynarray result = valT##_ptr_dynarray_make(1); \
+    size_t i; \
+    size_t j; \
+    for (i=0; i < in.size; i++) { \
+        for (j=0; j < in.begin[i].size; j++) { \
+            result = valT##_ptr_dynarray_add(result, &in.begin[i].begin[j].value); \
+        } \
+    } \
+    return result; \
+}
 
 #define DEFINE_GET_ALL(keyT, valT) \
 /* Carries out a lookup operation that gets ALL values matching a given key */ \

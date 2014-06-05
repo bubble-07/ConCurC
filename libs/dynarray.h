@@ -96,6 +96,13 @@ inline static type##_dynarray type##_dynarray_moveToBegin(size_t i, type##_dynar
     } \
     return in; \
 } \
+/*Sorts a given dynarray according to the passed comparison function. This method
+internally uses quicksort with qsort, which explains the funky type signature. The comparison
+function should return -1 if the first elem is before the second, 0 if equivalent, 1 else.*/ \
+inline static type##_dynarray type##_dynarray_sort(type##_dynarray in, int (*compare)(const void*, const void*)) { \
+    qsort(in.begin, in.size, sizeof(type), compare); \
+    return in; \
+} \
 /*creates a dynarray from an array and a given number of elements to read */\
 inline static type##_dynarray type##_dynarray_fromarray(type * values, int len) { \
     int x = 0; \

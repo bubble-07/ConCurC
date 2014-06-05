@@ -15,9 +15,17 @@ cell_tree cell_tree_addchild(cell_tree in, cell_tree toadd);
 cell_tree cell_tree_addleaf(cell_tree in, cell leaf);
 size_t cell_tree_numchildren(cell_tree in);
 cell_tree cell_tree_child(cell_tree in, size_t i);
+cell_tree_dynarray cell_tree_children(cell_tree in);
 cell cell_tree_child_data(cell_tree in, size_t i);
 cell_tree cell_tree_parent(cell_tree in);
 cell cell_tree_data(cell_tree in);
+cell_tree cell_tree_setdata(cell_tree in, cell data);
+size_t cell_tree_height(cell_tree in);
 cell_tree cell_tree_make_child_applicative(cell_tree in, size_t i);
+//Get a flat list of references to every node in the tree (don't care about order)
+cell_tree_dynarray cell_tree_flatten(cell_tree in);
+
+//Traverses the cell_tree from the bottom up, in order of increasing node height
+cell_tree cell_tree_bottom_up_transform(cell_tree in, cell (*transform)(cell_tree));
 
 #endif

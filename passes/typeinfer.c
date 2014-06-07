@@ -104,12 +104,14 @@ void check_polymorph(polymorph_ptr in) {
     return;
 }
 
-void typeinfer() {
+//For now, take a parse_result so we can debug and print stuff
+void typeinfer(parse_result in) {
     //Need to typecheck and infer for every function definition
     polymorph_ptr_dynarray functions = get_all_polymorph_ptrs(global_table);
     int i;
     for (i=0; i < functions.size; i++) {
         check_polymorph(functions.begin[i]);
+        print_polymorph_ptr(functions.begin[i], in.backsymtable);
     }
     return; //Done checking
 }

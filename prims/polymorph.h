@@ -48,8 +48,14 @@ static TypeInfo polymorph_ptr_get_parameter_type(polymorph_ptr in, int pos) {
     return result;
 }
 
-
-
+static void print_polymorph_ptr(polymorph_ptr in, string_dynarray backsymtable) {
+    int i;
+    for (i=0; i < in->options.size; i++) {
+        print_function(*(in->options.begin[i]), backsymtable);
+        printf("\n");
+    }
+    return;
+}
 
 
 static polymorph polymorph_lookup_failure = {{0,0,NULL}, {{0,0,NULL}}, 1};

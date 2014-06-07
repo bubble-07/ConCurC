@@ -61,7 +61,7 @@ int cell_tree_isroot(cell_tree in) {
 int cell_tree_get_offset(cell_tree in) {
     cell_tree parent = cell_tree_parent(in);
     int i;
-    for (i=0; i < cell_tree_numchildren(in); i++) {
+    for (i=0; i < cell_tree_numchildren(parent); i++) {
         //If the current child of the parent is our input
         if (cell_tree_child(parent, i) == in) {
             return i;

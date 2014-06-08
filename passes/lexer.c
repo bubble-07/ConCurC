@@ -294,27 +294,9 @@ lex_result lex(fileLoc* currentloc) {
     result.program = program;
     result.file = currentloc->file;
 
-    //fill the "backsymtable" with entries
-    //string_lexid_dict to string_dynarray
-    //remember, string_lexid_dict is actually string_lexid_bucket_dynarray_dynarray
-    result.backsymtable = string_dynarray_make(newlex + 1);
-    for (i=0; i < newlex + 1; i++) {
-        result.backsymtable = string_dynarray_add(result.backsymtable,char_dynarray_make(1));
-    }
+    //Invert our symtable so we can look up strings later.
+    result.backsymtable = nametable_make(symtable, newlex + 1);
 
-    //Now, correlate the entries correctly
-    result.backsymtable.size = newlex + 1;
-    int j = 0;
-    size_t index;
-    string_lexid_bucket_dynarray tmp;
-    for (i=0; i < symtable.size; i++) {
-        tmp = symtable.begin[i];
-        for (j=0; j < tmp.size; j++) {
-            index = tmp.begin[j].value.tokenval;
-            char_dynarray_free(result.backsymtable.begin[index]);
-            result.backsymtable.begin[index] = tmp.begin[j].key;
-        }
-    } 
     string_lexid_dict_free(symtable);
 
     return result;

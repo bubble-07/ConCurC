@@ -3,18 +3,13 @@
 
 #include <stdlib.h>
 #include "../prims/lexid.h"
-
-/*defines a dictionary from strings to lexids in order to implement a working symbol table*/
-DEFINE_DICT(string, lexid)
-
+#include "../prims/nametable.h"
 
 //LEXER: Input -- a string
-//Output -- a dynamic array of lexids [program text] AND a dynarray of strings [symbols to names]
+//Output -- a dynamic array of lexids [program text] AND a name table (for backwards lookup)
 typedef struct {
     lexid_dynarray program;
-    /*a "backwards" symbol table that is actually just a dynarray of strings, with the
-    identifier's number cleverly represented in the index*/
-    string_dynarray backsymtable;
+    nametable backsymtable;
     string file;
 } lex_result; 
 

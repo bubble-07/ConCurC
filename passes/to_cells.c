@@ -213,6 +213,12 @@ cell_tree convert_to_cells(lexid_tree in, env e) {
     return result;
 }
 
+//Create a simple wrapper around what we previously defined in collectnames
+//to get the name (lexid) of a defined function.
+lexid load_function_name(lexid_tree def) {
+    return get_name_from_def(def.children);
+}
+
 //Returns a function generated from a top-level definition representing one
 //[expression of format def ((type function) (type arg1)...) (body)
 //or of format def (function arg1 arg2) (body)
@@ -244,6 +250,10 @@ function load_function_def(lexid_tree in) {
 
     result.body = convert_to_cells(in.children.begin[2], innerenv);
 
+    //Get the function's name
+    lexid name = load_function_name(in);
+    result.name = name;
+
     //Free the temporary environment we created
     free_env(innerenv);
     
@@ -251,17 +261,12 @@ function load_function_def(lexid_tree in) {
     return result;
 }
 
-//Create a simple wrapper around what we previously defined in collectnames
-//to get the name (lexid) of a defined function.
-lexid load_function_name(lexid_tree def) {
-    return get_name_from_def(def.children);
-}
-
 //For now, just print out every function we make
 //Do NOTHING else
 //Assumes the file contains ONLY function definitions
 void to_cells(parse_result in) {
     int i;
+    printf("\n");
     //For every top-level definition
     for (i = 0; i < in.AST.children.size; i++) {
         //Convert it to a function
@@ -269,11 +274,9 @@ void to_cells(parse_result in) {
         lexid name = load_function_name(in.AST.children.begin[i]);
         //Add it to the global function table
         global_table = add_function(global_table, name, current);
-        printf("\nFunction definition: ");
-        printf(to_cstring(in.backsymtable.begin[name.tokenval]));
-        printf(" ");
         //Print it
         print_function(current, in.backsymtable);
+        printf("\n");
     }
     return;
 }

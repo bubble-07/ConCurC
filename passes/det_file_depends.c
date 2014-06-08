@@ -167,7 +167,7 @@ void freeroots(string_path_dict in) {
 
 file_depends_result det_file_deps(parse_result in, path main_path) {
     file_depends_result result;
-    result.backsymtable = in.backsymtable;
+    result.backsymtable = in.names;
     result.AST = in.AST;
 
     depends_t_state state;
@@ -175,7 +175,7 @@ file_depends_result det_file_deps(parse_result in, path main_path) {
     path tmppath = to_cstring(in.file);
     path file = realpath(tmppath, NULL);
     free(tmppath);
-    state.backtable = in.backsymtable;
+    state.backtable = in.names;
     state.file_roots = getroots(file, &main_path);
 
     /*

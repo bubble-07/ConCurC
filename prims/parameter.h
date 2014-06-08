@@ -6,7 +6,7 @@
 
 typedef struct {
     TypeInfo type;
-    lexid name;
+    lexid name; //Name (identifier)
 } parameter;
 
 //Define a pointer type for parameters.
@@ -31,16 +31,16 @@ static parameter_ptr set_parameter_ptr_type(parameter_ptr in, TypeInfo i) {
     return in;
 }
 
-static void print_parameter(parameter in, string_dynarray backsymtable) {
+static void print_parameter(parameter in, nametable names) {
     printf("( ");
-    print_type(in.type, backsymtable);
-    printf(to_cstring(backsymtable.begin[in.name.tokenval]));
+    print_type(in.type, names);
+    printf(nametable_get_cstring(names, in.name));
     printf(" )");
     return;
 }
-static void print_parameter_ptr(parameter_ptr in, string_dynarray backsymtable) {
+static void print_parameter_ptr(parameter_ptr in, nametable names) {
     parameter toprint = *in;
-    print_parameter(toprint, backsymtable);
+    print_parameter(toprint, names);
     return;
 }
 

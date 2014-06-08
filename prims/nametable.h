@@ -38,5 +38,9 @@ static string nametable_get(nametable in, lexid token) {
     //TODO: Add error handling!
     return in.begin[token.tokenval];
 }
+//Gets the name of a passed lexid as a c string
+static char * nametable_get_cstring(nametable in, lexid token) {
+    return to_cstring(nametable_get(in, token));
+}
 
 #endif

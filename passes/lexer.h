@@ -9,7 +9,7 @@
 //Output -- a dynamic array of lexids [program text] AND a name table (for backwards lookup)
 typedef struct {
     lexid_dynarray program;
-    nametable backsymtable;
+    nametable names;
     string file;
 } lex_result; 
 

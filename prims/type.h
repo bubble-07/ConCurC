@@ -2,6 +2,7 @@
 #include "../libs/dict.h"
 #include "../libs/digraph.h"
 #include "../prims/lexid.h"
+#include "../prims/nametable.h"
 
 #ifdef TYPEDEFINED
 extern Type_graph UniverseGraph; //Give access to the type universe
@@ -90,13 +91,13 @@ static TypeRef get_TypeRef(lexid s) {
 
 
 //TODO: Write this better.
-static string get_type_name(TypeRef r, string_dynarray backsymtable) {
-    lexid name = lexid_TypeRef_dict_reverse_get(UniverseDict, r);
-    return backsymtable.begin[name.tokenval];
+static string get_type_name(TypeRef r, nametable names) {
+    lexid token = lexid_TypeRef_dict_reverse_get(UniverseDict, r);
+    return nametable_get(names, token);
 }
 
-static void print_TypeRef(TypeRef r, string_dynarray backsymtable) {
-    string name = get_type_name(r, backsymtable);
+static void print_TypeRef(TypeRef r, nametable names) {
+    string name = get_type_name(r, names);
     //If we were able to find it
     if (!string_eq(name, string_lookup_failure)) {
         printf("%s", to_cstring(name));
@@ -105,11 +106,11 @@ static void print_TypeRef(TypeRef r, string_dynarray backsymtable) {
     return;
 }
 
-static void print_type(TypeInfo in, string_dynarray backsymtable) {
+static void print_type(TypeInfo in, nametable names) {
     int i;
     printf("Option[ ");
     for (i=0; i < in.options.size; i++) {
-        print_TypeRef(in.options.begin[i], backsymtable);
+        print_TypeRef(in.options.begin[i], names);
         printf(" ,");
     }
     printf("] ");

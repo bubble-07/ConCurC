@@ -262,7 +262,7 @@ function load_function_def(lexid_tree in, function_table table) {
 def_collection to_cells(collectnames_result in) {
     lexid_tree parsetree = in.parse.AST;
     function_table table = in.table;
-    string_dynarray backsymtable = in.parse.backsymtable;
+    nametable names = in.parse.names;
 
     int i;
     printf("\n");
@@ -274,13 +274,13 @@ def_collection to_cells(collectnames_result in) {
         //Add it to the passed function table
         table = add_function(table, current.name, current);
         //Print it
-        print_function(current, backsymtable);
+        print_function(current, names);
         printf("\n");
     }
 
     def_collection result;
     result.funcs = get_all_polymorph_ptrs(table); //Flatten our dictionary, we don't need it anymore
-    result.backsymtable = backsymtable;
+    result.names = names;
     return result;
 }
 

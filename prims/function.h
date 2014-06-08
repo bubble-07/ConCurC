@@ -2,6 +2,7 @@
 #include "parameter.h"
 #include "cell_tree.h"
 #include "lexid.h"
+#include "nametable.h"
 
 #ifndef FUNCTION_DEFINED
 #define FUNCTION_DEFINED
@@ -31,18 +32,18 @@ static TypeInfo function_ptr_get_parameter_type(function_ptr in, int pos) {
     return make_empty_type();
 }
 
-static void print_function(function in, string_dynarray backsymtable) {
+static void print_function(function in, nametable names) {
     printf("Name: "); 
-    printf(to_cstring(backsymtable.begin[in.name.tokenval]));
+    printf(nametable_get_cstring(names, in.name));
     printf(" Return type: ");
-    print_type(in.retType, backsymtable);
+    print_type(in.retType, names);
     printf(" Parameters: ");
     int i;
     for (i = 0; i < in.params.size; i++) {
-        print_parameter(in.params.begin[i], backsymtable);
+        print_parameter(in.params.begin[i], names);
     }
     printf("\nBody:");
-    print_cell_tree(in.body, backsymtable);
+    print_cell_tree(in.body, names);
     return;
 }
 #endif

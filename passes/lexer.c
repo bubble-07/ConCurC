@@ -295,7 +295,7 @@ lex_result lex(fileLoc* currentloc) {
     result.file = currentloc->file;
 
     //Invert our symtable so we can look up strings later.
-    result.backsymtable = nametable_make(symtable, newlex + 1);
+    result.names = nametable_make(symtable, newlex + 1);
 
     string_lexid_dict_free(symtable);
 

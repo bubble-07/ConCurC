@@ -111,7 +111,7 @@ def_collection typeinfer(def_collection in) {
     int i;
     for (i=0; i < functions.size; i++) {
         check_polymorph(functions.begin[i]);
-        print_polymorph_ptr(functions.begin[i], in.backsymtable);
+        print_polymorph_ptr(functions.begin[i], in.names);
     }
     return in; //Done checking
 }

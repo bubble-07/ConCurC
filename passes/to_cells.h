@@ -17,7 +17,7 @@
 //as a way to modularize results of this pass.
 typedef struct {
     polymorph_ptr_dynarray funcs;
-    string_dynarray backsymtable;
+    nametable names;
 } def_collection; //Collection of definitions
     
 

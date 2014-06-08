@@ -8,7 +8,7 @@
 extern char* realpath(const char* path, char* resolved_path);
 
 #define GENPRINT(tok) else if (in.data.tokenval == tok) { printf("%s", #tok); }
-void display(lexid_tree in, string_dynarray backsymtable) {
+void display(lexid_tree in, nametable names) {
     string toprint;
     printf("%s", "\n on line: ");
     printf("%d", (int) in.data.loc.lineno);
@@ -41,13 +41,13 @@ void display(lexid_tree in, string_dynarray backsymtable) {
         printf("%s", "(");
         size_t i = 0;
         while (i < in.children.size) {
-            display(in.children.begin[i], backsymtable);
+            display(in.children.begin[i], names);
             i++;
         }
         printf("%s", ")");
     }
     else {
-        toprint = char_dynarray_copy(backsymtable.begin[in.data.tokenval]);
+        toprint = char_dynarray_copy(nametable_get(names, in.data));
         toprint = char_dynarray_add(toprint, (char) 0);
         printf("%s", toprint.begin);
     }
@@ -69,7 +69,7 @@ int main(int argc, const char* argv[]) {
     init_type_universe();
     
     //Print out our parse tree
-    display(program.parse.AST, program.parse.backsymtable);
+    display(program.parse.AST, program.parse.names);
 
     //Convert to a list of definitions
     def_collection defs = to_cells(program);

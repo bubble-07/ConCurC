@@ -1,8 +1,8 @@
-#ifndef PARSERDEFINED
-#define PARSERDEFINED
-
 #include "lexer.h"
 #include "../libs/tree.h"
+
+#ifndef PARSERDEFINED
+#define PARSERDEFINED
 
 /*The parser takes the token stream from lexing and turns it into an abstract syntax tree
 of lexids, where EXPR_LEXID as the root data represents that the children form an expression*/
@@ -11,7 +11,7 @@ DEFINE_TREE(lexid)
 
 typedef struct {
     lexid_tree AST;
-    string_dynarray backsymtable;
+    nametable names;
     string file;
 } parse_result;
 

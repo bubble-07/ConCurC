@@ -3,7 +3,6 @@
 
 #ifndef TYPEINFER_DEFINED
 #define TYPEINFER_DEFINED
-//For now, this uses global state
-//TODO: Make this take an argument and return
-void typeinfer(parse_result in);
+
+def_collection typeinfer(def_collection in);
 #endif

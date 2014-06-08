@@ -7,14 +7,22 @@
 #include "collectnames.h"
 #include "../prims/cell_tree.h"
 #include "../prims/env.h"
+#include "../prims/polymorph.h"
+#include "../prims/function_table.h"
 
 #ifndef TOCELLS_DEFINED
 #define TOCELLS_DEFINED
 
-//For now, conceptually represent everything in the global function
-//table.
-void to_cells(parse_result in);
-cell_tree convert_to_cells(lexid_tree in, env e);
+//Structure to represent a list of polymorphs and a backsymtable
+//as a way to modularize results of this pass.
+typedef struct {
+    polymorph_ptr_dynarray funcs;
+    string_dynarray backsymtable;
+} def_collection; //Collection of definitions
+    
+
+def_collection to_cells(collectnames_result in);
+cell_tree convert_to_cells(lexid_tree in, env e, function_table table);
 
 
 #endif

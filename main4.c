@@ -63,19 +63,20 @@ int main(int argc, const char* argv[]) {
     else {
         file = load_file(realpath(argv[1], NULL));
     }
-    parse_result program = collectnames(primorder(parse(lex(file))));
+    collectnames_result program = collectnames(primorder(parse(lex(file))));
 
     //Initialize the type universe so we can do things.
     init_type_universe();
     
-    display(program.AST, program.backsymtable);
-    //Attempt to print out the loaded functions.
-    to_cells(program);
-    //Type infer
-    printf("\n\nInferring types \n\n");
-    typeinfer(program);
+    //Print out our parse tree
+    display(program.parse.AST, program.parse.backsymtable);
 
+    //Convert to a list of definitions
+    def_collection defs = to_cells(program);
 
+    printf("\n\n Inferring types \n\n");
+
+    defs = typeinfer(defs);
     
     return 0;
 }

@@ -1,7 +1,7 @@
 #include "to_cells.h"
 #include "../prims/env.h"
 #include "../libs/memoryman.h"
-#include "../prims/global_function_table.h"
+#include "../prims/function_table.h"
 
 //Returns 1 if the given expression is a function definition
 //Assumes in.data is "EXPR_LEXID"
@@ -57,7 +57,7 @@ parameter name_decl_to_param(lexid_tree in) {
 
 //Makes a lambda form cell_tree from the given exprs for params and body
 //(Return type is left unspecified)
-cell_tree make_lambda_expr(lexid_tree paramtree, lexid_tree body, env e) {
+cell_tree make_lambda_expr(lexid_tree paramtree, lexid_tree body, env e, function_table table) {
     lambda* head = memalloc(sizeof(lambda));
     head->params = parameter_dynarray_make(1);
 
@@ -81,24 +81,19 @@ cell_tree make_lambda_expr(lexid_tree paramtree, lexid_tree body, env e) {
     env innerenv = fork_env(&e, head->params);
 
     //Add the converted body directly below the header
-    result = cell_tree_addchild(result, convert_to_cells(body, innerenv));
+    result = cell_tree_addchild(result, convert_to_cells(body, innerenv, table));
     //Clean up the environment we created
     free_env(innerenv);
 
     return result;
 }
 
-
-    
-    
-    
-
 //Converts the line of a lambda expression to a cell_tree
-cell_tree convert_lambda_expr(lexid_tree_dynarray in, env e) {
+cell_tree convert_lambda_expr(lexid_tree_dynarray in, env e, function_table table) {
     cell_tree result;
     if (in.size == 3) {
         //Must not have specified a return type
-        result = make_lambda_expr(in.begin[1], in.begin[2], e);
+        result = make_lambda_expr(in.begin[1], in.begin[2], e, table);
         //Get a pointer to the record for the lambda
         cell lambdahead = cell_tree_data(result);
         lambda_ptr ptr = lambdahead.data;
@@ -107,7 +102,7 @@ cell_tree convert_lambda_expr(lexid_tree_dynarray in, env e) {
     }
     if (in.size == 4) {
         //Return type must be specified for the first arg
-        result = make_lambda_expr(in.begin[2], in.begin[3], e);
+        result = make_lambda_expr(in.begin[2], in.begin[3], e, table);
         cell lambdahead = cell_tree_data(result);
         lambda_ptr ptr = lambdahead.data;
         ptr->retType = make_known_type(get_TypeRef(in.begin[1].data));
@@ -118,7 +113,7 @@ cell_tree convert_lambda_expr(lexid_tree_dynarray in, env e) {
 
 
 //Converts a leaf lexid to a cell_tree
-cell_tree convert_to_singleton_cell(lexid in, env e) {
+cell_tree convert_to_singleton_cell(lexid in, env e, function_table table) {
 
     cell result; //This will be used to store the resulting cell
 
@@ -144,10 +139,10 @@ cell_tree convert_to_singleton_cell(lexid in, env e) {
             result = make_parameter_cell(envlookup);
         }
         else {
-            //It's not in the environment -- look in the global polymorph table
-            if (has_polymorph(global_table, in)) {
+            //It's not in the environment -- look in the polymorph table
+            if (has_polymorph(table, in)) {
                 //Great, it registers with some known polymorph
-                result = make_polymorph_cell(get_polymorph_ptr(global_table, in));
+                result = make_polymorph_cell(get_polymorph_ptr(table, in));
             }
             else {
                 //TODO: Throw an error saying the identifier isn't in scope
@@ -164,12 +159,12 @@ cell_tree convert_to_singleton_cell(lexid in, env e) {
 //Takes a lexid_tree and a given environment pointer, and converts it to a cell_tree
 //(recursive procedure)
 //NOTE: For fun, rename "e" to "environ", and see the wacky error gcc gives!
-cell_tree convert_to_cells(lexid_tree in, env e) {
+cell_tree convert_to_cells(lexid_tree in, env e, function_table table) {
 
     //If the tree we recieve has no children, must be a leaf
     if (in.children.size == 0) {
         //Return our leaf node
-        return convert_to_singleton_cell(in.data, e);
+        return convert_to_singleton_cell(in.data, e, table);
     }
     //Otherwise....
     //The tree we recieved must be an expression, since it has children.
@@ -180,7 +175,7 @@ cell_tree convert_to_cells(lexid_tree in, env e) {
 
     //Handle the "lambda" special form
     if (lexid_eq(in.children.begin[0].data, LAMBDA_LEXID)) {
-        return convert_lambda_expr(in.children, e);
+        return convert_lambda_expr(in.children, e, table);
     }
 
     //Must be a simple expression, so make an expression subtree
@@ -192,7 +187,7 @@ cell_tree convert_to_cells(lexid_tree in, env e) {
     int i;
     for (i = 0; i < in.children.size; i++) {
         //Add the results of converting each child under the same environment
-        cell_tree converted = convert_to_cells(in.children.begin[i], e);
+        cell_tree converted = convert_to_cells(in.children.begin[i], e, table);
         result = cell_tree_addchild(result, converted);
     }
     //Not quite done yet -- if the original expression had non-strict ordering,
@@ -223,7 +218,7 @@ lexid load_function_name(lexid_tree def) {
 //[expression of format def ((type function) (type arg1)...) (body)
 //or of format def (function arg1 arg2) (body)
 //Assumption: the argument passed is already looking like a valid function.
-function load_function_def(lexid_tree in) {
+function load_function_def(lexid_tree in, function_table table) {
     function result;
     
     //Gets the part of the definition corresponding to the definition
@@ -248,7 +243,7 @@ function load_function_def(lexid_tree in) {
     //With the environment given by the parameters of the function.
     env innerenv = params_to_env(result.params);
 
-    result.body = convert_to_cells(in.children.begin[2], innerenv);
+    result.body = convert_to_cells(in.children.begin[2], innerenv, table);
 
     //Get the function's name
     lexid name = load_function_name(in);
@@ -264,20 +259,28 @@ function load_function_def(lexid_tree in) {
 //For now, just print out every function we make
 //Do NOTHING else
 //Assumes the file contains ONLY function definitions
-void to_cells(parse_result in) {
+def_collection to_cells(collectnames_result in) {
+    lexid_tree parsetree = in.parse.AST;
+    function_table table = in.table;
+    string_dynarray backsymtable = in.parse.backsymtable;
+
     int i;
     printf("\n");
     //For every top-level definition
-    for (i = 0; i < in.AST.children.size; i++) {
+    for (i = 0; i < parsetree.children.size; i++) {
         //Convert it to a function
-        function current = load_function_def(in.AST.children.begin[i]);
-        lexid name = load_function_name(in.AST.children.begin[i]);
-        //Add it to the global function table
-        global_table = add_function(global_table, name, current);
+        function current = load_function_def(parsetree.children.begin[i], table);
+
+        //Add it to the passed function table
+        table = add_function(table, current.name, current);
         //Print it
-        print_function(current, in.backsymtable);
+        print_function(current, backsymtable);
         printf("\n");
     }
-    return;
+
+    def_collection result;
+    result.funcs = get_all_polymorph_ptrs(table); //Flatten our dictionary, we don't need it anymore
+    result.backsymtable = backsymtable;
+    return result;
 }
 

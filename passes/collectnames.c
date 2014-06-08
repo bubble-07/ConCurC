@@ -18,7 +18,7 @@ lexid get_name_from_def(lexid_tree_dynarray def_expr) {
 }
 
 //Collect every function that's defined with "DEF"
-void populate_global_table(lexid_tree in) {
+function_table populate_table(lexid_tree in, function_table table) {
     //If the root isn't an expression
     if (!lexid_eq(in.data, EXPR_LEXID)) {
        //TODO: throw an error [not a valid program] 
@@ -48,16 +48,21 @@ void populate_global_table(lexid_tree in) {
                 //A definition of a constant.
                 lexid function_name = get_name_from_def(def_expr);
 
-                //Add it to the global function table as an empty entry
-                add_empty_polymorph(global_table, function_name);
+                //Add it to the function table as an empty entry
+                table = add_empty_polymorph(table, function_name);
             }
         }
     }
+    return table; //Return our modified table
 }
                 
-parse_result collectnames(parse_result in) {
-    global_table = init_function_table(); //Initialize global table as empty
-    populate_global_table(in.AST);
-    return in; //Return the input, untouched
+collectnames_result collectnames(parse_result in) {
+    function_table table = init_function_table(); //Initialize our table as empty
+    populate_table(in.AST, table); //Populate it with empty polymorph entries
+    
+    collectnames_result result;
+    result.table = table;
+    result.parse = in;
+    return result; //Return both the parse result and the table
 }
 

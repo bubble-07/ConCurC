@@ -112,6 +112,13 @@ void check_function(function_ptr in) {
     cell_tree body = in->body;
     //Check the body of the function in a bottom-up manner
     body = cell_tree_bottom_up_transform(body, &check_recursive);
+    //If the return type of the function is known...
+    if (function_ptr_return_type_is_known(in)) {
+        return; //We are done
+    }
+    //Else, set it to the type of the enclosing expression of the body
+    TypeInfo retType = get_cell_type(cell_tree_data(body));
+    in = function_ptr_set_return_type(in, retType);
     return;
 }
 

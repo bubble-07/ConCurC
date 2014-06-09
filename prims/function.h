@@ -36,6 +36,15 @@ static TypeInfo function_ptr_get_return_type(function_ptr in) {
     return in->retType;
 }
 
+static function_ptr function_ptr_set_return_type(function_ptr in, TypeInfo t) {
+    in->retType = t;
+    return in;
+}
+
+static int function_ptr_return_type_is_known(function_ptr in) {
+    return type_is_known(function_ptr_get_return_type(in));
+}
+
 static void print_function(function in, nametable names) {
     printf("Name: "); 
     printf(nametable_get_cstring(names, in.name));

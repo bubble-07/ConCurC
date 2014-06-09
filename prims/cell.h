@@ -55,7 +55,9 @@ static cell update_cell_type(cell in, TypeInfo i) {
     in.type = i;
     return in;
 }
-
+static TypeInfo get_cell_type(cell in) {
+    return in.type;
+}
 
 //Define a handy macro to make cells containing primitive datatypes.
 //Cell kind is the kind of cell that stores the datatype, and type is

@@ -4,7 +4,8 @@ struct cell_tree_struct {
     cell data;
     cell_tree parent;
     cell_tree_dynarray children;
-    size_t height;
+    size_t height; //Height of the given tree
+    int offset; //Offset of the given tree within its parent (-1 if no parent)
 };
 
 size_t max(size_t a, size_t b) {
@@ -19,6 +20,9 @@ void setparent(cell_tree in, cell_tree p) {
 }
 //Helper function to add a child reference to a cell_tree
 void addchild(cell_tree in, cell_tree c) {
+    //Update the offset of the child tree to point to where it will be
+    c->offset = in->children.size;
+    //Add it to the list of children
     in->children = cell_tree_dynarray_add(in->children, c);
     //Update the height of the tree if c is the longest branch
     in->height = max(in->height, c->height + 1);
@@ -30,6 +34,7 @@ cell_tree cell_tree_init(cell in) {
     cell_tree result = memalloc(sizeof(struct cell_tree_struct));
     result->children = cell_tree_dynarray_make(1);
     result->data = in;
+    result->offset = -1; //No parent yet
     result->parent = NULL;
     result->height = 0; //height of a tree with 1 elem: 0
     return result;
@@ -71,19 +76,8 @@ int cell_tree_islambda(cell_tree in) {
 
 
 int cell_tree_get_offset(cell_tree in) {
-    cell_tree parent = cell_tree_parent(in);
-    int i;
-    for (i=0; i < cell_tree_numchildren(parent); i++) {
-        //If the current child of the parent is our input
-        if (cell_tree_child(parent, i) == in) {
-            return i;
-        }
-    }
-    return -1;
+    return in->offset;
 }
-
-
-
 
 //Gets the number of children of the current cell_tree
 size_t cell_tree_numchildren(cell_tree in) {
@@ -115,6 +109,12 @@ cell_tree cell_tree_setdata(cell_tree in, cell data) {
 }
 //Moves the specified child to the applicative position [child 0] and shifts everything over
 cell_tree cell_tree_make_child_applicative(cell_tree in, size_t i) {
+    //Swap the offsets of the two children in question
+    int tmp = in->children.begin[0]->offset;
+    in->children.begin[0]->offset = in->children.begin[i]->offset;
+    in->children.begin[i]->offset = tmp;
+
+    //Actually perform the move
     in->children = cell_tree_dynarray_moveToBegin(i, in->children);
     return in;
 }

@@ -49,6 +49,11 @@ cell_tree cell_tree_addleaf(cell_tree in, cell leaf) {
     return cell_tree_addchild(in, leaftree);
 }
 
+CellType cell_tree_getkind(cell_tree in) {
+    cell data = cell_tree_data(in);
+    return data.kind;
+}
+
 //Returns true if the given cell is a leaf
 int cell_tree_isleaf(cell_tree in) {
     return (cell_tree_numchildren(in) == 0);
@@ -57,6 +62,13 @@ int cell_tree_isleaf(cell_tree in) {
 int cell_tree_isroot(cell_tree in) {
     return (cell_tree_parent(in) == NULL);
 }
+int cell_tree_isexpr(cell_tree in) {
+    return (cell_tree_getkind(in) == EXPRCELL);
+}
+int cell_tree_islambda(cell_tree in) {
+    return (cell_tree_getkind(in) == LAMBDA);
+}
+
 
 int cell_tree_get_offset(cell_tree in) {
     cell_tree parent = cell_tree_parent(in);

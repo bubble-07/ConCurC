@@ -24,8 +24,12 @@ cell_tree cell_tree_parent(cell_tree in);
 //Returns the offset [position] of the current cell tree in its parent
 int cell_tree_get_offset(cell_tree in);
 
+CellType cell_tree_getkind(cell_tree in);
+
 int cell_tree_isleaf(cell_tree in);
 int cell_tree_isroot(cell_tree in);
+int cell_tree_isexpr(cell_tree in);
+int cell_tree_islambda(cell_tree in);
 
 cell cell_tree_data(cell_tree in);
 cell_tree cell_tree_setdata(cell_tree in, cell data);

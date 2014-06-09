@@ -6,7 +6,6 @@
 
 struct polymorph {
     function_ptr_dynarray options; //List of functions that may work
-    TypeInfo type; //most general type that can be returned
 };
 typedef struct polymorph polymorph;
 
@@ -19,7 +18,6 @@ DEFINE_DYNARRAY(polymorph_ptr)
 static polymorph make_empty_polymorph() {
     polymorph result;
     result.options = function_ptr_dynarray_make(1);
-    result.type = make_empty_type();
     return result;
 }
 
@@ -50,7 +48,19 @@ static TypeInfo polymorph_ptr_get_parameter_type(polymorph_ptr in, int pos) {
         //Add another function option
         result = concat_types(result, function_ptr_get_parameter_type(options.begin[i], pos));
     }
+    //Simplify and return result
     return result;
+}
+//Gets a sum type of all possible return types the polymorph can have
+static TypeInfo polymorph_ptr_get_return_type(polymorph_ptr in) {
+    function_ptr_dynarray options = polymorph_get_options(*in);
+    TypeInfo result = make_empty_type();
+    int i;
+    for (i=0; i < options.size; i++) {
+        result = concat_types(result, function_ptr_get_return_type(options.begin[i]));
+    }
+    //Return a simplified version of the result
+    return simplify_TypeInfo(result);
 }
 
 static void print_polymorph_ptr(polymorph_ptr in, nametable names) {

@@ -31,6 +31,10 @@ static TypeInfo function_ptr_get_parameter_type(function_ptr in, int pos) {
     }
     return make_empty_type();
 }
+//Returns the return type of the given function
+static TypeInfo function_ptr_get_return_type(function_ptr in) {
+    return in->retType;
+}
 
 static void print_function(function in, nametable names) {
     printf("Name: "); 

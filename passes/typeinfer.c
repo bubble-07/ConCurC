@@ -71,6 +71,22 @@ cell check_singleton(cell_tree in) {
     return current; //If nothing else, just return it
 } 
 
+//Checks an expression rooted at the passed node
+//Returns the same root cell, modified with new type information
+cell check_expression(cell_tree in) {
+    //It's an expression, so the first argument represents some kind of polymorph
+    //Technically, by this stage, since we go bottom-up, left-to-right, no checking of
+    //arguments needs to be done -- all we need to do is insert the most general return type
+
+    //If we don't have some weird empty expression [TODO: Handle as an empty list!]
+    if (cell_tree_numchildren(in) > 0) {
+        cell poly = cell_tree_child_data(in, 0);
+        polymorph_ptr p = poly.data;
+        //Update the expression's type with the polymorph's most general return type
+        return update_cell_type(cell_tree_data(in), polymorph_ptr_get_return_type(p));
+    }
+    return cell_tree_data(in); //Safe fallthrough
+}
 
 //Helper function to be used in bottom-up traversal
 //Argument is the level of the tree being examined.
@@ -79,10 +95,10 @@ cell check_recursive(cell_tree in) {
     if (cell_tree_isleaf(in)) {
         return check_singleton(in);
     }
-    //Otherwise, we must be dealing with an expression!
-    else {
-        //For now, do nothing
-        //TODO: Do something!
+    //Otherwise, we must be dealing with an expression or a lambda
+    if (cell_tree_isexpr(in)) {
+        //It's an expression
+        return check_expression(in);
     }
     return cell_tree_data(in); //Reasonable fallback
 }

@@ -89,6 +89,9 @@ static TypeRef get_TypeRef(lexid s) {
     return lexid_TypeRef_dict_get(UniverseDict, s);
 }
 
+static int type_is_known(TypeInfo in) {
+    return in.known;
+}
 
 //TODO: Write this better.
 static string get_type_name(TypeRef r, nametable names) {

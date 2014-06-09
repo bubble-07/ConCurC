@@ -52,6 +52,11 @@ cell check_singleton(cell_tree in) {
     //Handle inference on parameters
     if (current.kind == PARAMETER) {
         //Check to see if it's part of a compound expression
+        //TODO: Handle the case where the type is known!
+        if (parameter_ptr_type_is_known(current.data)) {
+            //Do nothing
+            return current;
+        }
         if (cell_tree_isroot(in)) {
             //Must not be part of a compound expression
             return current; //Nothing to add to the type sig

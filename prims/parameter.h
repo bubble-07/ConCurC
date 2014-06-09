@@ -30,6 +30,9 @@ static parameter_ptr set_parameter_ptr_type(parameter_ptr in, TypeInfo i) {
     in->type = i;
     return in;
 }
+static int parameter_ptr_type_is_known(parameter_ptr in) {
+    return type_is_known(in->type);
+}
 
 static void print_parameter(parameter in, nametable names) {
     printf("( ");

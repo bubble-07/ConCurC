@@ -135,17 +135,23 @@ cell_tree_dynarray cell_tree_flatten(cell_tree in) {
     return cell_tree_recflatten(in, cell_tree_dynarray_make(1));
 }
 
-size_t cell_tree_height(cell_tree in) {
+inline size_t cell_tree_height(cell_tree in) {
     return in->height;
 }
 
-//Helper function to compare two pointers to trees by height -- if one has greater height than two,
-//then 1 will be returned. Otherwise, return -1
+//Helper function to compare two pointers to trees by height, with offset as a secondary criteria.
+//If one has greater height than two, then 1 will be returned (swap). If one has a lower height than two, return -1 (no swap)
+//However, if both heights are equal, then return 1 (swap) if one has a greater offset than two (comes later in children)
 int heightcompare(const void* one, const void* two) {
     cell_tree onetree = *(cell_tree*)one;
     cell_tree twotree = *(cell_tree*)two;
     if (cell_tree_height(onetree) > cell_tree_height(twotree)) {
         return 1;
+    }
+    else if (cell_tree_height(onetree) == cell_tree_height(twotree)) {
+        if (cell_tree_get_offset(onetree) > cell_tree_get_offset(twotree)) {
+            return 1;
+        }
     }
     return -1;
 }

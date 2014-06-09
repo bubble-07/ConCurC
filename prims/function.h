@@ -46,4 +46,10 @@ static void print_function(function in, nametable names) {
     print_cell_tree(in.body, names);
     return;
 }
+
+static void print_function_ptr_name(function_ptr in, nametable names) {
+    nametable_print(names, in->name);
+    return;
+}
+    
 #endif

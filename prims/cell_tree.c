@@ -151,16 +151,15 @@ cell_tree cell_tree_bottom_up_transform(cell_tree in, cell (*transform)(cell_tre
     return in; //Return the tree we transformed
 }
 
-
-
-
-void print_cell_tree(cell_tree in, string_dynarray backsymtable) {
+void print_cell_tree(cell_tree in, nametable names) {
     cell data = cell_tree_data(in);
     if (data.kind == EXPRCELL || data.kind == LAMBDACELL) {
-        printf("( ");
+        printf("[");
+        print_type(data.type, names); //Annotate with type of expression
+        printf("]( ");
         int i;
         for(i=0; i < cell_tree_numchildren(in); i++) {
-            print_cell_tree(cell_tree_child(in, i), backsymtable);
+            print_cell_tree(cell_tree_child(in, i), names);
             printf(" ");
         }
         printf(")");
@@ -174,8 +173,13 @@ void print_cell_tree(cell_tree in, string_dynarray backsymtable) {
     }
     if (data.kind == PARAMETER) {
         parameter* toprint = data.data;
-        print_parameter_ptr(toprint, backsymtable);
+        print_parameter_ptr(toprint, names);
         return;
+    }
+    if (data.kind == POLYMORPH) {
+        //Print out its name
+        polymorph_ptr toprint = data.data;
+        print_polymorph_ptr_name(toprint, names);
     }
 }
 

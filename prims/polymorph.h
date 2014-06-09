@@ -62,6 +62,14 @@ static void print_polymorph_ptr(polymorph_ptr in, nametable names) {
     return;
 }
 
+//Prints the name of the referred-to polymorph
+static void print_polymorph_ptr_name(polymorph_ptr in, nametable names) {
+    if (in->options.size > 0) {
+        print_function_ptr_name(in->options.begin[0], names);
+    }
+    return; //TODO: Come up with a name indicating an error if nothing in the polymorph
+}
+
 
 static polymorph_ptr polymorph_ptr_lookup_failure = NULL;
 

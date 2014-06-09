@@ -1,6 +1,8 @@
 #include "cell.h"
 #include "../libs/dynarray.h"
 #include "../libs/dynstring.h"
+#include "nametable.h"
+#include "polymorph.h"
 
 #ifndef CELL_TREE_DEFINED
 #define CELL_TREE_DEFINED
@@ -8,7 +10,7 @@
 typedef struct cell_tree_struct* cell_tree;
 DEFINE_DYNARRAY(cell_tree)
 
-void print_cell_tree(cell_tree in, string_dynarray backsymtable);
+void print_cell_tree(cell_tree in, nametable names);
 cell_tree cell_tree_init(cell in);
 //Adds the specified child tree to the tree. NOTE: Undefined behavior if toadd is already in another tree
 cell_tree cell_tree_addchild(cell_tree in, cell_tree toadd);

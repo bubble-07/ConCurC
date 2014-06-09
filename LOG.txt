@@ -13,3 +13,4 @@
 6/02/2014 - Lambda expressions now converted
 6/04/2014 - Created cell_tree (different structure) and implemented bottom-up traversal
 6/05/2014 - Added basic (introductory) type inference code on parameters
+6/08/2014 - Cleaned up a ton of stuff

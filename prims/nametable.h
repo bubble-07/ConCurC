@@ -42,5 +42,13 @@ static string nametable_get(nametable in, lexid token) {
 static char * nametable_get_cstring(nametable in, lexid token) {
     return to_cstring(nametable_get(in, token));
 }
+//Prints the name of the passed lexid
+static void nametable_print(nametable in, lexid token) {
+    //TODO: Free the string
+    char* s = nametable_get_cstring(in, token);
+    printf("%s", s);
+    free(s);
+    return;
+}
 
 #endif

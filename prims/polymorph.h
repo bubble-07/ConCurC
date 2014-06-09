@@ -6,6 +6,7 @@
 
 struct polymorph {
     function_ptr_dynarray options; //List of functions that may work
+    int local; //Should be set to 1 if the polymorph in question is local (not in a function table) else, 0
 };
 typedef struct polymorph polymorph;
 
@@ -14,10 +15,11 @@ typedef polymorph* polymorph_ptr;
 DEFINE_DYNARRAY(polymorph)
 DEFINE_DYNARRAY(polymorph_ptr)
 
-//Creates a polymorph with no function options
+//Creates a non-local polymorph with no function options
 static polymorph make_empty_polymorph() {
     polymorph result;
     result.options = function_ptr_dynarray_make(1);
+    result.local = 0;
     return result;
 }
 

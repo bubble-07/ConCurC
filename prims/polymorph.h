@@ -30,6 +30,15 @@ static polymorph_ptr make_empty_polymorph_ptr() {
     return result;
 }
 
+//Makes a local copy of the referenced polymorph
+static polymorph_ptr polymorph_ptr_copy(polymorph_ptr in) {
+    polymorph_ptr result = memalloc(sizeof(polymorph));
+    *result = *in;
+    result->local = 1;
+    return result;
+}
+
+
 //adds the given function pointer to the polymorph
 static polymorph add_to_polymorph(polymorph in, function_ptr f) {
     //TODO: Update the most general type returned when you do this!

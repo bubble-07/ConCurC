@@ -106,6 +106,7 @@ cell cell_tree_data(cell_tree in) {
 //Sets the data at the current node
 cell_tree cell_tree_setdata(cell_tree in, cell data) {
     in->data = data;
+    return in;
 }
 //Moves the specified child to the applicative position [child 0] and shifts everything over
 cell_tree cell_tree_make_child_applicative(cell_tree in, size_t i) {

@@ -5,6 +5,12 @@
 #define GRAPHDEFINED
 typedef size_t noderef;
 static const noderef noderef_lookup_failure = -1;
+inline static int hash_noderef(noderef in) {
+    return in;
+}
+inline static int noderef_eq(noderef one, noderef two) {
+    return one == two;
+}
 DEFINE_DYNARRAY(noderef)
 DEFINE_SET(noderef)
 #endif

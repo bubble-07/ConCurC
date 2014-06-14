@@ -129,7 +129,7 @@ string_path_dict getroots(path file, path* main_path) {
     }
         
     //If main_path is "stdin", we shouldn't have to add anything extra to the "libs" namespace
-    if (*main_path != "stdin") {
+    if (!strncmp(*main_path, "stdin", 5)) {
         //but if it isn't, we should add the main_path
         path innerpath = get_innermost_dir(*main_path);
         QUICKADD( (innerpath), copy_path(*main_path))

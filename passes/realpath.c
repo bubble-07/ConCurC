@@ -6,6 +6,9 @@ Copyright (C) September 8, 2005
 I am placing this in the public domain for anyone to use or modify
 */
 
+//Ensure that we are on Windows
+#if defined(_WIN32) || defined(__MINGW32__) || defined(__MINGW64__)
+
 #include <windows.h>
 #include <stdlib.h>
 #include <limits.h>
@@ -134,3 +137,4 @@ char *realpath(const char *path, char resolved_path[PATH_MAX])
     
   return return_path;
 }
+#endif

@@ -2,6 +2,8 @@
 #ifndef DYNSTRING_DEFINED
 #include <string.h>
 #include <stdlib.h>
+#include <stdio.h>
+#include <ctype.h>
 #define DYNSTRING_DEFINED
 //Definition of dynamic strings, and operations and setup for using strings in a dict
 DEFINE_DYNARRAY(char)

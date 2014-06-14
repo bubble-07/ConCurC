@@ -22,7 +22,7 @@ function_table populate_table(lexid_tree in, function_table table) {
     //If the root isn't an expression
     if (!lexid_eq(in.data, EXPR_LEXID)) {
        //TODO: throw an error [not a valid program] 
-       return;
+       return table;
     }
 
     //For convenience, denote the upper-level of expressions as "defs"
@@ -35,7 +35,7 @@ function_table populate_table(lexid_tree in, function_table table) {
         //If our upper-level definition isn't some kind of expression
         if (!lexid_eq(defs.begin[i].data, EXPR_LEXID) || defs.begin[i].children.size < 1) {
             //TODO: Throw some kind of error [this can't happen in any valid program]
-            return;
+            return table;
         }
         
         //Gets the expression that should begin with DEF

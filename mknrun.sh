@@ -1,4 +1,4 @@
 #!/bin/sh
 
-gcc -pg lexer.c parser.c primorder.c main3.c det_file_depends.c det_depends.c
-./a.out test.txt
+gcc -g main4.c passes/*.c prims/*.c
+./a.out test3.txt

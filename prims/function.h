@@ -47,7 +47,7 @@ static int function_ptr_return_type_is_known(function_ptr in) {
 
 static void print_function(function in, nametable names) {
     printf("Name: "); 
-    printf(nametable_get_cstring(names, in.name));
+    nametable_print(names, in.name);
     printf(" Return type: ");
     print_type(in.retType, names);
     printf(" Parameters: ");

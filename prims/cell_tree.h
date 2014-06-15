@@ -30,6 +30,11 @@ int cell_tree_isleaf(cell_tree in);
 int cell_tree_isroot(cell_tree in);
 int cell_tree_isexpr(cell_tree in);
 int cell_tree_islambda(cell_tree in);
+int cell_tree_isapplicative(cell_tree in); //Returns true if the given cell tree is in the applicative position of parent
+int cell_tree_hasparent(cell_tree in);
+
+type_ref cell_tree_get_type_ref(cell_tree in);
+cell_tree cell_tree_set_type_ref(cell_tree in, type_ref t); //Modifies the type ref at the current node
 
 cell cell_tree_data(cell_tree in);
 cell_tree cell_tree_setdata(cell_tree in, cell data);

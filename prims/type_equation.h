@@ -1,4 +1,5 @@
 #include "type_ref.h"
+#include "polymorph.h"
 
 #ifndef TYPE_EQN_DEFINED
 #define TYPE_EQN_DEFINED
@@ -49,11 +50,11 @@ typedef union {
 //Poor-man's ADT for possible RH sides of type equations
 
 typedef enum {
-    is_polymorph_kind;
-    is_in_pos_kind;
-    is_result_of_kind;
-    is_subtype_kind;
-    is_equal_kind;
+    is_polymorph_kind,
+    is_in_pos_kind,
+    is_result_of_kind,
+    is_subtype_kind,
+    is_equal_kind
 } type_expr_kind;
 //Corresponding enum tags for possible RH sides
 
@@ -63,6 +64,10 @@ typedef struct {
     type_expr expr;
     type_expr_kind expr_kind;
 } type_equation;
+
+type_equation make_is_polymorph_equation(type_ref var, polymorph_ptr p, type_ref_dynarray args);
+type_equation make_is_in_pos_equation(type_ref var, int pos, type_ref functype);
+type_equation make_is_result_of_equation(type_ref var, type_ref functype, type_ref_dynarray args);
 
 DEFINE_DYNARRAY(type_equation)
 

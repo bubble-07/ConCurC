@@ -38,6 +38,10 @@ typedef struct {
 
 DEFINE_DYNARRAY(cell)
 
+static type_ref get_cell_type_ref(cell in) {
+    return in.type;
+}
+
 static cell make_expr_cell() {
     cell result;
     result.kind = EXPRCELL;

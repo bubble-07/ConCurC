@@ -74,6 +74,24 @@ int cell_tree_islambda(cell_tree in) {
     return (cell_tree_getkind(in) == LAMBDA);
 }
 
+int cell_tree_hasparent(cell_tree in) {
+    return !cell_tree_isroot(in);
+}
+int cell_tree_isapplicative(cell_tree in) {
+    if (cell_tree_hasparent(in)) {
+        return (cell_tree_get_offset(in) == 0);
+    }
+    return 1; //It's the root, but say it's in the applicative position
+}
+
+type_ref cell_tree_get_type_ref(cell_tree in) {
+    return get_cell_type_ref(cell_tree_data(in));
+}
+cell_tree cell_tree_set_type_ref(cell_tree in, type_ref t) {
+    in->data.type = t;
+    return in;
+}
+
 
 int cell_tree_get_offset(cell_tree in) {
     return in->offset;

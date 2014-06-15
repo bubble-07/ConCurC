@@ -73,6 +73,8 @@ type_equation_dynarray gen_type_equations(cell_tree in, type_equation_dynarray e
 //Infers types in a given function body
 cell_tree infer_body(cell_tree in) {
     type_equation_dynarray equations = gen_type_equations(in, type_equation_dynarray_make(1)); //Generates type equations from the tree
+    //Print them out (debugging)
+    print_type_equations(equations);
     //equations = solve_type_equations(equations); //Solves type equations
     //in = elaborate_types(in, equations); //Pass to plug in the simplified equations to the tree
     return in;

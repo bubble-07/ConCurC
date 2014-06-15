@@ -71,4 +71,9 @@ type_equation make_is_result_of_equation(type_ref var, type_ref functype, type_r
 
 DEFINE_DYNARRAY(type_equation)
 
+void print_type_equations(type_equation_dynarray in);
+is_polymorph get_polymorph_eqn(type_equation in);
+is_in_pos get_argpos_eqn(type_equation in);
+is_result_of get_apply_eqn(type_equation in);
+
 #endif

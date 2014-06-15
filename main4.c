@@ -1,6 +1,7 @@
 #include "passes/primorder.h"
 #include "passes/collectnames.h"
 #include "passes/to_cells.h"
+#include "passes/typeinfer.h"
 
 //Being used to test function name collection on single file
 
@@ -75,7 +76,7 @@ int main(int argc, const char* argv[]) {
 
     printf("\n\n Inferring types \n\n");
 
-    //defs = typeinfer(defs);
+    defs = typeinfer(defs);
     
     return 0;
 }

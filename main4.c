@@ -1,7 +1,6 @@
 #include "passes/primorder.h"
 #include "passes/collectnames.h"
 #include "passes/to_cells.h"
-#include "passes/typeinfer.h"
 
 //Being used to test function name collection on single file
 
@@ -69,14 +68,14 @@ int main(int argc, const char* argv[]) {
     init_type_universe();
     
     //Print out our parse tree
-    display(program.parse.AST, program.parse.names);
+    //display(program.parse.AST, program.parse.names);
 
     //Convert to a list of definitions
     def_collection defs = to_cells(program);
 
     printf("\n\n Inferring types \n\n");
 
-    defs = typeinfer(defs);
+    //defs = typeinfer(defs);
     
     return 0;
 }

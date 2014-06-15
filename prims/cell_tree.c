@@ -174,7 +174,7 @@ void print_cell_tree(cell_tree in, nametable names) {
     cell data = cell_tree_data(in);
     if (data.kind == EXPRCELL || data.kind == LAMBDACELL) {
         printf("[");
-        print_type(data.type, names); //Annotate with type of expression
+        //print_type(data.type, names); //Annotate with type of expression //TODO: Fix this!
         printf("]( ");
         int i;
         for(i=0; i < cell_tree_numchildren(in); i++) {

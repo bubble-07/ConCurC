@@ -49,7 +49,7 @@ static void print_function(function in, nametable names) {
     printf("Name: "); 
     nametable_print(names, in.name);
     printf(" Return type: ");
-    print_type(in.retType, names);
+    //print_type(in.retType, names); TODO: FIXME!
     printf(" Parameters: ");
     int i;
     for (i = 0; i < in.params.size; i++) {

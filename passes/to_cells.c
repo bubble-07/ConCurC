@@ -27,7 +27,7 @@ TypeInfo name_decl_to_type(lexid_tree in) {
         //type must've been specified
         lexid type_lexid = in.children.begin[0].data;
         //Look up the type corresponding to the lexid
-        TypeRef result = get_TypeRef(type_lexid);
+        TypeGraphRef result = get_TypeGraphRef(type_lexid);
         //Finalize and return
         return make_known_type(result);
     }
@@ -105,7 +105,7 @@ cell_tree convert_lambda_expr(lexid_tree_dynarray in, env e, function_table tabl
         result = make_lambda_expr(in.begin[2], in.begin[3], e, table);
         cell lambdahead = cell_tree_data(result);
         lambda_ptr ptr = lambdahead.data;
-        ptr->retType = make_known_type(get_TypeRef(in.begin[1].data));
+        ptr->retType = make_known_type(get_TypeGraphRef(in.begin[1].data));
         return result;
     }
     return result; //TODO: THROW AN ERROR! (must be malformed)

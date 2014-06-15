@@ -36,7 +36,7 @@ static int parameter_ptr_type_is_known(parameter_ptr in) {
 
 static void print_parameter(parameter in, nametable names) {
     printf("( ");
-    print_type(in.type, names);
+    //print_type(in.type, names); TODO: FIXME!
     nametable_print(names, in.name);
     printf(" )");
     return;

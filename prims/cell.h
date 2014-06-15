@@ -2,7 +2,7 @@
 #include "../libs/dynstring.h"
 #include "parameter.h"
 #include "../libs/filehandler.h"
-#include "type.h"
+#include "type_ref.h"
 #include "lambda.h"
 
 #ifndef CELL_DEFINED
@@ -31,7 +31,7 @@ Variable: A node that references a parameter
 
 typedef struct {
     CellType kind;
-    TypeInfo type;
+    type_ref type;
     void* data;
     fileLoc loc;
 } cell;
@@ -42,7 +42,7 @@ static cell make_expr_cell() {
     cell result;
     result.kind = EXPRCELL;
     result.data = NULL;
-    result.type = make_unknown_type();
+    result.type = make_empty_type_ref();
     return result;
 }
 
@@ -51,6 +51,7 @@ static int cell_is_callable(cell in) {
     return (in.kind == LAMBDACELL || in.kind == POLYMORPH || in.kind == FUNCTION);
 }
 
+/*
 static cell update_cell_type(cell in, TypeInfo i) {
     in.type = i;
     return in;
@@ -58,6 +59,7 @@ static cell update_cell_type(cell in, TypeInfo i) {
 static TypeInfo get_cell_type(cell in) {
     return in.type;
 }
+*/
 
 //Define a handy macro to make cells containing primitive datatypes.
 //Cell kind is the kind of cell that stores the datatype, and type is
@@ -69,7 +71,7 @@ static cell make_##t##_cell(t in) { \
     /*Copy the input to a new memory location*/ \
     t * ptr = memalloc(sizeof(t)); \
     *ptr = in; \
-    result.type = make_unknown_type(); \
+    result.type = make_empty_type_ref(); \
     result.data = (void*) ptr; \
     return result; \
 }
@@ -85,7 +87,7 @@ static cell make_##name##_cell(t * in) { \
     cell result;  \
     result.kind = cellkind; \
     result.data = (void*) in; \
-    result.type = make_unknown_type(); \
+    result.type = make_empty_type_ref(); \
     return result; \
 }
 

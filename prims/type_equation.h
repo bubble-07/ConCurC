@@ -1,3 +1,8 @@
+#include "type_ref.h"
+
+#ifndef TYPE_EQN_DEFINED
+#define TYPE_EQN_DEFINED
+
 //Define type equations and supporting architecture
 
 typedef struct {
@@ -58,3 +63,7 @@ typedef struct {
     type_expr expr;
     type_expr_kind expr_kind;
 } type_equation;
+
+DEFINE_DYNARRAY(type_equation)
+
+#endif

@@ -50,30 +50,6 @@ static function_ptr_dynarray polymorph_get_options(polymorph in) {
     return in.options;
 }
 
-//Gets a sum type of all possible types the parameter in position pos could be
-static TypeInfo polymorph_ptr_get_parameter_type(polymorph_ptr in, int pos) {
-    function_ptr_dynarray options = polymorph_get_options(*in);
-    TypeInfo result = make_empty_type();
-    int i;
-    for (i=0; i < options.size; i++) {
-        //Add another function option
-        result = concat_types(result, function_ptr_get_parameter_type(options.begin[i], pos));
-    }
-    //Simplify and return result
-    return result;
-}
-//Gets a sum type of all possible return types the polymorph can have
-static TypeInfo polymorph_ptr_get_return_type(polymorph_ptr in) {
-    function_ptr_dynarray options = polymorph_get_options(*in);
-    TypeInfo result = make_empty_type();
-    int i;
-    for (i=0; i < options.size; i++) {
-        result = concat_types(result, function_ptr_get_return_type(options.begin[i]));
-    }
-    //Return a simplified version of the result
-    return simplify_TypeInfo(result);
-}
-
 static void print_polymorph_ptr(polymorph_ptr in, nametable names) {
     int i;
     for (i=0; i < in->options.size; i++) {

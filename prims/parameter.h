@@ -1,18 +1,18 @@
-#include "type.h"
+#include "type_ref.h"
 #include "../passes/lexer.h"
 
 #ifndef PARAMETER_DEFINED
 #define PARAMETER_DEFINED
 
 typedef struct {
-    TypeInfo type;
+    type_ref type;
     lexid name; //Name (identifier)
 } parameter;
 
 //Define a pointer type for parameters.
 typedef parameter* parameter_ptr;
 
-static parameter_ptr parameter_ptr_make(TypeInfo type, lexid name) {
+static parameter_ptr parameter_ptr_make(type_ref type, lexid name) {
     parameter_ptr result = memalloc(sizeof(parameter));
     result->type = type;
     result->name = name;
@@ -26,24 +26,21 @@ static int parameter_ptr_eq(parameter_ptr one, parameter_ptr two) {
     return one == two;
 }
 
-static TypeInfo get_parameter_type(parameter in) {
+static type_ref get_parameter_type(parameter in) {
     return in.type;
 }
 
-static TypeInfo get_parameter_ptr_type(parameter_ptr in) {
+static type_ref get_parameter_ptr_type(parameter_ptr in) {
     return in->type;
 }
-static parameter_ptr set_parameter_ptr_type(parameter_ptr in, TypeInfo i) {
+static parameter_ptr set_parameter_ptr_type(parameter_ptr in, type_ref i) {
     in->type = i;
     return in;
-}
-static int parameter_ptr_type_is_known(parameter_ptr in) {
-    return type_is_known(in->type);
 }
 
 static void print_parameter(parameter in, nametable names) {
     printf("( ");
-    print_type(in.type, names);// TODO: FIXME!
+    //print_type(in.type, names);// TODO: FIXME!
     nametable_print(names, in.name);
     printf(" )");
     return;

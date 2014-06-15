@@ -8,3 +8,10 @@ type_ref make_empty_type_ref() {
     result->kind = type_ref_empty; //Set the kind to empty
     return result;
 }
+
+type_ref make_known_type_ref(TypeInfo in) {
+    type_ref result = make_empty_type_ref();
+    result->type = in;
+    result->kind = type_ref_immediate;
+    return result;
+}

@@ -10,7 +10,7 @@
 //Why? Makes nested scopes during type inference easier to deal with
 
 typedef struct {
-    TypeInfo retType; //Return type
+    type_ref ret_type; //Return type
     parameter_ptr_dynarray params; //Parameters
 } lambda;
 

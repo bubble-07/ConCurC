@@ -21,7 +21,7 @@ int is_function_def(lexid_tree in) {
 //Takes something of the form "name" or "(type name)",
 //and if a type was specified, returns the type, but if
 //it wasn't, return an unknown type
-TypeInfo name_decl_to_type(lexid_tree in) {
+type_ref name_decl_to_type(lexid_tree in) {
     //TODO: fail gracefully in the case of a lookup failure
     if (lexid_eq(in.data, EXPR_LEXID)) {
         //type must've been specified
@@ -29,11 +29,11 @@ TypeInfo name_decl_to_type(lexid_tree in) {
         //Look up the type corresponding to the lexid
         TypeGraphRef result = get_TypeGraphRef(type_lexid);
         //Finalize and return
-        return make_known_type(result);
+        return make_known_type_ref(make_known_type(result));
     }
     else {
         //Otherwise, the type must still be unknown
-        return make_unknown_type();
+        return make_empty_type_ref();
     }
 }
 
@@ -94,7 +94,7 @@ cell_tree convert_lambda_expr(lexid_tree_dynarray in, env e, function_table tabl
         //Get a pointer to the record for the lambda
         cell lambdahead = cell_tree_data(result);
         lambda_ptr ptr = lambdahead.data;
-        ptr->retType = make_unknown_type();
+        ptr->ret_type = make_empty_type_ref();
         return result;
     }
     if (in.size == 4) {
@@ -102,7 +102,7 @@ cell_tree convert_lambda_expr(lexid_tree_dynarray in, env e, function_table tabl
         result = make_lambda_expr(in.begin[2], in.begin[3], e, table);
         cell lambdahead = cell_tree_data(result);
         lambda_ptr ptr = lambdahead.data;
-        ptr->retType = make_known_type(get_TypeGraphRef(in.begin[1].data));
+        ptr->ret_type = make_known_type_ref(make_known_type(get_TypeGraphRef(in.begin[1].data)));
         return result;
     }
     return result; //TODO: THROW AN ERROR! (must be malformed)
@@ -227,7 +227,7 @@ function load_function_def(lexid_tree in, function_table table) {
     lexid_tree_dynarray typeline = in.children.begin[1].children;
 
     //Assign the function's return type
-    result.retType = name_decl_to_type(typeline.begin[0]);
+    result.ret_type = name_decl_to_type(typeline.begin[0]);
 
     //All that remains are the parameters
     result.params = parameter_ptr_dynarray_make(1);

@@ -9,7 +9,7 @@
 
 typedef struct {
     lexid name; //Name of the function (identifier)
-    TypeInfo retType; //Return type of function
+    type_ref ret_type; //Return type of function
     cell_tree body; //Body of the function
     parameter_ptr_dynarray params; //Parameters of the function
 } function;
@@ -24,32 +24,28 @@ DEFINE_DYNARRAY(function)
 
 
 //Gets the type of the parameter in the given position
-//Returns an empty type if outside of bounds
-static TypeInfo function_ptr_get_parameter_type(function_ptr in, int pos) {
+//Returns null if outside of bounds
+static type_ref function_ptr_get_parameter_type(function_ptr in, int pos) {
     if (in->params.size > pos) {
         return get_parameter_type(*in->params.begin[pos]);
     }
-    return make_empty_type();
+    return NULL;
 }
 //Returns the return type of the given function
-static TypeInfo function_ptr_get_return_type(function_ptr in) {
-    return in->retType;
+static type_ref function_ptr_get_return_type(function_ptr in) {
+    return in->ret_type;
 }
 
-static function_ptr function_ptr_set_return_type(function_ptr in, TypeInfo t) {
-    in->retType = t;
+static function_ptr function_ptr_set_return_type(function_ptr in, type_ref t) {
+    in->ret_type = t;
     return in;
-}
-
-static int function_ptr_return_type_is_known(function_ptr in) {
-    return type_is_known(function_ptr_get_return_type(in));
 }
 
 static void print_function(function in, nametable names) {
     printf("Name: "); 
     nametable_print(names, in.name);
     printf(" Return type: ");
-    //print_type(in.retType, names); TODO: FIXME!
+    //print_type(in.ret_type, names); TODO: FIXME!
     printf(" Parameters: ");
     int i;
     for (i = 0; i < in.params.size; i++) {

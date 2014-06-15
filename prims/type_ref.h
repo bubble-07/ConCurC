@@ -26,5 +26,6 @@ typedef type_ref_node* type_ref;
 DEFINE_DYNARRAY(type_ref)
 
 type_ref make_empty_type_ref(); //Makes a new type ref that's completely empty
+type_ref make_known_type_ref(TypeInfo in); //Makes a new type ref that's known
 
 #endif

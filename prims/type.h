@@ -45,7 +45,6 @@ DEFINE_DYNARRAY(TypeGraphRef)
 
 typedef struct {
     TypeGraphRef_dynarray options; //List of potential types
-    int known; //1 if we know what the type is, 0 if not yet solidified.
 } TypeInfo;
 
 //Macro for adding a type to the graph with the given internal name (for reference to the node)
@@ -89,9 +88,6 @@ static TypeGraphRef get_TypeGraphRef(lexid s) {
     return lexid_TypeGraphRef_dict_get(UniverseDict, s);
 }
 
-static int type_is_known(TypeInfo in) {
-    return in.known;
-}
 
 //TODO: Write this better.
 static string get_type_name(TypeGraphRef r, nametable names) {
@@ -122,12 +118,10 @@ static void print_type(TypeInfo in, nametable names) {
 
         
 
-
 //Creates a new type that can't be anything.
 inline static TypeInfo make_empty_type() {
     TypeInfo result;
     result.options = TypeGraphRef_dynarray_make(1);
-    result.known = 0;
     return result;
 }
 
@@ -137,17 +131,10 @@ inline static TypeInfo add_type(TypeInfo in, TypeGraphRef a) {
     return in;
 }
 
-//Makes a finalized type with only one option
-inline static TypeInfo make_known_type(TypeGraphRef in) {
+//Makes a simple type from the given type graph reference
+inline static TypeInfo make_simple_type(TypeGraphRef in) {
     TypeInfo result = add_type(make_empty_type(), in);
-    result.known = 1;
     return result;
-}
-
-
-//Creates a new type that could be anything.
-inline static TypeInfo make_unknown_type() {
-    return add_type(make_empty_type(), Top);
 }
 
 //Frees the given type
@@ -266,11 +253,6 @@ static TypeInfo restrict_sum(TypeInfo in, TypeInfo by) {
         result = concat_types(result, restrict_type(in, by.options.begin[i]));
     }
     return simplify_TypeInfo(result);
-}
-
-static TypeInfo finalize_type(TypeInfo in) {
-    in.known = 1;
-    return in;
 }
     
 #endif

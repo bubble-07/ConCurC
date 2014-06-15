@@ -6,8 +6,8 @@
 
 #ifdef TYPEDEFINED
 extern Type_graph UniverseGraph; //Give access to the type universe
-extern lexid_TypeRef_dict UniverseDict;
-extern TypeRef Top;
+extern lexid_TypeGraphRef_dict UniverseDict;
+extern TypeGraphRef Top;
 #endif
 
 #ifndef TYPEDEFINED
@@ -18,41 +18,41 @@ typedef char Type; //For now, we'll have the Types actually contain no info
 //Define a directed graph on types
 DEFINE_GRAPH(Type)
 
-typedef noderef TypeRef;
+typedef noderef TypeGraphRef;
 
-static noderef TypeRef_lookup_failure = -1; //define -1 to be failure
+static noderef TypeGraphRef_lookup_failure = -1; //define -1 to be failure
 
-static int TypeRef_eq(TypeRef a, TypeRef b) {
+static int TypeGraphRef_eq(TypeGraphRef a, TypeGraphRef b) {
     return a == b;
 }
 
 //Define a dictionary allowing us to look up nodes in the dictionary
 //based upon the name of a type
-DEFINE_DICT(lexid, TypeRef)
+DEFINE_DICT(lexid, TypeGraphRef)
 
 
 
-DEFINE_REVERSE_LOOKUP(lexid, TypeRef)
+DEFINE_REVERSE_LOOKUP(lexid, TypeGraphRef)
 
 //Define a global type universe containing everything we want
 Type_graph UniverseGraph;
 //And define a global dictionary for looking up types
-lexid_TypeRef_dict UniverseDict;
+lexid_TypeGraphRef_dict UniverseDict;
 //Give a reference to the "Any" or "Top" type
-TypeRef Top;
+TypeGraphRef Top;
 
-DEFINE_DYNARRAY(TypeRef)
+DEFINE_DYNARRAY(TypeGraphRef)
 
 typedef struct {
-    TypeRef_dynarray options; //List of potential types
+    TypeGraphRef_dynarray options; //List of potential types
     int known; //1 if we know what the type is, 0 if not yet solidified.
 } TypeInfo;
 
 //Macro for adding a type to the graph with the given internal name (for reference to the node)
 //and the given value for the LEXID (probably hardcoded into lexer.c and lexid.h)
 #define AddType(name, id) noderef name; UniverseGraph = Type_graph_addnode(UniverseGraph, ' ', &name); \
-                      UniverseDict = lexid_TypeRef_dict_add(UniverseDict, \
-                                    lexid_TypeRef_bucket_make(id, name));
+                      UniverseDict = lexid_TypeGraphRef_dict_add(UniverseDict, \
+                                    lexid_TypeGraphRef_bucket_make(id, name));
 
 //Macro for denoting that one type subtypes another in the graph
 //Note that the arrow always points from supertype to subtype
@@ -61,7 +61,7 @@ typedef struct {
 
 inline static void init_type_universe() {
     UniverseGraph = Type_graph_init(2);
-    UniverseDict = lexid_TypeRef_dict_init(100);
+    UniverseDict = lexid_TypeGraphRef_dict_init(100);
     
     AddType(Any, ANYID_LEXID); //Add the ever-prevalent "Any" type
 
@@ -85,8 +85,8 @@ inline static void init_type_universe() {
     return;
 }
 
-static TypeRef get_TypeRef(lexid s) {
-    return lexid_TypeRef_dict_get(UniverseDict, s);
+static TypeGraphRef get_TypeGraphRef(lexid s) {
+    return lexid_TypeGraphRef_dict_get(UniverseDict, s);
 }
 
 static int type_is_known(TypeInfo in) {
@@ -94,12 +94,12 @@ static int type_is_known(TypeInfo in) {
 }
 
 //TODO: Write this better.
-static string get_type_name(TypeRef r, nametable names) {
-    lexid token = lexid_TypeRef_dict_reverse_get(UniverseDict, r);
+static string get_type_name(TypeGraphRef r, nametable names) {
+    lexid token = lexid_TypeGraphRef_dict_reverse_get(UniverseDict, r);
     return nametable_get(names, token);
 }
 
-static void print_TypeRef(TypeRef r, nametable names) {
+static void print_TypeGraphRef(TypeGraphRef r, nametable names) {
     string name = get_type_name(r, names);
     //If we were able to find it
     if (!string_eq(name, string_lookup_failure)) {
@@ -113,7 +113,7 @@ static void print_type(TypeInfo in, nametable names) {
     int i;
     printf("Option[ ");
     for (i=0; i < in.options.size; i++) {
-        print_TypeRef(in.options.begin[i], names);
+        print_TypeGraphRef(in.options.begin[i], names);
         printf(" ,");
     }
     printf("] ");
@@ -126,19 +126,19 @@ static void print_type(TypeInfo in, nametable names) {
 //Creates a new type that can't be anything.
 inline static TypeInfo make_empty_type() {
     TypeInfo result;
-    result.options = TypeRef_dynarray_make(1);
+    result.options = TypeGraphRef_dynarray_make(1);
     result.known = 0;
     return result;
 }
 
 //Adds a type to the given TypeInfo
-inline static TypeInfo add_type(TypeInfo in, TypeRef a) {
-    in.options = TypeRef_dynarray_add(in.options, a);
+inline static TypeInfo add_type(TypeInfo in, TypeGraphRef a) {
+    in.options = TypeGraphRef_dynarray_add(in.options, a);
     return in;
 }
 
 //Makes a finalized type with only one option
-inline static TypeInfo make_known_type(TypeRef in) {
+inline static TypeInfo make_known_type(TypeGraphRef in) {
     TypeInfo result = add_type(make_empty_type(), in);
     result.known = 1;
     return result;
@@ -152,14 +152,14 @@ inline static TypeInfo make_unknown_type() {
 
 //Frees the given type
 inline static void free_type(TypeInfo in) {
-    TypeRef_dynarray_free(in.options);
+    TypeGraphRef_dynarray_free(in.options);
     return;
 }
 
 //Concatenates [adds] the types of one to the types of two
 //Then invalidates all references to two
 inline static TypeInfo concat_types(TypeInfo one, TypeInfo two) {
-    one.options = TypeRef_dynarray_cat(one.options, two.options);
+    one.options = TypeGraphRef_dynarray_cat(one.options, two.options);
     free_type(two);
     return one;
 }
@@ -172,7 +172,7 @@ inline static TypeInfo concat_types(TypeInfo one, TypeInfo two) {
 //TODO: Have this operate on the transitive reduction or a user-supplied graph,
 //and make it based on a traversal instead! [For probably greater efficiency]
 
-inline static TypeInfo intersect_types(TypeRef a, TypeRef b) {
+inline static TypeInfo intersect_types(TypeGraphRef a, TypeGraphRef b) {
     TypeInfo result = make_empty_type();
     size_t i;
     //Go through all subtypes of a, and add only those types
@@ -248,7 +248,7 @@ inline static TypeInfo simplify_TypeInfo(TypeInfo in) {
 }
 
 //Intersects a with all elements of in, sums them, and simplifies
-static TypeInfo restrict_type(TypeInfo in, TypeRef a) {
+static TypeInfo restrict_type(TypeInfo in, TypeGraphRef a) {
     TypeInfo result = make_empty_type();
     int i;
     for (i=0; i < in.options.size; i++) {

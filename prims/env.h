@@ -43,24 +43,24 @@ static env add_param_to_env(env in, parameter_ptr p) {
 //Adds a dynamic array of parameters one-by-one to the environment
 //Note: this internally uses parameter_dynarray_getptr, which is UNSAFE
 //if the dynamic array of parameters is mutated at any point after calling this
-static env add_params_to_env(env in, parameter_dynarray toadd) {
+static env add_params_to_env(env in, parameter_ptr_dynarray toadd) {
     int i;
     for (i=0; i < toadd.size; i++) {
         //Add a pointer to the current element in the dynarray to the environment
-        in = add_param_to_env(in, parameter_dynarray_getptr(toadd, i));
+        in = add_param_to_env(in, parameter_ptr_dynarray_get(toadd, i));
     }
     return in;
 }
 
 //Creates a fork of the environment passed with the requested params
-static env fork_env(env* in, parameter_dynarray toadd) {
+static env fork_env(env* in, parameter_ptr_dynarray toadd) {
     env result = make_new_env(in);
     result = add_params_to_env(result, toadd);
     return result;
 }
 
 //Creates a new environment from a dynamic array of params
-static env params_to_env(parameter_dynarray in) {
+static env params_to_env(parameter_ptr_dynarray in) {
     return add_params_to_env(make_new_env(NULL), in);
 }
 

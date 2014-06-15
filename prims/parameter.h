@@ -12,6 +12,13 @@ typedef struct {
 //Define a pointer type for parameters.
 typedef parameter* parameter_ptr;
 
+static parameter_ptr parameter_ptr_make(TypeInfo type, lexid name) {
+    parameter_ptr result = memalloc(sizeof(parameter));
+    result->type = type;
+    result->name = name;
+    return result;
+}
+
 static const parameter_ptr parameter_ptr_lookup_failure = NULL;
 
 //Define it so that parameter pointers are equal iff same address
@@ -36,7 +43,7 @@ static int parameter_ptr_type_is_known(parameter_ptr in) {
 
 static void print_parameter(parameter in, nametable names) {
     printf("( ");
-    //print_type(in.type, names); TODO: FIXME!
+    print_type(in.type, names);// TODO: FIXME!
     nametable_print(names, in.name);
     printf(" )");
     return;
@@ -48,6 +55,7 @@ static void print_parameter_ptr(parameter_ptr in, nametable names) {
 }
 
 DEFINE_DYNARRAY(parameter)
+DEFINE_DYNARRAY(parameter_ptr)
 
 
 #endif

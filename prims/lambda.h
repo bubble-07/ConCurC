@@ -11,7 +11,7 @@
 
 typedef struct {
     TypeInfo retType; //Return type
-    parameter_dynarray params; //Parameters
+    parameter_ptr_dynarray params; //Parameters
 } lambda;
 
 typedef lambda* lambda_ptr;

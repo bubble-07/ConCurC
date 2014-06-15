@@ -11,7 +11,7 @@ typedef struct {
     lexid name; //Name of the function (identifier)
     TypeInfo retType; //Return type of function
     cell_tree body; //Body of the function
-    parameter_dynarray params; //Parameters of the function
+    parameter_ptr_dynarray params; //Parameters of the function
 } function;
 
 
@@ -27,7 +27,7 @@ DEFINE_DYNARRAY(function)
 //Returns an empty type if outside of bounds
 static TypeInfo function_ptr_get_parameter_type(function_ptr in, int pos) {
     if (in->params.size > pos) {
-        return get_parameter_type(in->params.begin[pos]);
+        return get_parameter_type(*in->params.begin[pos]);
     }
     return make_empty_type();
 }
@@ -53,7 +53,7 @@ static void print_function(function in, nametable names) {
     printf(" Parameters: ");
     int i;
     for (i = 0; i < in.params.size; i++) {
-        print_parameter(in.params.begin[i], names);
+        print_parameter_ptr(in.params.begin[i], names);
     }
     printf("\nBody:");
     print_cell_tree(in.body, names);

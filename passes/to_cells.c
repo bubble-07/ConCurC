@@ -47,11 +47,8 @@ lexid name_decl_to_name(lexid_tree in) {
     return in.data;
 }
 
-parameter name_decl_to_param(lexid_tree in) {
-    parameter result;
-    result.name = name_decl_to_name(in);
-    result.type = name_decl_to_type(in);
-    return result;
+parameter_ptr name_decl_to_param(lexid_tree in) {
+    return parameter_ptr_make(name_decl_to_type(in), name_decl_to_name(in));
 }
 
 
@@ -59,18 +56,18 @@ parameter name_decl_to_param(lexid_tree in) {
 //(Return type is left unspecified)
 cell_tree make_lambda_expr(lexid_tree paramtree, lexid_tree body, env e, function_table table) {
     lambda* head = memalloc(sizeof(lambda));
-    head->params = parameter_dynarray_make(1);
+    head->params = parameter_ptr_dynarray_make(1);
 
     if (!lexid_eq(paramtree.data, EXPR_LEXID)) {
         //Must be a single parameter without a type given (right there)
-        head->params = parameter_dynarray_add(head->params, name_decl_to_param(paramtree));
+        head->params = parameter_ptr_dynarray_add(head->params, name_decl_to_param(paramtree));
     }
     else {
         //Must have multiple parameters
         int i;
         for (i=0; i < paramtree.children.size; i++) {
-            parameter current = name_decl_to_param(paramtree.children.begin[i]);
-            head->params = parameter_dynarray_add(head->params, current);
+            parameter_ptr current = name_decl_to_param(paramtree.children.begin[i]);
+            head->params = parameter_ptr_dynarray_add(head->params, current);
         }
     }
     
@@ -122,14 +119,14 @@ cell_tree convert_to_singleton_cell(lexid in, env e, function_table table) {
         //Must be an integer, so make an integer cell
         result = make_int_cell(in.attr.intval);
     }
-    if (lexid_eq(in, FLOAT_LEXID)) {
+    else if (lexid_eq(in, FLOAT_LEXID)) {
         result = make_float_cell(in.attr.floatval);
     }
-    if (lexid_eq(in, STRING_LEXID)) {
+    else if (lexid_eq(in, STRING_LEXID)) {
         result = make_string_cell(in.attr.stringval);
     }
 
-    if (isNonPrimID(in)) {
+    else if (isNonPrimID(in)) {
         //Our input expression must be some kind of identifier,
         //Variable, or function name
         //We look it up in the environment first, then in the function table
@@ -149,6 +146,10 @@ cell_tree convert_to_singleton_cell(lexid in, env e, function_table table) {
                 printf("\n Error! Identifier not in scope. \n");
             }
         }
+    }
+    else {
+        printf("ERROR!\n"); //Some kind of error, since not a recognized singleton
+        result = make_int_cell(3); //FIXME: Do something sensible for empty expressions!
     }
     //Set the file location of the resulting cell to what we got in
     result.loc = in.loc;
@@ -229,14 +230,14 @@ function load_function_def(lexid_tree in, function_table table) {
     result.retType = name_decl_to_type(typeline.begin[0]);
 
     //All that remains are the parameters
-    result.params = parameter_dynarray_make(1);
+    result.params = parameter_ptr_dynarray_make(1);
     int i;
     //for each parameter
     for (i = 1; i < typeline.size; i++) {
         //Convert the current name/type declaration to a parameter
-        parameter current = name_decl_to_param(typeline.begin[i]);
+        parameter_ptr current = name_decl_to_param(typeline.begin[i]);
         //Add it to the function's parameter list
-        result.params = parameter_dynarray_add(result.params, current);
+        result.params = parameter_ptr_dynarray_add(result.params, current);
     }
 
     //Set the body of the function to the result of converting it to cells

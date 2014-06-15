@@ -191,8 +191,11 @@ void print_cell_tree(cell_tree in, nametable names) {
         return;
     }
     if (data.kind == PARAMETER) {
+        /* FIXME: This is broken, for some reason! */
+        
         parameter* toprint = data.data;
         print_parameter_ptr(toprint, names);
+        
         return;
     }
     if (data.kind == POLYMORPH) {

@@ -26,6 +26,7 @@ DEFINE_DYNARRAY(function)
 //Gets the type of the parameter in the given position
 //Returns null if outside of bounds
 static type_ref function_ptr_get_parameter_type(function_ptr in, int pos) {
+    pos = pos - 1; //Do this so "1" corresponds to the first element in the array of params
     if (in->params.size > pos) {
         return get_parameter_type(*in->params.begin[pos]);
     }

@@ -23,7 +23,28 @@ static polymorph make_empty_polymorph() {
     return result;
 }
 
-//Same, but allocates on heap
+static int polymorph_ptr_numoptions(polymorph_ptr in) {
+    return in->options.size;
+}
+
+static function_ptr_dynarray polymorph_ptr_get_options(polymorph_ptr in) {
+    return in->options;
+}
+
+//Gets a sum type of all possible types the parameter in position pos could be
+static type_ref polymorph_ptr_get_parameter_type(polymorph_ptr in, int pos) {
+    function_ptr_dynarray options = polymorph_ptr_get_options(in);
+    type_ref result = make_empty_type_ref();
+    int i;
+    for (i=0; i < options.size; i++) {
+        //Add more options for what the type can be
+        result = concat_type_refs(result, function_ptr_get_parameter_type(options.begin[i], pos));
+    }
+    //Simplify and return result
+    return result;
+}
+
+//Same as make_empty_polymorph, but allocates on heap and returns a pointer
 static polymorph_ptr make_empty_polymorph_ptr() {
     polymorph_ptr result = memalloc(sizeof(polymorph));
     *result = make_empty_polymorph();
@@ -44,10 +65,6 @@ static polymorph add_to_polymorph(polymorph in, function_ptr f) {
     //TODO: Update the most general type returned when you do this!
     in.options = function_ptr_dynarray_add(in.options, f);
     return in;
-}
-
-static function_ptr_dynarray polymorph_get_options(polymorph in) {
-    return in.options;
 }
 
 static void print_polymorph_ptr(polymorph_ptr in, nametable names) {

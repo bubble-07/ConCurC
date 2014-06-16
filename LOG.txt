@@ -15,3 +15,5 @@
 6/05/2014 - Added basic (introductory) type inference code on parameters
 6/08/2014 - Cleaned up a ton of stuff
 6/09/2014 - Expanded inference, improved cell tree structure
+6/14/2014 - Defined basics of equation-based inference
+6/15/2014 - Generated equations from cell-trees

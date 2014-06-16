@@ -1,4 +1,5 @@
 #include "type.h"
+#include "nametable.h"
 
 #ifndef TYPE_REF_DEFINED
 #define TYPE_REF_DEFINED
@@ -28,4 +29,10 @@ DEFINE_DYNARRAY(type_ref)
 type_ref make_empty_type_ref(); //Makes a new type ref that's completely empty
 type_ref make_known_type_ref(TypeInfo in); //Makes a new type ref that's known
 
+//Modifies the first type ref to the UNION of the two type refs
+//All empty type_refs (which represent variables) are ignored
+type_ref concat_type_refs(type_ref in, type_ref a); 
+
+void print_type_ref(type_ref in, nametable names);
+void print_type_ref_list(type_ref_dynarray in, nametable names);
 #endif

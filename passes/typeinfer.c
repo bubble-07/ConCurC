@@ -1,5 +1,8 @@
 #include "typeinfer.h"
 
+//For now, because we want to print things (but don't want to affect function signatures) make a global nametable
+nametable names;
+
 //Given a reference to an expression involving a function application, returns the respective
 //types of arguments
 type_ref_dynarray get_arg_type_refs(cell_tree in) {
@@ -69,13 +72,95 @@ type_equation_dynarray gen_type_equations(cell_tree in, type_equation_dynarray e
     return eqns;
 }
 
+typedef struct {
+    type_equation_dynarray eqns; //The (modified) set of equations
+    int active; //Indicates whether a rule was applied to the equations
+} rule_app_result; //Result of a rule application
+
+
+//This rule expands any "is_in_pos" equations to generate new constraints (if possible)
+//If the first argument of the "is_in_pos" is a type equation that points to a polymorph
+//that can only take on one type, the "is_in_pos" equation will replaced with the new constraint
+rule_app_result expand_argpos(type_equation_dynarray eqns) {
+    rule_app_result result;
+    result.active = 0;
+
+    //Search for an is_in_pos equation
+    int i;
+    for (i=0; i < eqns.size; i++) {
+        //If the current node is a is_in_pos equation
+        if (eqns.begin[i].expr_kind == is_in_pos_kind) {
+            type_equation argpos_eqn = eqns.begin[i];
+            //Store it
+            is_in_pos argpos_RH = get_argpos_eqn(argpos_eqn);
+            //Get the type_ref of the function it references
+            type_ref func = argpos_RH.func;
+            //Search for the corresponding function
+            //TODO: Handle the case where have multiple function expressions better!
+            //(if it ever comes up as an issue)
+            int j;
+            for (j=0; j < eqns.size; j++) {
+                if (eqns.begin[j].expr_kind == is_polymorph_kind) {
+                    result.active = 1; //We are active!
+                    is_polymorph poly_eqn = get_poly_eqn(eqns.begin[j]); 
+                    //Get a reference to the polymorph we're dealing with
+                    polymorph_ptr poly = poly_eqn.poly;
+                    //Figure out what our parameter would need to fall under
+                    type_ref constraint = polymorph_ptr_get_parameter_type(poly, argpos_RH.pos);
+
+                    //Generate the new subtype constraint equation
+                    type_equation sub_eqn = make_is_subtype_equation(argpos_eqn.var, constraint);
+
+                    //If there is one, and only one option for the polymorph
+                    if (polymorph_ptr_numoptions(poly) == 1) {
+                        //Replace in-place at position i
+                        eqns.begin[i] = sub_eqn;
+                    }
+                    else {
+                        //Add it to the end
+                        eqns = type_equation_dynarray_add(eqns, sub_eqn);
+                    }
+                }
+            }
+        }
+    }
+    result.eqns = eqns;
+    return result;
+}
+
+//To be used with "solve_type_equations"
+#define APPLY_RULE(rule) \
+    tmp_result = rule(eqns); \
+    active = active || tmp_result.active; /* Thread activity through, if there is any */ \
+    eqns = tmp_result.eqns; //Mutate our equations
+
+
+//Method for solving type equations
+type_equation_dynarray solve_type_equations(type_equation_dynarray eqns) {
+    //Basic method (for now): Apply rules until no more rules apply
+    //TODO: Look at rule application process, figure out how to recursively check instead
+
+    int active = 1; //This will be "1" if any rules were applied
+    rule_app_result tmp_result; //Will store temporary results of applying rules
+
+    while (active) {
+        active = 0; //Default to no proof of activity
+
+        APPLY_RULE(expand_argpos)
+        //APPLY_RULE(restrict_poly)
+        //APPLY_RULE(expand_apply)
+
+        printf("\n"); //For now, debug statements!
+        print_type_equations(eqns, names);
+    }
+}
 
 //Infers types in a given function body
 cell_tree infer_body(cell_tree in) {
     type_equation_dynarray equations = gen_type_equations(in, type_equation_dynarray_make(1)); //Generates type equations from the tree
     //Print them out (debugging)
-    print_type_equations(equations);
-    //equations = solve_type_equations(equations); //Solves type equations
+    print_type_equations(equations, names);
+    equations = solve_type_equations(equations); //Solves type equations
     //in = elaborate_types(in, equations); //Pass to plug in the simplified equations to the tree
     return in;
 }
@@ -108,7 +193,14 @@ polymorph_ptr infer_polymorph(polymorph_ptr in) {
 //TODO: Change the order to be dependency-based!
 
 def_collection typeinfer(def_collection in) {
-    in.funcs = polymorph_ptr_dynarray_map(in.funcs, &infer_polymorph);
+    //TODO: Make it so we don't have global variable "names"!
+    names = in.names;
+    //in.funcs = polymorph_ptr_dynarray_map(in.funcs, &infer_polymorph);
+    //TODO: FIXME: This is a really dumb way to debug for now
+    int i;
+    for (i=2; i < in.funcs.size; i++) {
+        in.funcs.begin[i] = infer_polymorph(in.funcs.begin[i]);
+    }
     return in;
 }
 

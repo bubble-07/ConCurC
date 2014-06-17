@@ -80,56 +80,94 @@ typedef struct {
     int active; //Indicates whether a rule was applied to the equations
 } rule_app_result; //Result of a rule application
 
+//Initializes an inactive rule application result
+rule_app_result rule_app_result_init(type_equation_dynarray eqns) {
+    rule_app_result result;
+    result.active = 0;
+    result.eqns = eqns;
+    return result;
+}
+
+
+//Finds every expression of a given kind and applies the given rule to it
+rule_app_result for_every(type_expr_kind k, type_equation_dynarray eqns, 
+                          rule_app_result (*f)(type_equation*, type_equation_dynarray)) {
+    rule_app_result tmp_result;
+    int total_activity = 0;
+
+    int i;
+    for (i=0; i < eqns.size; i++) {
+        //If it's the kind we're looking for
+        if (eqns.begin[i].expr_kind == k) {
+            tmp_result = f(&eqns.begin[i], eqns);
+            //Some plumbing
+            eqns = tmp_result.eqns;
+            //If any of the applications were "active", the whole thing is
+            total_activity = total_activity || tmp_result.active;
+        }
+    }
+    //Return our final result
+    tmp_result.eqns = eqns;
+    tmp_result.active = total_activity;
+    return tmp_result;
+}
+
+rule_app_result expand_argpos_rule(type_equation* argpos_eqn, type_equation_dynarray eqns) {
+    rule_app_result result = rule_app_result_init(eqns);
+
+    //Get the RH side
+    is_in_pos argpos_RH = get_argpos_eqn(*argpos_eqn);
+    //Get the type_ref of the function it references
+    type_ref func = argpos_RH.func;
+    //Search for the corresponding function
+    //TODO: Handle the case where have multiple function expressions better!
+    //(if it ever comes up as an issue)
+    int j;
+    for (j=0; j < eqns.size; j++) {
+        //To match, most both be a polymorph and be of the type we're looking for
+        if (eqns.begin[j].expr_kind == is_polymorph_kind && eqns.begin[j].var == func) {
+            result.active = 1; //We are active!
+            is_polymorph poly_eqn = get_poly_eqn(eqns.begin[j]); 
+            //Get a reference to the polymorph we're dealing with
+            polymorph_ptr poly = poly_eqn.poly;
+            //Figure out what our parameter would need to fall under
+            type_ref constraint = polymorph_ptr_get_parameter_type(poly, argpos_RH.pos);
+
+            //Generate the new subtype constraint equation
+            type_equation sub_eqn = make_is_subtype_equation(argpos_eqn->var, constraint);
+
+            //If there is one, and only one option for the polymorph
+            if (polymorph_ptr_numoptions(poly) == 1) {
+                //Replace our incoming equation in-place
+                *argpos_eqn = sub_eqn;
+                return result;
+            }
+            else {
+                //Add it to the end
+                eqns = type_equation_dynarray_add(eqns, sub_eqn);
+            }
+        }
+    }
+    return result;
+}
 
 //This rule expands any "is_in_pos" equations to generate new constraints (if possible)
 //If the first argument of the "is_in_pos" is a type equation that points to a polymorph
 //that can only take on one type, the "is_in_pos" equation will replaced with the new constraint
 rule_app_result expand_argpos(type_equation_dynarray eqns) {
+    return for_every(is_in_pos_kind, eqns, &expand_argpos_rule);
+}
+
+/*
+rule_app_result expand_apply(type_equation_dynarray eqns) {
     rule_app_result result;
     result.active = 0;
 
-    //Search for an is_in_pos equation
+    //Search for a is_result_of equation
     int i;
     for (i=0; i < eqns.size; i++) {
-        //If the current node is a is_in_pos equation
-        if (eqns.begin[i].expr_kind == is_in_pos_kind) {
-            type_equation argpos_eqn = eqns.begin[i];
-            //Store it
-            is_in_pos argpos_RH = get_argpos_eqn(argpos_eqn);
-            //Get the type_ref of the function it references
-            type_ref func = argpos_RH.func;
-            //Search for the corresponding function
-            //TODO: Handle the case where have multiple function expressions better!
-            //(if it ever comes up as an issue)
-            int j;
-            for (j=0; j < eqns.size; j++) {
-                if (eqns.begin[j].expr_kind == is_polymorph_kind) {
-                    result.active = 1; //We are active!
-                    is_polymorph poly_eqn = get_poly_eqn(eqns.begin[j]); 
-                    //Get a reference to the polymorph we're dealing with
-                    polymorph_ptr poly = poly_eqn.poly;
-                    //Figure out what our parameter would need to fall under
-                    type_ref constraint = polymorph_ptr_get_parameter_type(poly, argpos_RH.pos);
-
-                    //Generate the new subtype constraint equation
-                    type_equation sub_eqn = make_is_subtype_equation(argpos_eqn.var, constraint);
-
-                    //If there is one, and only one option for the polymorph
-                    if (polymorph_ptr_numoptions(poly) == 1) {
-                        //Replace in-place at position i
-                        eqns.begin[i] = sub_eqn;
-                    }
-                    else {
-                        //Add it to the end
-                        eqns = type_equation_dynarray_add(eqns, sub_eqn);
-                    }
-                }
-            }
-        }
-    }
-    result.eqns = eqns;
-    return result;
-}
+        if (eqns.begin[i].expr_kind
+*/
 
 //To be used with "solve_type_equations"
 #define APPLY_RULE(rule) \

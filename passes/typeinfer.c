@@ -158,26 +158,11 @@ rule_app_result expand_argpos_rule(type_equation* argpos_eqn, type_equation* pol
 
 
 rule_app_result expand_argpos_foreach(type_equation* argpos_eqn, type_equation_dynarray eqns) {
-    rule_app_result result = rule_app_result_init(eqns);
 
     is_in_pos argpos_RH = get_argpos_eqn(*argpos_eqn);
 
     return with_polymorph(argpos_eqn, argpos_RH.func, eqns, &expand_argpos_rule);
 }
-
-/*
-rule_app_result expand_apply_rule(type_equation* apply_eqn, type_equation_dynarray eqns) {
-
-    rule_app_result result = rule_app_result_init(eqns);
-    is_result_of apply_RH = get_apply_eqn(*apply_eqn);
-
-    type_ref func = apply_RH.func;
-    //Search for corr. function
-    int j;
-    for (j=0; j < eqns.size; j++) {
-        //To match, must be both a polymorph and of the kind we're looking for
-*/
-
 
 //This rule expands any "is_in_pos" equations to generate new constraints (if possible)
 //If the first argument of the "is_in_pos" is a type equation that points to a polymorph
@@ -186,11 +171,21 @@ rule_app_result expand_argpos(type_equation_dynarray eqns) {
     return for_every(is_in_pos_kind, eqns, &expand_argpos_foreach);
 }
 
-/*
-rule_app_result expand_apply(type_equation_dynarray eqns) {
-    return for_every(is_result_of_kind, eqns, &expand_apply_rule);
+//TODO: FIXME: Find this based upon BEST CURRENT KNOWLEDGE of parameter types! [trickier than the dumb way!]
+rule_app_result expand_apply_rule(type_equation* apply_eqn, type_equation* poly_eqn, type_equation_dynarray eqns) {
+    is_result_of apply_RH = get_apply_eqn(*apply_eqn);
+    is_polymorph poly_RH = get_poly_eqn(*poly_eqn);
+} 
+
+rule_app_result expand_apply_foreach(type_equation* apply_eqn, type_equation_dynarray eqns) {
+    is_result_of apply_RH = get_apply_eqn(*apply_eqn);
+    return with_polymorph(apply_eqn, apply_RH.func, eqns, &expand_apply_rule);
 }
-*/
+
+
+rule_app_result expand_apply(type_equation_dynarray eqns) {
+    return for_every(is_result_of_kind, eqns, &expand_apply_foreach);
+}
 
 //To be used with "solve_type_equations"
 #define APPLY_RULE(rule) \

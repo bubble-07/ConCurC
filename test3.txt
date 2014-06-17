@@ -3,5 +3,5 @@ def (int +) (int a) (int b)
 def (int *) (int a) (int b)
     ( )
 def test a b
-    a + b
+    a + (a * b)
     

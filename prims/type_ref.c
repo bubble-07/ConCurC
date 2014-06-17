@@ -50,7 +50,9 @@ void print_type_ref(type_ref in, nametable names) {
         print_type(in->type, names);
     }
     else {
-        printf(" %p ", in); //Otherwise, just print the pointer. Woo.
+        int tmp = (int) in;
+        char printchar = (tmp % 27) + 64; //Make it some dumb printable letter/character
+        printf(" %c ", printchar);
     }
     return;
 }

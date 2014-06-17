@@ -16,9 +16,9 @@ type_ref_dynarray get_arg_type_refs(cell_tree in) {
 
 //Recursive procedure that produces type equations given a cell tree
 type_equation_dynarray gen_type_equations(cell_tree in, type_equation_dynarray eqns) {
-    //Do everything depth-first
-    size_t i;
-    for (i=0; i < cell_tree_numchildren(in); i++) {
+    //Do everything depth-first and RIGHT TO LEFT (otherwise, polymorph eqns won't emit correctly)
+    int i;
+    for (i=cell_tree_numchildren(in) - 1; i >= 0; i--) {
         eqns = gen_type_equations(cell_tree_child(in, i), eqns); //Add equations of subtrees
     }
 
@@ -56,6 +56,9 @@ type_equation_dynarray gen_type_equations(cell_tree in, type_equation_dynarray e
         parameter_ptr p = node.data;
         type_ref paramtype = p->type;
         cell_tree_set_type_ref(in, paramtype);
+        //Refresh the information about our node
+        node = cell_tree_data(in);
+        node_type_ref = cell_tree_get_type_ref(in);
     }
 
 

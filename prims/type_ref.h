@@ -26,6 +26,14 @@ typedef type_ref_node* type_ref;
 
 DEFINE_DYNARRAY(type_ref)
 
+inline static int hash_type_ref(type_ref in) {
+    return (int) in;
+}
+//For the purposes of dictionaries, equal iff pointers equal
+inline static int type_ref_eq(type_ref one, type_ref two) {
+    return one == two;
+}
+
 type_ref make_empty_type_ref(); //Makes a new type ref that's completely empty
 type_ref make_known_type_ref(TypeInfo in); //Makes a new type ref that's known
 

@@ -1,6 +1,6 @@
 #include "type_equation.h"
 
-type_equation make_is_polymorph_equation(type_ref var, polymorph_ptr poly, type_ref_dynarray argtypes) {
+type_equation make_poly_eqn(type_ref var, polymorph_ptr poly, type_ref_dynarray argtypes) {
     type_equation result;
     result.var = var;
     result.expr_kind = is_polymorph_kind;
@@ -10,7 +10,7 @@ type_equation make_is_polymorph_equation(type_ref var, polymorph_ptr poly, type_
     return result;
 }
 
-type_equation make_is_subtype_equation(type_ref var, type_ref super) {
+type_equation make_subtype_eqn(type_ref var, type_ref super) {
     type_equation result;
     result.var = var;
     result.expr_kind = is_subtype_kind;
@@ -18,7 +18,7 @@ type_equation make_is_subtype_equation(type_ref var, type_ref super) {
     return result;
 }
 
-type_equation make_is_in_pos_equation(type_ref var, int pos, type_ref functype) {
+type_equation make_argpos_eqn(type_ref var, int pos, type_ref functype) {
     type_equation result;
     result.var = var;
     result.expr_kind = is_in_pos_kind;
@@ -28,7 +28,7 @@ type_equation make_is_in_pos_equation(type_ref var, int pos, type_ref functype) 
     return result;
 }
 
-type_equation make_is_result_of_equation(type_ref var, type_ref functype, type_ref_dynarray args) {
+type_equation make_apply_eqn(type_ref var, type_ref functype, type_ref_dynarray args) {
     type_equation result;
     result.var = var;
     result.expr_kind = is_result_of_kind;
@@ -101,10 +101,5 @@ type_equation print_type_equation(type_equation in, nametable names) {
 
     return in;
 }
-void print_type_equations(type_equation_dynarray in, nametable names) {
-    int i;
-    for (i=0; i < in.size; i++) {
-        print_type_equation(in.begin[i], names);
-    }
-}
+
 

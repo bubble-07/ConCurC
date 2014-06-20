@@ -44,7 +44,7 @@ static type_ref polymorph_ptr_get_parameter_type(polymorph_ptr in, int pos) {
 }
 
 static type_ref polymorph_ptr_get_return_type(polymorph_ptr in) {
-    polymorph_ptr_dynarray options = polymorph_ptr_get_options(in);
+    function_ptr_dynarray options = polymorph_ptr_get_options(in);
     type_ref result = make_empty_type_ref();
     int i;
     for (i=0; i < options.size; i++) {

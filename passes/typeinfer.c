@@ -1,4 +1,5 @@
 #include "typeinfer.h"
+#include "../prims/equation_set.h"
 
 //For now, because we want to print things (but don't want to affect function signatures) make a global nametable
 nametable names;
@@ -15,7 +16,7 @@ type_ref_dynarray get_arg_type_refs(cell_tree in) {
 }
 
 //Recursive procedure that produces type equations given a cell tree
-type_equation_dynarray gen_type_equations(cell_tree in, type_equation_dynarray eqns) {
+equation_set gen_type_equations(cell_tree in, equation_set eqns) {
     //Do everything depth-first and RIGHT TO LEFT (otherwise, polymorph eqns won't emit correctly)
     int i;
     for (i=cell_tree_numchildren(in) - 1; i >= 0; i--) {
@@ -33,19 +34,16 @@ type_equation_dynarray gen_type_equations(cell_tree in, type_equation_dynarray e
         type_ref_dynarray argtypes = get_arg_type_refs(cell_tree_parent(in));
         //Get the polymorph referenced by the node
         polymorph_ptr poly = node.data;
-        //Generate the type equation
-        type_equation poly_eqn = make_is_polymorph_equation(node_type_ref, poly, argtypes);
-        //Add it
-        eqns = type_equation_dynarray_add(eqns, poly_eqn);
+        //Generate and add "polymorph" equation
+        eqns = equation_set_addpoly(eqns, node_type_ref, poly, argtypes);
     }
 
     //If we're dealing with a compound expression
     if (kind == EXPRCELL) {
         type_ref_dynarray argtypes = get_arg_type_refs(in);
         type_ref functype = get_cell_type_ref(cell_tree_child_data(in, 0));
-        type_equation expr_eqn = make_is_result_of_equation(node_type_ref, functype, argtypes);
-        //Add it
-        eqns = type_equation_dynarray_add(eqns, expr_eqn);
+        //Generate and add "apply" equation
+        eqns = equation_set_addapply(eqns, node_type_ref, functype, argtypes);
     }
 
     //If we're dealing with a parameter of some kind
@@ -68,66 +66,13 @@ type_equation_dynarray gen_type_equations(cell_tree in, type_equation_dynarray e
         //Get the type ref to the function we're dealing with
         type_ref func = get_cell_type_ref(cell_tree_child_data(cell_tree_parent(in), 0));
         //Generate the equation
-        type_equation argpos_eqn = make_is_in_pos_equation(node_type_ref, pos, func);
-        eqns = type_equation_dynarray_add(eqns, argpos_eqn);
+        eqns = equation_set_addargpos(eqns, node_type_ref, func, pos);
     }
 
     return eqns;
 }
 
-typedef struct {
-    type_equation_dynarray eqns; //The (modified) set of equations
-    int active; //Indicates whether a rule was applied to the equations
-} rule_app_result; //Result of a rule application
-
-//Initializes an inactive rule application result
-rule_app_result rule_app_result_init(type_equation_dynarray eqns) {
-    rule_app_result result;
-    result.active = 0;
-    result.eqns = eqns;
-    return result;
-}
-
-
-//Finds every expression of a given kind and applies the given rule to it
-rule_app_result for_every(type_expr_kind k, type_equation_dynarray eqns, 
-                          rule_app_result (*f)(type_equation*, type_equation_dynarray)) {
-    rule_app_result tmp_result;
-    int total_activity = 0;
-
-    int i;
-    for (i=0; i < eqns.size; i++) {
-        //If it's the kind we're looking for
-        if (eqns.begin[i].expr_kind == k) {
-            tmp_result = f(&eqns.begin[i], eqns);
-            //Some plumbing
-            eqns = tmp_result.eqns;
-            //If any of the applications were "active", the whole thing is
-            total_activity = total_activity || tmp_result.active;
-        }
-    }
-    //Return our final result
-    tmp_result.eqns = eqns;
-    tmp_result.active = total_activity;
-    return tmp_result;
-}
-
-//Finds the polymorph corresponding to the given type var and applies a rule to it
-//The rule is specified as a function accepting the other equation and the polymorph equation
-rule_app_result with_polymorph(type_equation* other_eqn, type_ref func_type, type_equation_dynarray eqns,
-                               rule_app_result (*f)(type_equation*, type_equation*, type_equation_dynarray)) {
-    int j;
-    for (j=0; j < eqns.size; j++) {
-        //If we find the magical matching polymorph
-        if (eqns.begin[j].expr_kind == is_polymorph_kind && eqns.begin[j].var == func_type) {
-            return f(other_eqn, &eqns.begin[j], eqns);
-        }
-    }
-    //Otherwise, return empty-handed
-    return rule_app_result_init(eqns);
-}
-
-rule_app_result expand_argpos_rule(type_equation* argpos_eqn, type_equation* poly_eqn, type_equation_dynarray eqns) {
+rule_app_result expand_argpos_rule(type_equation* argpos_eqn, type_equation* poly_eqn, equation_set eqns) {
     rule_app_result result = rule_app_result_init(eqns);
     result.active = 1; //We are active!
 
@@ -139,7 +84,7 @@ rule_app_result expand_argpos_rule(type_equation* argpos_eqn, type_equation* pol
     type_ref constraint = polymorph_ptr_get_parameter_type(poly, argpos_RH.pos);
 
     //Generate the new subtype constraint equation
-    type_equation sub_eqn = make_is_subtype_equation(argpos_eqn->var, constraint);
+    type_equation sub_eqn = make_subtype_eqn(argpos_eqn->var, constraint);
 
     //If there is one, and only one option for the polymorph
     if (polymorph_ptr_numoptions(poly) == 1) {
@@ -149,7 +94,7 @@ rule_app_result expand_argpos_rule(type_equation* argpos_eqn, type_equation* pol
     }
     else {
         //Add it to the end
-        eqns = type_equation_dynarray_add(eqns, sub_eqn);
+        eqns = equation_set_add(eqns, sub_eqn);
     }
 
     result.eqns = eqns;
@@ -157,7 +102,7 @@ rule_app_result expand_argpos_rule(type_equation* argpos_eqn, type_equation* pol
 }
 
 
-rule_app_result expand_argpos_foreach(type_equation* argpos_eqn, type_equation_dynarray eqns) {
+rule_app_result expand_argpos_foreach(type_equation* argpos_eqn, equation_set eqns) {
 
     is_in_pos argpos_RH = get_argpos_eqn(*argpos_eqn);
 
@@ -167,23 +112,23 @@ rule_app_result expand_argpos_foreach(type_equation* argpos_eqn, type_equation_d
 //This rule expands any "is_in_pos" equations to generate new constraints (if possible)
 //If the first argument of the "is_in_pos" is a type equation that points to a polymorph
 //that can only take on one type, the "is_in_pos" equation will replaced with the new constraint
-rule_app_result expand_argpos(type_equation_dynarray eqns) {
+rule_app_result expand_argpos(equation_set eqns) {
     return for_every(is_in_pos_kind, eqns, &expand_argpos_foreach);
 }
 
 //TODO: FIXME: Find this based upon BEST CURRENT KNOWLEDGE of parameter types! [trickier than the dumb way!]
-rule_app_result expand_apply_rule(type_equation* apply_eqn, type_equation* poly_eqn, type_equation_dynarray eqns) {
+rule_app_result expand_apply_rule(type_equation* apply_eqn, type_equation* poly_eqn, equation_set eqns) {
     is_result_of apply_RH = get_apply_eqn(*apply_eqn);
     is_polymorph poly_RH = get_poly_eqn(*poly_eqn);
 } 
 
-rule_app_result expand_apply_foreach(type_equation* apply_eqn, type_equation_dynarray eqns) {
+rule_app_result expand_apply_foreach(type_equation* apply_eqn, equation_set eqns) {
     is_result_of apply_RH = get_apply_eqn(*apply_eqn);
     return with_polymorph(apply_eqn, apply_RH.func, eqns, &expand_apply_rule);
 }
 
 
-rule_app_result expand_apply(type_equation_dynarray eqns) {
+rule_app_result expand_apply(equation_set eqns) {
     return for_every(is_result_of_kind, eqns, &expand_apply_foreach);
 }
 
@@ -195,7 +140,7 @@ rule_app_result expand_apply(type_equation_dynarray eqns) {
 
 
 //Method for solving type equations
-type_equation_dynarray solve_type_equations(type_equation_dynarray eqns) {
+equation_set solve_type_equations(equation_set eqns) {
     //Basic method (for now): Apply rules until no more rules apply
     //TODO: Look at rule application process, figure out how to recursively check instead
 
@@ -216,7 +161,7 @@ type_equation_dynarray solve_type_equations(type_equation_dynarray eqns) {
 
 //Infers types in a given function body
 cell_tree infer_body(cell_tree in) {
-    type_equation_dynarray equations = gen_type_equations(in, type_equation_dynarray_make(1)); //Generates type equations from the tree
+    equation_set equations = gen_type_equations(in, equation_set_init()); //Generates type equations from the tree
     //Print them out (debugging)
     print_type_equations(equations, names);
     equations = solve_type_equations(equations); //Solves type equations

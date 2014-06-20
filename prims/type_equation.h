@@ -65,17 +65,21 @@ typedef struct {
     type_expr_kind expr_kind;
 } type_equation;
 
-type_equation make_is_polymorph_equation(type_ref var, polymorph_ptr p, type_ref_dynarray args);
-type_equation make_is_in_pos_equation(type_ref var, int pos, type_ref functype);
-type_equation make_is_result_of_equation(type_ref var, type_ref functype, type_ref_dynarray args);
-type_equation make_is_subtype_equation(type_ref var, type_ref super);
+typedef type_equation* type_equation_ptr;
+
+type_equation make_poly_eqn(type_ref var, polymorph_ptr p, type_ref_dynarray args);
+type_equation make_argpos_eqn(type_ref var, int pos, type_ref functype);
+type_equation make_apply_eqn(type_ref var, type_ref functype, type_ref_dynarray args);
+type_equation make_subtype_eqn(type_ref var, type_ref super);
 
 DEFINE_DYNARRAY(type_equation)
+DEFINE_DYNARRAY(type_equation_ptr)
 
-void print_type_equations(type_equation_dynarray in, nametable names);
 is_polymorph get_poly_eqn(type_equation in);
 is_in_pos get_argpos_eqn(type_equation in);
 is_result_of get_apply_eqn(type_equation in);
 is_subtype get_subtype_eqn(type_equation in);
+
+type_equation print_type_equation(type_equation in, nametable names);
 
 #endif

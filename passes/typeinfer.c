@@ -76,8 +76,8 @@ rule_app_result expand_argpos_rule(type_equation* argpos_eqn, type_equation* pol
     rule_app_result result = rule_app_result_init(eqns);
     result.active = 1; //We are active!
 
-    is_in_pos argpos_RH = get_argpos_eqn(*argpos_eqn);
-    is_polymorph poly_RH = get_poly_eqn(*poly_eqn); 
+    is_in_pos argpos_RH = get_argpos_RH(*argpos_eqn);
+    is_polymorph poly_RH = get_poly_RH(*poly_eqn); 
     //Get a reference to the polymorph we're dealing with
     polymorph_ptr poly = poly_RH.poly;
     //Figure out what our parameter would need to fall under
@@ -104,7 +104,7 @@ rule_app_result expand_argpos_rule(type_equation* argpos_eqn, type_equation* pol
 
 rule_app_result expand_argpos_foreach(type_equation* argpos_eqn, equation_set eqns) {
 
-    is_in_pos argpos_RH = get_argpos_eqn(*argpos_eqn);
+    is_in_pos argpos_RH = get_argpos_RH(*argpos_eqn);
 
     return with_polymorph(argpos_eqn, argpos_RH.func, eqns, &expand_argpos_rule);
 }
@@ -118,12 +118,12 @@ rule_app_result expand_argpos(equation_set eqns) {
 
 //TODO: FIXME: Find this based upon BEST CURRENT KNOWLEDGE of parameter types! [trickier than the dumb way!]
 rule_app_result expand_apply_rule(type_equation* apply_eqn, type_equation* poly_eqn, equation_set eqns) {
-    is_result_of apply_RH = get_apply_eqn(*apply_eqn);
-    is_polymorph poly_RH = get_poly_eqn(*poly_eqn);
+    is_result_of apply_RH = get_apply_RH(*apply_eqn);
+    is_polymorph poly_RH = get_poly_RH(*poly_eqn);
 } 
 
 rule_app_result expand_apply_foreach(type_equation* apply_eqn, equation_set eqns) {
-    is_result_of apply_RH = get_apply_eqn(*apply_eqn);
+    is_result_of apply_RH = get_apply_RH(*apply_eqn);
     return with_polymorph(apply_eqn, apply_RH.func, eqns, &expand_apply_rule);
 }
 

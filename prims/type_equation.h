@@ -75,10 +75,10 @@ type_equation make_subtype_eqn(type_ref var, type_ref super);
 DEFINE_DYNARRAY(type_equation)
 DEFINE_DYNARRAY(type_equation_ptr)
 
-is_polymorph get_poly_eqn(type_equation in);
-is_in_pos get_argpos_eqn(type_equation in);
-is_result_of get_apply_eqn(type_equation in);
-is_subtype get_subtype_eqn(type_equation in);
+is_polymorph get_poly_RH(type_equation in);
+is_in_pos get_argpos_RH(type_equation in);
+is_result_of get_apply_RH(type_equation in);
+is_subtype get_subtype_RH(type_equation in);
 
 type_equation print_type_equation(type_equation in, nametable names);
 

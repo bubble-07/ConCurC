@@ -38,19 +38,19 @@ type_equation make_apply_eqn(type_ref var, type_ref functype, type_ref_dynarray 
     return result;
 }
 
-is_polymorph get_poly_eqn(type_equation in) {
+is_polymorph get_poly_RH(type_equation in) {
     return in.expr.is_polymorph_entry;
 }
-is_in_pos get_argpos_eqn(type_equation in) {
+is_in_pos get_argpos_RH(type_equation in) {
     return in.expr.is_in_pos_entry;
 }
-is_result_of get_apply_eqn(type_equation in) {
+is_result_of get_apply_RH(type_equation in) {
     return in.expr.is_result_of_entry;
 }
-is_subtype get_subtype_eqn(type_equation in) {
+is_subtype get_subtype_RH(type_equation in) {
     return in.expr.is_subtype_entry;
 }
-is_equal get_equal_eqn(type_equation in) {
+is_equal get_equal_RH(type_equation in) {
     return in.expr.is_equal_entry;
 }
 
@@ -59,7 +59,7 @@ type_equation print_type_equation(type_equation in, nametable names) {
 
     type_expr_kind kind = in.expr_kind;
     if (kind == is_polymorph_kind) {
-        is_polymorph RH = get_poly_eqn(in);
+        is_polymorph RH = get_poly_RH(in);
         printf("= poly(");
         //TODO: Print available polymorph types
         //For now, just print the name
@@ -72,7 +72,7 @@ type_equation print_type_equation(type_equation in, nametable names) {
         printf("] )");
     }
     else if (kind == is_in_pos_kind) {
-        is_in_pos RH = get_argpos_eqn(in);
+        is_in_pos RH = get_argpos_RH(in);
         printf("<: argpos( %d", RH.pos);
         printf(",");
         print_type_ref(RH.func, names);
@@ -80,7 +80,7 @@ type_equation print_type_equation(type_equation in, nametable names) {
 
     }
     else if (kind == is_result_of_kind) {
-        is_result_of RH = get_apply_eqn(in);
+        is_result_of RH = get_apply_RH(in);
         printf("= apply(");
         print_type_ref(RH.func, names);
         printf(", [");
@@ -88,12 +88,12 @@ type_equation print_type_equation(type_equation in, nametable names) {
         printf("] )");
     }
     else if (kind == is_subtype_kind) {
-        is_subtype RH = get_subtype_eqn(in);
+        is_subtype RH = get_subtype_RH(in);
         printf("<: ");
         print_type_ref(RH.t, names);
     }
     else if (kind == is_equal_kind) {
-        is_equal RH = get_equal_eqn(in);
+        is_equal RH = get_equal_RH(in);
         printf("= ");
         print_type_ref(RH.t, names);
     }

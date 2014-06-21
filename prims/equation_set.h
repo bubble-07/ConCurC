@@ -34,6 +34,8 @@ eqn_set equation_set_addpoly(eqn_set s, type_ref var, polymorph_ptr poly, type_r
 eqn_set equation_set_addargpos(eqn_set s, type_ref var, type_ref func, int pos);
 eqn_set equation_set_addapply(eqn_set s, type_ref var, type_ref func, type_ref_dynarray args);
 eqn_set equation_set_addsubtype(eqn_set s, type_ref var, type_ref super);
+//Replace the referenced equation with a different one
+eqn_set equation_set_replace(eqn_set s, type_equation* ref, type_equation val);
 
 //Returns a reference to a polymorph equation associated with the given variable [if there is one]
 type_equation* equation_set_getpoly(eqn_set s, type_ref var);

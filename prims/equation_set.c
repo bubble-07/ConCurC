@@ -45,6 +45,11 @@ eqn_set equation_set_addsubtype(eqn_set s, type_ref var, type_ref super) {
     return equation_set_add(s, make_subtype_eqn(var, super));
 }
 
+eqn_set equation_set_replace(eqn_set s, type_equation* ref, type_equation val) {
+    *ref = val;
+    return s;
+}
+
 type_equation* equation_set_getkind(eqn_set s, type_ref var, type_expr_kind k) {
     eqn_listref var_eqns = equation_set_getvareqns(s, var);
     if (var_eqns == NULL) {

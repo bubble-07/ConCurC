@@ -89,8 +89,7 @@ rule_app_result expand_argpos_rule(type_equation* argpos_eqn, type_equation* pol
     //If there is one, and only one option for the polymorph
     if (polymorph_ptr_numoptions(poly) == 1) {
         //Replace our incoming equation in-place
-        *argpos_eqn = sub_eqn;
-        return result;
+        eqns = equation_set_replace(eqns, argpos_eqn, sub_eqn);
     }
     else {
         //Add it to the end

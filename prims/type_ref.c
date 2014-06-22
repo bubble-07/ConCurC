@@ -12,8 +12,8 @@ type_ref make_known_type_ref(TypeInfo in) {
     return result;
 }
 
-type_ref make_empty_type_ref() {
-    return make_known_type_ref(make_empty_type());
+type_ref make_unknown_type_ref() {
+    return make_known_type_ref(make_unknown_type());
 }
 
 //Gets the representative node

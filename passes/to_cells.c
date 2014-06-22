@@ -33,7 +33,7 @@ type_ref name_decl_to_type(lexid_tree in) {
     }
     else {
         //Otherwise, the type must still be unknown
-        return make_empty_type_ref();
+        return make_unknown_type_ref();
     }
 }
 
@@ -94,7 +94,7 @@ cell_tree convert_lambda_expr(lexid_tree_dynarray in, env e, function_table tabl
         //Get a pointer to the record for the lambda
         cell lambdahead = cell_tree_data(result);
         lambda_ptr ptr = lambdahead.data;
-        ptr->ret_type = make_empty_type_ref();
+        ptr->ret_type = make_unknown_type_ref();
         return result;
     }
     if (in.size == 4) {

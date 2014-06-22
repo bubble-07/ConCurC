@@ -47,7 +47,7 @@ static cell make_expr_cell() {
     cell result;
     result.kind = EXPRCELL;
     result.data = NULL;
-    result.type = make_empty_type_ref();
+    result.type = make_unknown_type_ref();
     return result;
 }
 
@@ -76,7 +76,7 @@ static cell make_##t##_cell(t in) { \
     /*Copy the input to a new memory location*/ \
     t * ptr = memalloc(sizeof(t)); \
     *ptr = in; \
-    result.type = make_empty_type_ref(); \
+    result.type = make_unknown_type_ref(); \
     result.data = (void*) ptr; \
     return result; \
 }
@@ -92,7 +92,7 @@ static cell make_##name##_cell(t * in) { \
     cell result;  \
     result.kind = cellkind; \
     result.data = (void*) in; \
-    result.type = make_empty_type_ref(); \
+    result.type = make_unknown_type_ref(); \
     return result; \
 }
 

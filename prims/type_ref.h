@@ -41,7 +41,7 @@ int hash_type_ref(type_ref in);
 //Equal iff have same representative node
 int type_ref_eq(type_ref one, type_ref two);
 
-type_ref make_empty_type_ref(); //Makes a new type ref that's completely empty
+type_ref make_unknown_type_ref(); //Makes a new type ref that's completely empty
 type_ref make_known_type_ref(TypeInfo in); //Makes a new type ref with a bounded type
 
 TypeInfo type_ref_getbound(type_ref in);

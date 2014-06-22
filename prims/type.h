@@ -137,6 +137,10 @@ inline static TypeInfo make_simple_type(TypeGraphRef in) {
     return result;
 }
 
+inline static TypeInfo make_unknown_type() {
+    return make_simple_type(Top);
+}
+
 //Frees the given type
 inline static void free_type(TypeInfo in) {
     TypeGraphRef_dynarray_free(in.options);
@@ -180,6 +184,7 @@ inline static TypeInfo intersect_types(TypeGraphRef a, TypeGraphRef b) {
 //and returns some new TypeInfo representing the simplified result.
 //While inefficient as hell (O(n*n)), it's a necessary operation.
 //NOTE: this operation destroys the TypeInfo passed in.
+//FIXME: Actually free the typeinfo passed in!
 
 inline static TypeInfo simplify_TypeInfo(TypeInfo in) {
     int i; //Will be used for indexing the source
@@ -206,7 +211,6 @@ inline static TypeInfo simplify_TypeInfo(TypeInfo in) {
     }
 
     //Delete "in", and make it into a new TypeInfo
-    free_type(in);
     in = make_empty_type();
 
     //Pass 2: Copy back into "in" from right to left, which

@@ -1,8 +1,7 @@
 #include "type_equation.h"
 
-type_equation make_poly_eqn(type_ref var, polymorph_ptr poly, type_ref_dynarray argtypes) {
+type_equation make_poly_eqn(polymorph_ptr poly, type_ref_dynarray argtypes) {
     type_equation result;
-    result.var = var;
     result.expr_kind = is_polymorph_kind;
 
     result.expr.is_polymorph_entry.poly = poly;
@@ -10,17 +9,8 @@ type_equation make_poly_eqn(type_ref var, polymorph_ptr poly, type_ref_dynarray 
     return result;
 }
 
-type_equation make_subtype_eqn(type_ref var, type_ref super) {
+type_equation make_argpos_eqn(int pos, type_ref functype) {
     type_equation result;
-    result.var = var;
-    result.expr_kind = is_subtype_kind;
-    result.expr.is_subtype_entry.t = super;
-    return result;
-}
-
-type_equation make_argpos_eqn(type_ref var, int pos, type_ref functype) {
-    type_equation result;
-    result.var = var;
     result.expr_kind = is_in_pos_kind;
 
     result.expr.is_in_pos_entry.pos = pos;
@@ -28,9 +18,8 @@ type_equation make_argpos_eqn(type_ref var, int pos, type_ref functype) {
     return result;
 }
 
-type_equation make_apply_eqn(type_ref var, type_ref functype, type_ref_dynarray args) {
+type_equation make_apply_eqn(type_ref functype, type_ref_dynarray args) {
     type_equation result;
-    result.var = var;
     result.expr_kind = is_result_of_kind;
 
     result.expr.is_result_of_entry.func = functype;
@@ -47,15 +36,8 @@ is_in_pos get_argpos_RH(type_equation in) {
 is_result_of get_apply_RH(type_equation in) {
     return in.expr.is_result_of_entry;
 }
-is_subtype get_subtype_RH(type_equation in) {
-    return in.expr.is_subtype_entry;
-}
-is_equal get_equal_RH(type_equation in) {
-    return in.expr.is_equal_entry;
-}
 
 type_equation print_type_equation(type_equation in, nametable names) {
-    print_type_ref(in.var, names);
 
     type_expr_kind kind = in.expr_kind;
     if (kind == is_polymorph_kind) {
@@ -86,16 +68,6 @@ type_equation print_type_equation(type_equation in, nametable names) {
         printf(", [");
         print_type_ref_list(RH.args, names);
         printf("] )");
-    }
-    else if (kind == is_subtype_kind) {
-        is_subtype RH = get_subtype_RH(in);
-        printf("<: ");
-        print_type_ref(RH.t, names);
-    }
-    else if (kind == is_equal_kind) {
-        is_equal RH = get_equal_RH(in);
-        printf("= ");
-        print_type_ref(RH.t, names);
     }
     printf("\n");
 

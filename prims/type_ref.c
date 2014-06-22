@@ -47,7 +47,7 @@ int type_ref_restrict(type_ref in, TypeInfo bound) {
     TypeInfo oldbound = copy_type(info->upperbound);
 
     info->upperbound = restrict_sum(info->upperbound, bound);
-    return !type_eq(oldbound, info->upperbound); //Active if the type is different
+    return !type_eq(oldbound, info->upperbound); //Active if the upper bound has changed
 }
 
 //Really dumb way to print type refs FIXME: Make this generate sensible unique names

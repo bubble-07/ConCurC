@@ -1,8 +1,9 @@
 #include "type_ref.h"
-#include "polymorph.h"
 
 #ifndef TYPE_EQN_DEFINED
 #define TYPE_EQN_DEFINED
+
+#include "polymorph.h"
 
 //Define type equations and supporting architecture
 

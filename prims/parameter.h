@@ -1,8 +1,9 @@
-#include "type_ref.h"
 #include "../passes/lexer.h"
 
 #ifndef PARAMETER_DEFINED
 #define PARAMETER_DEFINED
+
+#include "type_ref.h"
 
 typedef struct {
     type_ref type;
@@ -26,13 +27,15 @@ static int parameter_ptr_eq(parameter_ptr one, parameter_ptr two) {
     return one == two;
 }
 
-static type_ref get_parameter_type(parameter in) {
-    return in.type;
-}
-
-static type_ref get_parameter_ptr_type(parameter_ptr in) {
+static type_ref get_parameter_ptr_type_ref(parameter_ptr in) {
     return in->type;
 }
+
+//Assumes that the given parameter has a non-variable type
+static TypeInfo get_parameter_ptr_bound(parameter_ptr in) {
+    return type_ref_getbound(in->type);
+}
+
 static parameter_ptr set_parameter_ptr_type(parameter_ptr in, type_ref i) {
     in->type = i;
     return in;

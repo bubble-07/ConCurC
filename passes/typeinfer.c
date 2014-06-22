@@ -81,22 +81,11 @@ rule_app_result expand_argpos_rule(type_equation* argpos_eqn, type_equation* pol
     //Get a reference to the polymorph we're dealing with
     polymorph_ptr poly = poly_RH.poly;
     //Figure out what our parameter would need to fall under
-    type_ref constraint = polymorph_ptr_get_parameter_type(poly, argpos_RH.pos);
+    TypeInfo constraint = polymorph_ptr_get_parameter_type(poly, argpos_RH.pos);
 
-    //Generate the new subtype constraint equation
-    type_equation sub_eqn = make_subtype_eqn(argpos_eqn->var, constraint);
+    //Restrict our the parameter in the argpos equation
+    argpos_eqn->var = type_ref_restrict(argpos_eqn->var, constraint);
 
-    //If there is one, and only one option for the polymorph
-    if (polymorph_ptr_numoptions(poly) == 1) {
-        //Replace our incoming equation in-place
-        eqns = equation_set_replace(eqns, argpos_eqn, sub_eqn);
-    }
-    else {
-        //Add it to the end
-        eqns = equation_set_add(eqns, sub_eqn);
-    }
-
-    result.eqns = eqns;
     return result;
 }
 
@@ -122,6 +111,7 @@ rule_app_result expand_apply_rule(type_equation* apply_eqn, type_equation* poly_
 } 
 
 rule_app_result expand_apply_foreach(type_equation* apply_eqn, equation_set eqns) {
+    //TODO: Fix up the activity a bit! (Check for duplicated information)
     is_result_of apply_RH = get_apply_RH(*apply_eqn);
     return with_polymorph(apply_eqn, apply_RH.func, eqns, &expand_apply_rule);
 }

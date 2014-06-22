@@ -2,11 +2,12 @@
 #include "../libs/dynstring.h"
 #include "parameter.h"
 #include "../libs/filehandler.h"
-#include "type_ref.h"
 #include "lambda.h"
 
 #ifndef CELL_DEFINED
 #define CELL_DEFINED
+
+#include "type_ref.h"
 
 typedef enum {
     FUNCTION, //A single function

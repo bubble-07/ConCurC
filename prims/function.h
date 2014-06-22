@@ -1,8 +1,8 @@
 #include "../libs/dynarray.h"
 #include "parameter.h"
-#include "cell_tree.h"
 #include "lexid.h"
 #include "nametable.h"
+#include "cell_tree.h"
 
 #ifndef FUNCTION_DEFINED
 #define FUNCTION_DEFINED
@@ -15,7 +15,6 @@ typedef struct {
 } function;
 
 
-
 typedef function* function_ptr;
 
 DEFINE_DYNARRAY(function_ptr)
@@ -24,17 +23,17 @@ DEFINE_DYNARRAY(function)
 
 
 //Gets the type of the parameter in the given position
-//Returns null if outside of bounds
-static type_ref function_ptr_get_parameter_type(function_ptr in, int pos) {
+//Returns empty type if outside of bounds
+static TypeInfo function_ptr_get_parameter_type(function_ptr in, int pos) {
     pos = pos - 1; //Do this so "1" corresponds to the first element in the array of params
     if (in->params.size > pos) {
-        return get_parameter_type(*in->params.begin[pos]);
+        return get_parameter_ptr_bound(in->params.begin[pos]);
     }
-    return NULL;
+    return make_empty_type();
 }
 //Returns the return type of the given function
-static type_ref function_ptr_get_return_type(function_ptr in) {
-    return in->ret_type;
+static TypeInfo function_ptr_get_return_type(function_ptr in) {
+    return type_ref_getbound(in->ret_type);
 }
 
 static function_ptr function_ptr_set_return_type(function_ptr in, type_ref t) {

@@ -1,9 +1,9 @@
 #include "../libs/dynarray.h"
-#include "parameter.h"
 
 #ifndef LAMBDA_DEFINED
 #define LAMBDA_DEFINED
 
+#include "parameter.h"
 
 //NOTE: The body of a lambda expression comes underneath the
 //lambda cell in a cell tree

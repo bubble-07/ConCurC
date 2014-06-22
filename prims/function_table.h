@@ -2,12 +2,13 @@
 
 #include "../libs/dict.h"
 #include "../libs/dynstring.h"
-#include "polymorph.h"
 #include "../libs/memoryman.h"
 #include "lexid.h"
 
 #ifndef FUNCTIONTABLE_DEFINED
 #define FUNCTIONTABLE_DEFINED
+
+#include "polymorph.h"
 
 DEFINE_DICT(lexid, polymorph_ptr)
 //Define something that lets us get all stored polymorphs

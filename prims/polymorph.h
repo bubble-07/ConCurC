@@ -1,4 +1,3 @@
-
 #ifndef POLYMORPH_DEFINED
 #define POLYMORPH_DEFINED
 
@@ -32,23 +31,26 @@ static function_ptr_dynarray polymorph_ptr_get_options(polymorph_ptr in) {
 }
 
 //Gets a sum type of all possible types the parameter in position pos could be
-static type_ref polymorph_ptr_get_parameter_type(polymorph_ptr in, int pos) {
+//Assumes that the position pos does not accept a type variable
+static TypeInfo polymorph_ptr_get_parameter_type(polymorph_ptr in, int pos) {
     function_ptr_dynarray options = polymorph_ptr_get_options(in);
-    type_ref result = make_empty_type_ref();
+    TypeInfo result = make_empty_type();
     int i;
     for (i=0; i < options.size; i++) {
         //Add more options for what the type can be
-        result = concat_type_refs(result, function_ptr_get_parameter_type(options.begin[i], pos));
+        result = concat_types(result, function_ptr_get_parameter_type(options.begin[i], pos));
     }
     return result;
 }
 
-static type_ref polymorph_ptr_get_return_type(polymorph_ptr in) {
+//Gets a sum type representing the most general return type of the polymorph.
+//Assumes that the return type is not variable
+static TypeInfo polymorph_ptr_get_return_type(polymorph_ptr in) {
     function_ptr_dynarray options = polymorph_ptr_get_options(in);
-    type_ref result = make_empty_type_ref();
+    TypeInfo result = make_empty_type();
     int i;
     for (i=0; i < options.size; i++) {
-        result = concat_type_refs(result, function_ptr_get_return_type(options.begin[i]));
+        result = concat_types(result, function_ptr_get_return_type(options.begin[i]));
     }
     return result;
 }

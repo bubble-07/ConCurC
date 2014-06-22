@@ -1,59 +1,60 @@
 #include "../libs/memoryman.h"
 #include "type_ref.h"
-
-type_ref make_empty_type_ref() {
-    type_ref result = memalloc(sizeof(type_ref_node));
-    result->forward = NULL; //Not forwarding
-    result->type = make_empty_type(); //Stores nothing
-    result->kind = type_ref_empty; //Set the kind to empty
-    return result;
-}
+#include "type_ref_info.h"
 
 type_ref make_known_type_ref(TypeInfo in) {
-    type_ref result = make_empty_type_ref();
-    result->type = in;
-    result->kind = type_ref_immediate;
+    type_ref_info* info = memalloc(sizeof(type_ref_info));
+    info->upperbound = in;
+    info->equations = type_equation_dynarray_make(1);
+    type_ref result = memalloc(sizeof(type_ref_node));
+    result->data = (void*) info;
+    result->kind = type_ref_representative; //This is the representative node
     return result;
 }
-type_ref copy_type_ref_data(type_ref target, type_ref source) {
-    target->kind = source->kind;
-    target->type = source->type;
-    target->forward = source->forward;
-    return target;
+
+type_ref make_empty_type_ref() {
+    return make_known_type_ref(make_empty_type());
 }
 
-//TODO: Handle forwarding nodes here!
-type_ref concat_type_refs(type_ref in, type_ref a) {
-    if (in->kind == type_ref_empty) {
-        //Just copy along the stuff in a
-        return copy_type_ref_data(in, a);
+//Gets the representative node
+type_ref find(type_ref in) {
+    if (in->kind == type_ref_representative) {
+        return in;
     }
-    else if (in->kind == type_ref_immediate) {
-        //We have some kind of immediate type
-        if (a->kind == type_ref_empty) {
-            //But if the other one is empty, do nothing
-            return in;
-        }
-        else if (a->kind == type_ref_immediate) {
-            //Yay, get to actually do something -- sum the two types
-            in->type = concat_types(in->type, a->type);
-            return in;
-        }
-    }
-    return in; //Usable default for now
+    //Otherwise, follow the chain
+    return find((type_ref) in->data);
+}
+
+int hash_type_ref(type_ref in) {
+    return (int) find(in); //Return address of representative
+}
+
+int type_ref_eq(type_ref one, type_ref two) {
+    return find(one) == find(two); //Equal iff representative addresses equal
+}
+
+//Gets the principal bounding type of the given typeref
+TypeInfo type_ref_getbound(type_ref in) {
+    type_ref rep = find(in);
+    type_ref_info* info = rep->data;
+    return info->upperbound;
+}
+
+type_ref type_ref_restrict(type_ref in, TypeInfo bound) {
+    type_ref rep = find(in);
+    type_ref_info* info = rep->data;
+    info->upperbound = restrict_sum(info->upperbound, bound);
+    return in;
 }
 
 //Really dumb way to print type refs FIXME: Make this generate sensible unique names
 void print_type_ref(type_ref in, nametable names) {
-    if (in->kind == type_ref_immediate) {
-        //Actually print out the type it has
-        print_type(in->type, names);
-    }
-    else {
-        int tmp = (int) in;
-        char printchar = (tmp % 27) + 64; //Make it some dumb printable letter/character
-        printf(" %c ", printchar);
-    }
+    printf(" [");
+    int tmp = (int) find(in);
+    char printchar = (tmp % 27) + 64; //Make it some dumb printable letter/character
+    printf("%c <: ", printchar);
+    print_type(type_ref_getbound(in), names);
+    printf("] ");
     return;
 }
 

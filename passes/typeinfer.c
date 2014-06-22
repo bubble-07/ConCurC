@@ -74,7 +74,6 @@ equation_set gen_type_equations(cell_tree in, equation_set eqns) {
 
 rule_app_result expand_argpos_rule(type_equation* argpos_eqn, type_equation* poly_eqn, equation_set eqns) {
     rule_app_result result = rule_app_result_init(eqns);
-    result.active = 1; //We are active!
 
     is_in_pos argpos_RH = get_argpos_RH(*argpos_eqn);
     is_polymorph poly_RH = get_poly_RH(*poly_eqn); 
@@ -84,7 +83,8 @@ rule_app_result expand_argpos_rule(type_equation* argpos_eqn, type_equation* pol
     TypeInfo constraint = polymorph_ptr_get_parameter_type(poly, argpos_RH.pos);
 
     //Restrict our the parameter in the argpos equation
-    argpos_eqn->var = type_ref_restrict(argpos_eqn->var, constraint);
+    //If we restrict it at all, we are active!
+    result.active = type_ref_restrict(argpos_eqn->var, constraint);
 
     return result;
 }

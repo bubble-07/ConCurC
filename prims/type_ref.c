@@ -40,11 +40,14 @@ TypeInfo type_ref_getbound(type_ref in) {
     return info->upperbound;
 }
 
-type_ref type_ref_restrict(type_ref in, TypeInfo bound) {
+int type_ref_restrict(type_ref in, TypeInfo bound) {
     type_ref rep = find(in);
     type_ref_info* info = rep->data;
+
+    TypeInfo oldbound = copy_type(info->upperbound);
+
     info->upperbound = restrict_sum(info->upperbound, bound);
-    return in;
+    return !type_eq(oldbound, info->upperbound); //Active if the type is different
 }
 
 //Really dumb way to print type refs FIXME: Make this generate sensible unique names

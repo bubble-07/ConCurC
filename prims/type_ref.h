@@ -47,7 +47,8 @@ type_ref make_known_type_ref(TypeInfo in); //Makes a new type ref with a bounded
 TypeInfo type_ref_getbound(type_ref in);
 
 //Restricts the incoming type_ref to fall under the given type
-type_ref type_ref_restrict(type_ref in, TypeInfo info);
+//Returns "1" if the type was restricted, "0" otherwise
+int type_ref_restrict(type_ref in, TypeInfo info);
 
 //Unifies the two type refs
 type_ref unify_type_refs(type_ref one, type_ref two);

@@ -125,6 +125,12 @@ inline static TypeInfo make_empty_type() {
     return result;
 }
 
+inline static TypeInfo copy_type(TypeInfo in) {
+    TypeInfo result;
+    result.options = TypeGraphRef_dynarray_copy(in.options);
+    return result;
+}
+
 //Adds a type to the given TypeInfo
 inline static TypeInfo add_type(TypeInfo in, TypeGraphRef a) {
     in.options = TypeGraphRef_dynarray_add(in.options, a);
@@ -140,6 +146,22 @@ inline static TypeInfo make_simple_type(TypeGraphRef in) {
 inline static TypeInfo make_unknown_type() {
     return make_simple_type(Top);
 }
+
+//Determine if two types are equal
+//TODO: Make this actually check properly
+inline static int type_eq(TypeInfo one, TypeInfo two) {
+    if (one.options.size != two.options.size) {
+        return 0;
+    }
+    int i;
+    for (i=0; i < one.options.size; i++) {
+        if (one.options.begin[i] != two.options.begin[i]) {
+            return 0;
+        }
+    }
+    return 1;
+}
+    
 
 //Frees the given type
 inline static void free_type(TypeInfo in) {
@@ -184,7 +206,6 @@ inline static TypeInfo intersect_types(TypeGraphRef a, TypeGraphRef b) {
 //and returns some new TypeInfo representing the simplified result.
 //While inefficient as hell (O(n*n)), it's a necessary operation.
 //NOTE: this operation destroys the TypeInfo passed in.
-//FIXME: Actually free the typeinfo passed in!
 
 inline static TypeInfo simplify_TypeInfo(TypeInfo in) {
     int i; //Will be used for indexing the source
@@ -211,6 +232,7 @@ inline static TypeInfo simplify_TypeInfo(TypeInfo in) {
     }
 
     //Delete "in", and make it into a new TypeInfo
+    free_type(in);
     in = make_empty_type();
 
     //Pass 2: Copy back into "in" from right to left, which

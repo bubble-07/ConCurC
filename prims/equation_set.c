@@ -8,18 +8,6 @@ eqn_set equation_set_add(eqn_set s, type_equation eqn) {
     return type_equation_dynarray_add(s, eqn);
 }
 
-eqn_set equation_set_addpoly(eqn_set s, polymorph_ptr poly, type_ref_dynarray args) {
-    return equation_set_add(s, make_poly_eqn(poly, args));
-}
-
-eqn_set equation_set_addargpos(eqn_set s, type_ref func, int pos) {
-    return equation_set_add(s, make_argpos_eqn(pos, func));
-}
-
-eqn_set equation_set_addapply(eqn_set s, type_ref func, type_ref_dynarray args) {
-    return equation_set_add(s, make_apply_eqn(func, args));
-}
-
 eqn_set equation_set_replace(eqn_set s, type_equation* ref, type_equation val) {
     *ref = val;
     return s;
@@ -49,11 +37,11 @@ type_equation_ptr_dynarray equation_set_getall(eqn_set s, type_expr_kind k) {
 }
         
 
-void print_type_equations(eqn_set s, nametable names) {
+void print_type_equations(eqn_set eqns, nametable names) {
     int i;
-    for (i=0; i < s.size; i++) {
-        printf("   ");
-        print_type_equation(s.begin[i], names);
+    for (i=0; i < eqns.size; i++) {
+        printf("blah \n");
+        print_type_equation(eqns.begin[i], names);
     }
     return;
 }

@@ -1,4 +1,5 @@
 #include "typeinfer.h"
+#include "../prims/type_ref_info.h"
 #include "../prims/equation_set.h"
 
 //For now, because we want to print things (but don't want to affect function signatures) make a global nametable
@@ -16,11 +17,11 @@ type_ref_dynarray get_arg_type_refs(cell_tree in) {
 }
 
 //Recursive procedure that produces type equations given a cell tree
-equation_set gen_type_equations(cell_tree in, equation_set eqns) {
+type_ref_table gen_type_equations(cell_tree in, type_ref_table table) {
     //Do everything depth-first and RIGHT TO LEFT (otherwise, polymorph eqns won't emit correctly)
     int i;
     for (i=cell_tree_numchildren(in) - 1; i >= 0; i--) {
-        eqns = gen_type_equations(cell_tree_child(in, i), eqns); //Add equations of subtrees
+        table = gen_type_equations(cell_tree_child(in, i), table); //Add equations of subtrees
     }
 
     //Now, handle the current node
@@ -34,8 +35,8 @@ equation_set gen_type_equations(cell_tree in, equation_set eqns) {
         type_ref_dynarray argtypes = get_arg_type_refs(cell_tree_parent(in));
         //Get the polymorph referenced by the node
         polymorph_ptr poly = node.data;
-        //Generate and add "polymorph" equation
-        eqns = equation_set_addpoly(eqns, node_type_ref, poly, argtypes);
+        //Generate and add "polymorph" equation to the current cell
+        node_type_ref = type_ref_addpoly_eqn(node_type_ref, poly, argtypes);
     }
 
     //If we're dealing with a compound expression
@@ -43,7 +44,7 @@ equation_set gen_type_equations(cell_tree in, equation_set eqns) {
         type_ref_dynarray argtypes = get_arg_type_refs(in);
         type_ref functype = get_cell_type_ref(cell_tree_child_data(in, 0));
         //Generate and add "apply" equation
-        eqns = equation_set_addapply(eqns, node_type_ref, functype, argtypes);
+        node_type_ref = type_ref_addapply_eqn(node_type_ref, functype, argtypes);
     }
 
     //If we're dealing with a parameter of some kind
@@ -66,94 +67,82 @@ equation_set gen_type_equations(cell_tree in, equation_set eqns) {
         //Get the type ref to the function we're dealing with
         type_ref func = get_cell_type_ref(cell_tree_child_data(cell_tree_parent(in), 0));
         //Generate the equation
-        eqns = equation_set_addargpos(eqns, node_type_ref, func, pos);
+        node_type_ref = type_ref_addargpos_eqn(node_type_ref, func, pos);
     }
-
-    return eqns;
+    //Add the current node's type ref to the type_ref table and return
+    table = type_ref_table_add(table, node_type_ref);
+    return table;
 }
 
-rule_app_result expand_argpos_rule(type_equation* argpos_eqn, type_equation* poly_eqn, equation_set eqns) {
-    rule_app_result result = rule_app_result_init(eqns);
+int solve_argpos_equation(type_ref node, is_in_pos* eqn) {
+    type_ref func = eqn->func; //The function the current node is supplied to 
 
-    is_in_pos argpos_RH = get_argpos_RH(*argpos_eqn);
-    is_polymorph poly_RH = get_poly_RH(*poly_eqn); 
-    //Get a reference to the polymorph we're dealing with
-    polymorph_ptr poly = poly_RH.poly;
-    //Figure out what our parameter would need to fall under
-    TypeInfo constraint = polymorph_ptr_get_parameter_type(poly, argpos_RH.pos);
+    polymorph_ptr poly = type_ref_getpoly(func);
+    //If the given function is a polymorph
+    if (poly != NULL) {
+        //Figure out what our parameter would need to fall under
+        TypeInfo constraint = polymorph_ptr_get_parameter_type(poly, eqn->pos);
 
-    //Restrict our the parameter in the argpos equation
-    //If we restrict it at all, we are active!
-    result.active = type_ref_restrict(argpos_eqn->var, constraint);
-
-    return result;
+        //Restrict our node to fall under the new type
+        //If we restrict it at all, we are active!
+        return type_ref_restrict(node, constraint);
+    }
+    return 0; //TODO: Add other kinds of functions here!
 }
 
+//Solves the type equations associated with a given type_ref
+int solve_type_ref_equations(type_ref in) {
+    type_equation_dynarray eqns = type_ref_get_equations(in);
 
-rule_app_result expand_argpos_foreach(type_equation* argpos_eqn, equation_set eqns) {
-
-    is_in_pos argpos_RH = get_argpos_RH(*argpos_eqn);
-
-    return with_polymorph(argpos_eqn, argpos_RH.func, eqns, &expand_argpos_rule);
-}
-
-//This rule expands any "is_in_pos" equations to generate new constraints (if possible)
-//If the first argument of the "is_in_pos" is a type equation that points to a polymorph
-//that can only take on one type, the "is_in_pos" equation will replaced with the new constraint
-rule_app_result expand_argpos(equation_set eqns) {
-    return for_every(is_in_pos_kind, eqns, &expand_argpos_foreach);
-}
-
-//TODO: FIXME: Find this based upon BEST CURRENT KNOWLEDGE of parameter types! [trickier than the dumb way!]
-rule_app_result expand_apply_rule(type_equation* apply_eqn, type_equation* poly_eqn, equation_set eqns) {
-    is_result_of apply_RH = get_apply_RH(*apply_eqn);
-    is_polymorph poly_RH = get_poly_RH(*poly_eqn);
-} 
-
-rule_app_result expand_apply_foreach(type_equation* apply_eqn, equation_set eqns) {
-    //TODO: Fix up the activity a bit! (Check for duplicated information)
-    is_result_of apply_RH = get_apply_RH(*apply_eqn);
-    return with_polymorph(apply_eqn, apply_RH.func, eqns, &expand_apply_rule);
+    int active = 0;
+    int i;
+    for (i=0; i < eqns.size; i++) {
+        switch (eqns.begin[i].expr_kind) {
+            case is_polymorph_kind:
+                //active = active || solve_polymorph_equation(in, &eqns.begin[i].expr.is_polymorph_entry);
+                break;
+            case is_in_pos_kind:
+                active = active || solve_argpos_equation(in, &eqns.begin[i].expr.is_in_pos_entry);
+                break;
+            case is_result_of_kind:
+                //active = active || solve_apply_equation(in, &eqns.begin[i].expr.is_result_of_entry);
+                break;
+        }
+    }
+    return active;
 }
 
 
-rule_app_result expand_apply(equation_set eqns) {
-    return for_every(is_result_of_kind, eqns, &expand_apply_foreach);
-}
+//Method for solving type equations associated with a given set of type_refs
+type_ref_table solve_type_equations(type_ref_table table) {
+    //Basic method (for now): Iterate through every type_ref, and with each one, iterate through
+    //every equation. For each equation of a given type, call a different function which returns an int
+    // that represents the activity status of the rule. When there cease
+    //to be active rules, we are done.
+    //TODO: Switch to the smarter method of building a digraph of dependencies and propagating changes
 
-//To be used with "solve_type_equations"
-#define APPLY_RULE(rule) \
-    tmp_result = rule(eqns); \
-    active = active || tmp_result.active; /* Thread activity through, if there is any */ \
-    eqns = tmp_result.eqns; //Mutate our equations
-
-
-//Method for solving type equations
-equation_set solve_type_equations(equation_set eqns) {
-    //Basic method (for now): Apply rules until no more rules apply
-    //TODO: Look at rule application process, figure out how to recursively check instead
-
-    int active = 1; //This will be "1" if any rules were applied
-    rule_app_result tmp_result; //Will store temporary results of applying rules
+    int active;
 
     while (active) {
         active = 0; //Default to no proof of activity
 
-        APPLY_RULE(expand_argpos)
-        //APPLY_RULE(restrict_poly)
-        //APPLY_RULE(expand_apply)
+        int i;
+        for (i=0; i < table.size; i++) {
+            //We are active if any of the type_refs has an active rule
+            active = active || solve_type_ref_equations(table.begin[i]);
+        }
 
         printf("\n"); //For now, debug statements!
-        print_type_equations(eqns, names);
+        print_type_ref_table_equations(table, names);
     }
 }
 
 //Infers types in a given function body
 cell_tree infer_body(cell_tree in) {
-    equation_set equations = gen_type_equations(in, equation_set_init()); //Generates type equations from the tree
+    type_ref_table type_refs = gen_type_equations(in, type_ref_table_init()); //Generates type equations from the tree
     //Print them out (debugging)
-    print_type_equations(equations, names);
-    equations = solve_type_equations(equations); //Solves type equations
+    print_type_ref_table_equations(type_refs, names);
+    type_refs = solve_type_equations(type_refs); //Solves type equations
     //in = elaborate_types(in, equations); //Pass to plug in the simplified equations to the tree
     return in;
 }

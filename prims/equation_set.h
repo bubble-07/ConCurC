@@ -12,9 +12,6 @@ typedef equation_set eqn_set;
 
 eqn_set equation_set_init();
 eqn_set equation_set_add(eqn_set s, type_equation eqn);
-eqn_set equation_set_addpoly(eqn_set s, polymorph_ptr poly, type_ref_dynarray args);
-eqn_set equation_set_addargpos(eqn_set s, type_ref func, int pos);
-eqn_set equation_set_addapply(eqn_set s, type_ref func, type_ref_dynarray args);
 //Replace the referenced equation with a different one
 eqn_set equation_set_replace(eqn_set s, type_equation* ref, type_equation val);
 

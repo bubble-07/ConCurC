@@ -1,6 +1,6 @@
 #include "to_cells.h"
 #include "../prims/type_equation.h"
-#include "../prims/type_rules.h"
+#include "../prims/type_ref_table.h"
 
 #ifndef TYPEINFER_DEFINED
 #define TYPEINFER_DEFINED

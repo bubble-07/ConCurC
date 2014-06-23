@@ -121,7 +121,7 @@ type_ref_table solve_type_equations(type_ref_table table) {
     //to be active rules, we are done.
     //TODO: Switch to the smarter method of building a digraph of dependencies and propagating changes
 
-    int active;
+    int active = 1;
 
     while (active) {
         active = 0; //Default to no proof of activity

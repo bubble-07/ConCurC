@@ -135,6 +135,7 @@ type_ref_table solve_type_equations(type_ref_table table) {
         printf("\n"); //For now, debug statements!
         print_type_ref_table_equations(table, names);
     }
+    return table;
 }
 
 //Infers types in a given function body

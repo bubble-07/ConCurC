@@ -49,7 +49,7 @@ type_equation print_type_equation(type_equation in, nametable names) {
         printf(", [");
 
         //Print argument types
-        //print_type_ref_list(RH.args, names);
+        print_type_ref_list(RH.args, names);
 
         printf("] )");
     }
@@ -66,7 +66,7 @@ type_equation print_type_equation(type_equation in, nametable names) {
         printf("= apply(");
         //print_type_ref(RH.func, names);
         printf(", [");
-        //print_type_ref_list(RH.args, names);
+        print_type_ref_list(RH.args, names);
         printf("] )");
     }
     printf("\n");

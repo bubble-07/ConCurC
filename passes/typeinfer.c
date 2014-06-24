@@ -70,7 +70,7 @@ type_ref_table gen_type_equations(cell_tree in, type_ref_table table) {
         node_type_ref = type_ref_addargpos_eqn(node_type_ref, func, pos);
     }
     //Add the current node's type ref to the type_ref table and return
-    table = type_ref_table_add(table, node_type_ref);
+    table = type_ref_table_add(table, cell_tree_get_type_ref(in));
     return table;
 }
 

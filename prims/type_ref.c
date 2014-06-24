@@ -6,8 +6,8 @@ type_ref make_known_type_ref(TypeInfo in) {
     type_ref_info* info = memalloc(sizeof(type_ref_info));
     info->upperbound = in;
     info->equations = equation_set_init();
-    type_ref result = memalloc(sizeof(type_ref_node));
-    result->data = (void*) info;
+    type_ref_node* result = memalloc(sizeof(type_ref_node));
+    result->data = info;
     result->kind = type_ref_representative; //This is the representative node
     return result;
 }
@@ -50,7 +50,6 @@ type_ref type_ref_add_equation(type_ref in, type_equation eqn) {
 
 type_equation_dynarray type_ref_get_equations(type_ref in) {
     type_ref rep = find(in);
-    printf("%p \n", in);
     type_ref_info* info = rep->data;
     return info->equations;
 }

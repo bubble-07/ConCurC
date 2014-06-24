@@ -173,7 +173,6 @@ inline static void free_type(TypeInfo in) {
 //Then invalidates all references to two
 inline static TypeInfo concat_types(TypeInfo one, TypeInfo two) {
     one.options = TypeGraphRef_dynarray_cat(one.options, two.options);
-    free_type(two);
     return one;
 }
 

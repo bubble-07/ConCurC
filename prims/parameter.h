@@ -41,6 +41,11 @@ static parameter_ptr set_parameter_ptr_type(parameter_ptr in, type_ref i) {
     return in;
 }
 
+//Returns "true" if the parameter's bounding type and the other's bounding type are not disjoint
+static int parameter_ptr_accepts(parameter_ptr in, type_ref val) {
+    return !types_are_disjoint(type_ref_getbound(in->type), type_ref_getbound(val));
+}
+
 static void print_parameter(parameter in, nametable names) {
     printf("( ");
     //print_type(in.type, names);// TODO: FIXME!

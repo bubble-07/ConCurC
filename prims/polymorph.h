@@ -30,6 +30,12 @@ static function_ptr_dynarray polymorph_ptr_get_options(polymorph_ptr in) {
     return in->options;
 }
 
+static void polymorph_ptr_free(polymorph_ptr in) {
+    function_ptr_dynarray_free(in->options);
+    return;
+}
+            
+
 //Gets a sum type of all possible types the parameter in position pos could be
 //Assumes that the position pos does not accept a type variable
 static TypeInfo polymorph_ptr_get_parameter_type(polymorph_ptr in, int pos) {
@@ -62,6 +68,12 @@ static polymorph_ptr make_empty_polymorph_ptr() {
     return result;
 }
 
+static polymorph_ptr make_empty_local_polymorph_ptr() {
+    polymorph_ptr result = make_empty_polymorph_ptr();
+    result->local = 1;
+    return result;
+}
+
 //Makes a local copy of the referenced polymorph
 static polymorph_ptr polymorph_ptr_copy(polymorph_ptr in) {
     polymorph_ptr result = memalloc(sizeof(polymorph));
@@ -77,6 +89,42 @@ static polymorph add_to_polymorph(polymorph in, function_ptr f) {
     in.options = function_ptr_dynarray_add(in.options, f);
     return in;
 }
+
+static polymorph_ptr add_to_polymorph_ptr(polymorph_ptr in, function_ptr f) {
+    in->options = function_ptr_dynarray_add(in->options, f);
+    return in;
+}
+
+//Rules out functions in the polymorph that do not fit with the given
+//argument types. If at least one option was ruled out, return an entirely
+//new, "forked" polymorph, deleting the old if it was local.
+//Otherwise, return the input unchanged
+//Assumes the polymorph_ptr passed in is non-null
+static polymorph_ptr polymorph_ptr_restrict(polymorph_ptr in, type_ref_dynarray args) {
+    //Tentatively allocate a new polymorph pointer as a result
+    polymorph_ptr result = make_empty_local_polymorph_ptr();
+
+    int i;
+    for (i=0; i < in->options.size; i++) {
+        if (function_ptr_accepts(in->options.begin[i], args)) {
+            //If the current function accepts the parameters, add it to the result
+            add_to_polymorph_ptr(result, in->options.begin[i]);
+        }
+    }
+    
+    //If the result is restricted at all
+    if (polymorph_ptr_numoptions(result) < polymorph_ptr_numoptions(in)) {
+        //Return it, and free the old one if it is local
+        if (in->local == 1) {
+            polymorph_ptr_free(in);
+        }
+        return result;
+    }
+    //Otherwise, free it and return the input
+    polymorph_ptr_free(result);
+    return in;
+}
+
 
 static void print_polymorph_ptr(polymorph_ptr in, nametable names) {
     int i;

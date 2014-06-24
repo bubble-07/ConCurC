@@ -41,6 +41,21 @@ static function_ptr function_ptr_set_return_type(function_ptr in, type_ref t) {
     return in;
 }
 
+//Returns true if the given argument types stand a chance of being accepted, 0 otherwise
+//Right now, do this the REALLY dumb way
+static int function_ptr_accepts(function_ptr in, type_ref_dynarray args) {
+    if (in->params.size != args.size) {
+        return 0; //TODO: support currying!
+    }
+    int i;
+    for (i=0; i < args.size; i++) {
+        if (!parameter_ptr_accepts(in->params.begin[i], args.begin[i])) {
+            return 0;
+        }
+    }
+    return 1;
+}
+
 static void print_function(function in, nametable names) {
     printf("Name: "); 
     nametable_print(names, in.name);

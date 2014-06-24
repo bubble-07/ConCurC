@@ -105,7 +105,16 @@ int solve_argpos_equation(type_ref node, is_in_pos* eqn) {
 }
 
 //If we're given a polymorph, restrict it based upon the types of its arguments
-//int solve_polymorph_equation(type_ref node, is_polymorph* eqn);
+int solve_polymorph_equation(type_ref node, is_polymorph* eqn) {
+    polymorph_ptr oldpoly = eqn->poly;
+    //Restrict the polymorph based on current knowledge
+    eqn->poly = polymorph_ptr_restrict(oldpoly, eqn->args);
+    if (oldpoly != eqn->poly) {
+        //must've changed!
+        return 1;
+    }
+    return 0; //Otherwise, must not have
+}
 
 //Solves the type equations associated with a given type_ref
 int solve_type_ref_equations(type_ref in) {
@@ -116,7 +125,7 @@ int solve_type_ref_equations(type_ref in) {
     for (i=0; i < eqns.size; i++) {
         switch (eqns.begin[i].expr_kind) {
             case is_polymorph_kind:
-                //active = active || solve_polymorph_equation(in, &eqns.begin[i].expr.is_polymorph_entry);
+                active = active || solve_polymorph_equation(in, &eqns.begin[i].expr.is_polymorph_entry);
                 break;
             case is_in_pos_kind:
                 active = active || solve_argpos_equation(in, &eqns.begin[i].expr.is_in_pos_entry);
@@ -198,7 +207,7 @@ def_collection typeinfer(def_collection in) {
     //in.funcs = polymorph_ptr_dynarray_map(in.funcs, &infer_polymorph);
     //TODO: FIXME: This is a really dumb way to debug for now
     int i;
-    for (i=2; i < in.funcs.size; i++) {
+    for (i=0; i < in.funcs.size; i++) {
         in.funcs.begin[i] = infer_polymorph(in.funcs.begin[i]);
     }
     return in;

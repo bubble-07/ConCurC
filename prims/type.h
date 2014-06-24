@@ -176,7 +176,6 @@ inline static TypeInfo concat_types(TypeInfo one, TypeInfo two) {
     return one;
 }
 
-
 //Note: we assume each TypeInfo reference is always unique.
 
 //Finds the set of all types that are subtypes of a and b.
@@ -279,5 +278,16 @@ static TypeInfo restrict_sum(TypeInfo in, TypeInfo by) {
     }
     return simplify_TypeInfo(result);
 }
-    
+
+//Returns "true" if one can't possibly be anything
+inline static int type_is_empty(TypeInfo one) {
+    return one.options.size == 0;
+}
+ 
+//Returns true if the given types have nothing in common (neither subtypes the other)
+inline static int types_are_disjoint(TypeInfo one, TypeInfo two) {
+    //The above condition is true iff the result of restricting the sum is nil
+    return type_is_empty(restrict_sum(one, two));
+}
+   
 #endif

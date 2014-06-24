@@ -45,7 +45,7 @@ type_equation print_type_equation(type_equation in, nametable names) {
         printf("= poly(");
         //TODO: Print available polymorph types
         //For now, just print the name
-        //print_polymorph_ptr_name(RH.poly);
+        print_polymorph_ptr_name(RH.poly, names);
         printf(", [");
 
         //Print argument types

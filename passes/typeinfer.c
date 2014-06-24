@@ -74,6 +74,20 @@ type_ref_table gen_type_equations(cell_tree in, type_ref_table table) {
     return table;
 }
 
+int solve_apply_equation(type_ref node, is_result_of* eqn) {
+    type_ref func = eqn->func;
+
+    polymorph_ptr poly = type_ref_getpoly(func);
+    //If the given function is a polymorph
+    if (poly != NULL) {
+        //Figure out what the return type must fall under
+        TypeInfo constraint = polymorph_ptr_get_return_type(poly);
+
+        return type_ref_restrict(node, constraint);
+    }
+    return 0; //TODO: Add other kinds of functions here!
+}
+
 int solve_argpos_equation(type_ref node, is_in_pos* eqn) {
     type_ref func = eqn->func; //The function the current node is supplied to 
 
@@ -90,6 +104,9 @@ int solve_argpos_equation(type_ref node, is_in_pos* eqn) {
     return 0; //TODO: Add other kinds of functions here!
 }
 
+//If we're given a polymorph, restrict it based upon the types of its arguments
+//int solve_polymorph_equation(type_ref node, is_polymorph* eqn);
+
 //Solves the type equations associated with a given type_ref
 int solve_type_ref_equations(type_ref in) {
     type_equation_dynarray eqns = type_ref_get_equations(in);
@@ -105,7 +122,7 @@ int solve_type_ref_equations(type_ref in) {
                 active = active || solve_argpos_equation(in, &eqns.begin[i].expr.is_in_pos_entry);
                 break;
             case is_result_of_kind:
-                //active = active || solve_apply_equation(in, &eqns.begin[i].expr.is_result_of_entry);
+                active = active || solve_apply_equation(in, &eqns.begin[i].expr.is_result_of_entry);
                 break;
         }
     }

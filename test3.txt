@@ -1,9 +1,0 @@
-def (int +) (int a) (int b)
-    ( )
-def (int *) (int a) (int b)
-    ( )
-def (string +) (string a) (string b)
-    ( )
-def test a b
-    a + (a * b)
-    

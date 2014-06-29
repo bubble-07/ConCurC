@@ -1,23 +1,82 @@
-#include "prims/type.h"
-int main() {
+#include "passes/primorder.h"
+#include "passes/collectnames.h"
+#include "passes/to_cells.h"
+#include "passes/typeinfer.h"
 
-    init_type_universe();
+//Being used to test function name collection on single file
 
-    TypeRef Int = get_TypeRef(to_dynstring("Int"));
-    TypeRef Num = get_TypeRef(to_dynstring("Num"));
-    TypeRef String = get_TypeRef(to_dynstring("String"));
+extern char* realpath(const char* path, char* resolved_path);
+
+#define GENPRINT(tok) else if (in.data.tokenval == tok) { printf("%s", #tok); }
+void display(lexid_tree in, nametable names) {
+    string toprint;
+    printf("%s", "\n on line: ");
+    printf("%d", (int) in.data.loc.lineno);
+    printf("%s", " col: ");
+    printf("%d", (int) in.data.loc.linepos);
+    printf(" ");
     
-    TypeInfo Both = add_type(add_type(make_empty_type(), String), Num);
-    //TypeInfo Both = intersect_types(Num, Top);
+    if (in.data.tokenval == INT) {
+        printf("%s", "integer: ");
+        printf("%d", in.data.attr.intval);
+    }
+    else if (in.data.tokenval == FLOAT) {
+        printf("%s", "float: ");
+        printf("%.20f", in.data.attr.floatval);
+    }
+    else if (in.data.tokenval == STRING) {
+        printf("%s", "STRING CONSTANT");
+    }
+    else if (in.data.tokenval == FILEREF) {
+        printf("FILE REF: %s", to_cstring(in.data.attr.stringval));
+    }
+    GENPRINT(DEF)
+    GENPRINT(LAMBDA)
+    GENPRINT(NAMESPACE)
+    GENPRINT(IMPORT)
+    GENPRINT(TYPE)
+    GENPRINT(SUBS)
+    GENPRINT(SUPS)
+    else if (in.data.tokenval == EXPR) {
+        printf("%s", "(");
+        size_t i = 0;
+        while (i < in.children.size) {
+            display(in.children.begin[i], names);
+            i++;
+        }
+        printf("%s", ")");
+    }
+    else {
+        toprint = char_dynarray_copy(nametable_get(names, in.data));
+        toprint = char_dynarray_add(toprint, (char) 0);
+        printf("%s", toprint.begin);
+    }
+    printf("%s", "   ");
+    return;
+}
 
-    TypeInfo Restrictor = add_type(add_type(make_empty_type(), Top), Int);
+int main(int argc, const char* argv[]) {
+    fileLoc* file;
+    if (argc < 2) {
+        file = load_stdin();
+    }
+    else {
+        file = load_file(realpath(argv[1], NULL));
+    }
+    collectnames_result program = collectnames(primorder(parse(lex(file))));
 
-    print_type(Both);
+    //Initialize the type universe so we can do things.
+    init_type_universe();
+    
+    //Print out our parse tree
+    //display(program.parse.AST, program.parse.names);
 
-    Both = restrict_sum(Both, Restrictor);
+    //Convert to a list of definitions
+    def_collection defs = to_cells(program);
 
+    printf("\n\n Inferring types \n\n");
 
-    print_type(Both);
-
+    defs = typeinfer(defs);
+    
     return 0;
 }

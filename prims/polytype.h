@@ -5,15 +5,27 @@
 #include "type_ref.h"
 
 #ifndef POLYTYPE_DEFINED
-#define POLYTYPE_DEFINED
 
 typedef struct {
     noderef ref; //Stores a reference to the node in the type graph that stores the polymorph "stem"
     type_ref_dynarray argtypes;
 } polytype;
 
+DEFINE_DYNARRAY(polytype)
+
+#define POLYTYPE_DEFINED
+
+#ifndef TYPEINFO_DEFINED
+#include "typeinfo.h"
+#endif
+
 void print_polytype(polytype in, nametable names);
 polytype make_monotype(noderef in);
+int polytype_trivial_eq(polytype one, polytype two);
+int is_monotype(polytype in);
 
-DEFINE_DYNARRAY(polytype)
+TypeInfo polytype_get_subtypes(polytype in);
+
+void polytype_pour_args(polytype one, polytype two);
+
 #endif

@@ -15,4 +15,7 @@ typedef struct {
 } subtype_lattice;
 
 typedef subtype_lattice sub_lat; //Shorthand
+
+//Gets the subtypes of the incoming type that are enumerated in the lattice
+TypeInfo lattice_get_subtypes(polytype in, subtype_lattice* lattice);
 #endif

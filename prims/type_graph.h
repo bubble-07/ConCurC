@@ -44,5 +44,6 @@ void init_type_universe();
 TypeGraphRef get_TypeGraphRef(lexid s);
 string get_type_name(TypeGraphRef r, nametable names);
 void print_TypeGraphRef(TypeGraphRef r, nametable names);
+type_graph_node get_graph_node(TypeGraphRef r);
 
 #endif

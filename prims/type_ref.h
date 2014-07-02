@@ -40,6 +40,12 @@ int hash_type_ref(type_ref in);
 //Equal iff have same representative node
 int type_ref_eq(type_ref one, type_ref two);
 
+//Slightly different version of equality -- equal if have the same form and bounds
+int type_ref_trivial_eq(type_ref one, type_ref two);
+
+//Same as above, but elementwise on a list (used for comparing argument lists)
+int type_ref_dynarray_trivial_eq(type_ref_dynarray one, type_ref_dynarray two);
+
 type_ref make_unknown_type_ref(); //Makes a new type ref that's completely empty
 
 //Unifies the two type refs

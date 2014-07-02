@@ -19,6 +19,12 @@ TypeInfo make_empty_type() {
     return result;
 }
 
+TypeInfo polytype_dynarray_to_TypeInfo(polytype_dynarray in) {
+    TypeInfo result;
+    result.options = in; //TODO: maybe make this copy?
+    return result;
+}
+
 TypeInfo copy_type(TypeInfo in) {
     TypeInfo result;
     result.options = polytype_dynarray_copy(in.options);
@@ -73,35 +79,42 @@ TypeInfo concat_types(TypeInfo one, TypeInfo two) {
     return one;
 }
 
-//Note: we assume each TypeInfo reference is always unique.
-
 //Finds the set of all types that are subtypes of a and b.
 //Note that this version assumes we have the transitive closure
-//TODO: Have this operate on the transitive reduction or a user-supplied graph,
-//and make it based on a traversal instead! [For probably greater efficiency]
+//TODO: Maybe make monotypes also have subtype lattices?
 
 //TODO: Have this work on things other than monotypes!
 TypeInfo intersect_types(polytype a, polytype b) {
     TypeInfo result = make_empty_type();
-    size_t i;
-    //Go through all subtypes of a, and add only those types
-    //that are also subtypes of b.
-    for (i=0; i < UniverseGraph.size; i++) {
-        if (Type_graph_testedge(UniverseGraph, a.ref, i) && 
-            Type_graph_testedge(UniverseGraph, b.ref, i)) {
-            //Add the type at i to option list
-            result = add_type(result, make_monotype(i));
+
+    //Is A possibly a subtype of B?
+    if (Type_graph_testedge(UniverseGraph, b.ref, a.ref)) {
+        //it is. Check if A __is__ B (trivially -- is it exactly the same?)
+        if (polytype_trivial_eq(a, b)) {
+            //Great, they're both the same. Add one to the result and return
+            return add_type(result, a);
+        }
+        else {
+            //Since A is possibly a subtype of B, but A is not B,
+            //we should be able to find A somewhere under B. 
+            //To do so, instantiate B's subtypes in the lattice and recurse
+            //by restricting the set of B's subtypes by A.
+            return restrict_type(polytype_get_subtypes(b), a);
         }
     }
-    return result;
+    //A cannot subtype B
+    //Check if A's children do so instead.
+    return restrict_type(polytype_get_subtypes(a), b);
 }
-
 
 //Takes some TypeInfo, eliminates redundant options,
 //[types that turn out to be subtypes of other types in the typeinfo]
 //and returns some new TypeInfo representing the simplified result.
 //While inefficient as hell (O(n*n)), it's a necessary operation.
 //NOTE: this operation destroys the TypeInfo passed in.
+
+//TODO: Make this work with polymorphic type constructors, or restrict its operation
+//to strictly deal with monotypes
 
 TypeInfo simplify_TypeInfo(TypeInfo in) {
     int i; //Will be used for indexing the source
@@ -163,7 +176,8 @@ TypeInfo restrict_type(TypeInfo in, polytype a) {
     for (i=0; i < in.options.size; i++) {
         result = concat_types(result, intersect_types(in.options.begin[i], a));
     }
-    return simplify_TypeInfo(result);
+    //return simplify_TypeInfo(result); 
+    return result; //TODO: fix simplification
 }
 
 //Concats the result of running restrict_type on "in" with the elements of "by"
@@ -174,7 +188,8 @@ TypeInfo restrict_sum(TypeInfo in, TypeInfo by) {
     for (i=0; i < by.options.size; i++) {
         result = concat_types(result, restrict_type(in, by.options.begin[i]));
     }
-    return simplify_TypeInfo(result);
+    //return simplify_TypeInfo(result);
+    return result;
 }
 
 //Returns "true" if one can't possibly be anything

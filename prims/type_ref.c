@@ -40,6 +40,26 @@ TypeInfo type_ref_getbound(type_ref in) {
     return info->upperbound;
 }
 
+//Equal if the two type refs have the same form (that is, unknown variables equal unknown variables,
+//and all others equal iff have the same upper bound)
+//TODO: Modify this for type variables!
+int type_ref_trivial_eq(type_ref one, type_ref two) {
+    return type_eq(type_ref_getbound(one), type_ref_getbound(two));
+}
+
+int type_ref_dynarray_trivial_eq(type_ref_dynarray one, type_ref_dynarray two) {
+    if (one.size != two.size) {
+        return 0;
+    }
+    int i;
+    for (i=0; i < one.size; i++) {
+        if (!type_ref_trivial_eq(one.begin[i], two.begin[i])) {
+            return 0;
+        }
+    }
+    return 1;
+}
+
 //Adds the given type equation to the typeref
 type_ref type_ref_add_equation(type_ref in, type_equation eqn) {
     type_ref rep = find(in);

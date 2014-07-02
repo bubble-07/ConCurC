@@ -48,6 +48,10 @@ string get_type_name(TypeGraphRef r, nametable names) {
     return nametable_get(names, token);
 }
 
+type_graph_node get_graph_node(TypeGraphRef r) {
+    return Type_graph_getnode(UniverseGraph, r);
+}
+
 void print_TypeGraphRef(TypeGraphRef r, nametable names) {
     string name = get_type_name(r, names);
     //If we were able to find it

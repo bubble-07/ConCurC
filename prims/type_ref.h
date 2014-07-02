@@ -1,4 +1,3 @@
-#include "type.h"
 #include "nametable.h"
 
 #ifndef TYPE_REF_DEFINED
@@ -42,13 +41,6 @@ int hash_type_ref(type_ref in);
 int type_ref_eq(type_ref one, type_ref two);
 
 type_ref make_unknown_type_ref(); //Makes a new type ref that's completely empty
-type_ref make_known_type_ref(TypeInfo in); //Makes a new type ref with a bounded type
-
-TypeInfo type_ref_getbound(type_ref in);
-
-//Restricts the incoming type_ref to fall under the given type
-//Returns "1" if the type was restricted, "0" otherwise
-int type_ref_restrict(type_ref in, TypeInfo info);
 
 //Unifies the two type refs
 type_ref unify_type_refs(type_ref one, type_ref two);

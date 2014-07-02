@@ -2,6 +2,8 @@
 #include "../prims/env.h"
 #include "../libs/memoryman.h"
 #include "../prims/function_table.h"
+#include "../prims/type_graph.h"
+#include "../prims/type_ref_info.h"
 
 //Returns 1 if the given expression is a function definition
 //Assumes in.data is "EXPR_LEXID"
@@ -29,7 +31,7 @@ type_ref name_decl_to_type(lexid_tree in) {
         //Look up the type corresponding to the lexid
         TypeGraphRef result = get_TypeGraphRef(type_lexid);
         //Finalize and return
-        return make_known_type_ref(make_simple_type(result));
+        return make_known_type_ref(make_simple_monotype(result));
     }
     else {
         //Otherwise, the type must still be unknown
@@ -102,7 +104,7 @@ cell_tree convert_lambda_expr(lexid_tree_dynarray in, env e, function_table tabl
         result = make_lambda_expr(in.begin[2], in.begin[3], e, table);
         cell lambdahead = cell_tree_data(result);
         lambda_ptr ptr = lambdahead.data;
-        ptr->ret_type = make_known_type_ref(make_simple_type(get_TypeGraphRef(in.begin[1].data)));
+        ptr->ret_type = make_known_type_ref(make_simple_monotype(get_TypeGraphRef(in.begin[1].data)));
         return result;
     }
     return result; //TODO: THROW AN ERROR! (must be malformed)

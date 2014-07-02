@@ -11,6 +11,9 @@ Implement FRP mechanism
 Polish, extend core libraries, play, have fun
 Publish
 
+Short-term:
+Change the definition of a type to be more consistent and accomodate parametric types
+
 NOTE: Language should be renamed to "Phi" to avoid conflict with "Concur" -- 
 will also make for a much cleaner logo (because it's just typographic)
 

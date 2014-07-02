@@ -17,7 +17,15 @@ type_ref type_ref_addpoly_eqn(type_ref in, polymorph_ptr poly, type_ref_dynarray
 type_ref type_ref_addargpos_eqn(type_ref in, type_ref func, int pos);
 type_ref type_ref_addapply_eqn(type_ref in, type_ref func, type_ref_dynarray args);
 
+type_ref make_known_type_ref(TypeInfo in); //Makes a new type ref with a bounded type
 //Gets a pointer to the polymorph associated with a given type_ref (NULL if nonexistent)
+
+TypeInfo type_ref_getbound(type_ref in);
+
+//Restricts the incoming type_ref to fall under the given type
+//Returns "1" if the type was restricted, "0" otherwise
+int type_ref_restrict(type_ref in, TypeInfo info);
+
 polymorph_ptr type_ref_getpoly(type_ref in);
 
 type_equation_dynarray type_ref_get_equations(type_ref in);

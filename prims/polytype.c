@@ -5,9 +5,11 @@
 //Prints a given polytype
 void print_polytype(polytype in, nametable names) {
     print_TypeGraphRef(in.ref, names);
-    printf("(");
-    print_type_ref_list(in.argtypes, names);
-    printf(")");
+    if (!is_monotype(in)) {
+        printf("(");
+        print_type_ref_list(in.argtypes, names);
+        printf(")");
+    }
     return;
 }
 

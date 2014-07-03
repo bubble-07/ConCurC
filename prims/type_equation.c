@@ -64,7 +64,7 @@ type_equation print_type_equation(type_equation in, nametable names) {
     else if (kind == is_result_of_kind) {
         is_result_of RH = get_apply_RH(in);
         printf("= apply(");
-        //print_type_ref(RH.func, names);
+        print_type_ref(RH.func, names);
         printf(", [");
         print_type_ref_list(RH.args, names);
         printf("] )");

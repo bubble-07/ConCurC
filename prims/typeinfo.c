@@ -3,10 +3,13 @@
 //Prints the options in the given type
 void print_type(TypeInfo in, nametable names) {
     int i;
-    printf("Option[ ");
+    printf("Option[");
     for (i=0; i < in.options.size; i++) {
         print_polytype(in.options.begin[i], names);
-        printf(" ,");
+        //If we're not dealing with the last element
+        if (i < in.options.size - 1) {
+            printf(", ");
+        }
     }
     printf("] ");
     return;

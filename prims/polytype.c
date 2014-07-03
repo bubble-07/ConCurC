@@ -23,12 +23,27 @@ int is_monotype(polytype in) {
 }
 
 TypeInfo polytype_get_subtypes(polytype in) {
-    //TODO: Handle the case that we have a monotype!
+
+    //Handle the special case that we have a monotype (no lattice)
+    //TODO: Handle cycles!
+    if (is_monotype(in)) {
+        size_t i;
+        TypeInfo result = make_empty_type();
+        for (i=0; i < UniverseGraph.size; i++) {
+            //Add all subtypes of the incoming node
+            if (!noderef_eq(in.ref, i) && Type_graph_testedge(UniverseGraph, in.ref, i)) {
+                //FIXME: This gets the representation wrong if a polytype subtypes a monotype!
+                result = add_type(result, make_monotype(i));
+            }
+        }
+        return result;
+    }
+
     type_graph_node node = get_graph_node(in.ref);
     if (node.lattice == NULL) {
         return make_empty_type(); //For now, just do nothing
     }
-    return lattice_get_subtypes(in, *node.lattice);
+    return lattice_get_subtypes(in, node.lattice);
 }
 
 int polytype_trivial_eq(polytype one, polytype two) {

@@ -83,7 +83,7 @@ TypeInfo concat_types(TypeInfo one, TypeInfo two) {
 //Note that this version assumes we have the transitive closure
 //TODO: Maybe make monotypes also have subtype lattices?
 
-//TODO: Have this work on things other than monotypes!
+//TODO: Expand functionality!
 TypeInfo intersect_types(polytype a, polytype b) {
     TypeInfo result = make_empty_type();
 
@@ -106,6 +106,33 @@ TypeInfo intersect_types(polytype a, polytype b) {
     //Check if A's children do so instead.
     return restrict_type(polytype_get_subtypes(a), b);
 }
+
+//Returns "true" if the given polytype is in the given typeinfo [equality checked trivially]
+int trivial_is_in_TypeInfo(TypeInfo in, polytype t) {
+    int i;
+    for (i=0; i < in.options.size; i++) {
+        if (polytype_trivial_eq(in.options.begin[i], t)) {
+            return 1;
+        }
+    }
+    return 0;
+}
+
+//Takes some TypeInfo, and eliminates options that are EXACTLY EQUAL [polytype_trivial_eq]
+TypeInfo trivial_simplify_TypeInfo(TypeInfo in) {
+    TypeInfo result = make_empty_type();
+    //Copy incoming over into the result one-by-one, checking to see if there are duplicates
+    int i;
+    for (i=0; i < in.options.size; i++) {
+        //If the current item is not already in the result
+        if (!trivial_is_in_TypeInfo(result, in.options.begin[i])) {
+            //Add it to the result
+            result = add_type(result, in.options.begin[i]);
+        }
+    }
+    return result;
+}
+        
 
 //Takes some TypeInfo, eliminates redundant options,
 //[types that turn out to be subtypes of other types in the typeinfo]
@@ -177,7 +204,7 @@ TypeInfo restrict_type(TypeInfo in, polytype a) {
         result = concat_types(result, intersect_types(in.options.begin[i], a));
     }
     //return simplify_TypeInfo(result); 
-    return result; //TODO: fix simplification
+    return trivial_simplify_TypeInfo(result); //TODO: fix simplification
 }
 
 //Concats the result of running restrict_type on "in" with the elements of "by"
@@ -189,7 +216,7 @@ TypeInfo restrict_sum(TypeInfo in, TypeInfo by) {
         result = concat_types(result, restrict_type(in, by.options.begin[i]));
     }
     //return simplify_TypeInfo(result);
-    return result;
+    return trivial_simplify_TypeInfo(result);
 }
 
 //Returns "true" if one can't possibly be anything

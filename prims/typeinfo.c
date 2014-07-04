@@ -1,5 +1,11 @@
 #include "typeinfo.h"
 
+TypeInfo make_typeinfo(polytype_dynarray in) {
+    TypeInfo result;
+    result.options = in;
+    return result;
+}
+
 //Prints the options in the given type
 void print_type(TypeInfo in, nametable names) {
     int i;

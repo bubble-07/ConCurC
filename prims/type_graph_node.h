@@ -22,6 +22,16 @@ static type_graph_node make_type_graph_node(lexid name, subtype_lattice* lattice
     return result;
 }
 
+//Adds the given subtype to the subtype lattice of the incoming graph node
+static type_graph_node type_graph_node_add_subtype(type_graph_node in, polytype sub) {
+    if (in.lattice == NULL) {
+        //Allocate a new one
+    }
+    in.lattice = lattice_add_subtype(in.lattice, sub);
+    return in;
+}
+
+
 static int TypeGraphRef_eq(TypeGraphRef a, TypeGraphRef b) {
     return a == b;
 }

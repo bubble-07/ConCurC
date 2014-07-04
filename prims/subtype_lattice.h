@@ -10,7 +10,7 @@
 #ifndef SUBTYPE_LATTICE_DEFINED
 #define SUBTYPE_LATTICE_DEFINED
 typedef struct {
-    polytype head; //The "head", or type to match
+    type_ref_dynarray head; //The list of parameter types to match
     polytype_dynarray subtypes; //Set of all subtypes that derive from the head
 } subtype_lattice;
 
@@ -18,4 +18,8 @@ typedef subtype_lattice sub_lat; //Shorthand
 
 //Gets the subtypes of the incoming type that are enumerated in the lattice
 TypeInfo lattice_get_subtypes(polytype in, subtype_lattice* lattice);
+
+subtype_lattice* make_monotype_lattice();
+
+subtype_lattice* lattice_add_subtype(subtype_lattice* in, polytype subtype);
 #endif

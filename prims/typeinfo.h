@@ -12,6 +12,7 @@ typedef struct {
 
 #include "type_graph.h"
 
+TypeInfo make_typeinfo(polytype_dynarray in);
 void print_type(TypeInfo in, nametable names);
 TypeInfo make_empty_type(); //Makes a new type that can't be anything
 TypeInfo copy_type(TypeInfo in);

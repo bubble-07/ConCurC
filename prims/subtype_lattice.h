@@ -20,6 +20,7 @@ typedef subtype_lattice sub_lat; //Shorthand
 TypeInfo lattice_get_subtypes(polytype in, subtype_lattice* lattice);
 
 subtype_lattice* make_monotype_lattice();
+subtype_lattice* make_polytype_lattice(type_ref_dynarray in);
 
 subtype_lattice* lattice_add_subtype(subtype_lattice* in, polytype subtype);
 #endif

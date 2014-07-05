@@ -105,7 +105,7 @@ TypeInfo intersect_types(polytype a, polytype b) {
     }
 
     //Is A possibly a subtype of B?
-    if (Type_graph_testedge(UniverseGraph, b.ref, a.ref)) {
+    if (Type_graph_possiblesubtype(UniverseGraph, a, b)) {
         //it is. Check if A __is__ B (trivially -- is it exactly the same?)
         if (polytype_trivial_eq(a, b)) {
             //Great, they're both the same. Add one to the result and return

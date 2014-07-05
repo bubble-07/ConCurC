@@ -82,6 +82,9 @@ int solve_apply_equation(type_ref node, is_result_of* eqn) {
     if (poly != NULL) {
         //Figure out what the return type must fall under
         TypeInfo constraint = polymorph_ptr_get_return_type(poly);
+        
+        //TODO: We don't __actually__ mean "restrict" here -- we need to check if the
+        //returned type is a subtype of the node's current type. If not, then it's a type error
 
         return type_ref_restrict(node, constraint);
     }

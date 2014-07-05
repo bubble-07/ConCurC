@@ -5,11 +5,15 @@ subtype_lattice* lattice_add_subtype(subtype_lattice* in, polytype subtype) {
     return in;
 }
 
-subtype_lattice* make_monotype_lattice() {
+//Makes a polytype lattice with the supplied type_refs (TODO: backwards?)
+subtype_lattice* make_polytype_lattice(type_ref_dynarray header) {
     subtype_lattice* result = (subtype_lattice*) memalloc(sizeof(subtype_lattice));
     result->subtypes = polytype_dynarray_make(1);
-    result->head = type_ref_dynarray_make(1);
+    result->head = header;
     return result;
+}
+subtype_lattice* make_monotype_lattice() {
+    return make_polytype_lattice(type_ref_dynarray_make(1));
 }
 
 TypeInfo lattice_get_subtypes(polytype in, subtype_lattice* lattice) {
@@ -25,10 +29,11 @@ TypeInfo lattice_get_subtypes(polytype in, subtype_lattice* lattice) {
     return poltype_dynarray_to_TypeInfo(lattice->subtypes);
     */
 
-    //For now, just handle monotypes
     if (is_monotype(in)) {
         return make_typeinfo(lattice->subtypes);
     }
+    //If it's not a monotype, then it must be a polytype!
+    //Make it so
 
     return make_empty_type(); //For now, leave unimplemented to make sure everything still works for monotypes
 }

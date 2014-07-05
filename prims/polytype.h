@@ -21,6 +21,7 @@ DEFINE_DYNARRAY(polytype)
 
 void print_polytype(polytype in, nametable names);
 polytype make_monotype(noderef in);
+polytype make_polytype(noderef in, type_ref_dynarray args);
 int polytype_trivial_eq(polytype one, polytype two);
 int is_monotype(polytype in);
 

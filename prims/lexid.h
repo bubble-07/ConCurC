@@ -59,10 +59,13 @@ D_LEX(NUMID, 30)
 D_LEX(STRINGID, 31)
 D_LEX(FLOATID, 32)
 D_LEX(ANYID, 33)
+D_LEX(EITHERID, 34)
+D_LEX(LISTID, 35)
+D_LEX(MONOID, 36) //Defines the internal lexid used for "monotype" (for parametric monotypes)
 
 
 //Set the value of the last primitive lexid (so all non-hardcoded identifiers come after)
-#define LAST_PRIM_ID_VAL 33
+#define LAST_PRIM_ID_VAL 36
 
 //Necessary to allow lookup failure in a dictionary. This is why LPAREN is 1, not 0*/
 const static lexid lexid_lookup_failure = {0, 0};

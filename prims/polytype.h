@@ -24,6 +24,9 @@ polytype make_monotype(noderef in);
 int polytype_trivial_eq(polytype one, polytype two);
 int is_monotype(polytype in);
 
+//Returns true if the incoming polytype is "Any"
+int is_any(polytype in);
+
 TypeInfo polytype_get_subtypes(polytype in);
 
 void polytype_pour_args(polytype one, polytype two);

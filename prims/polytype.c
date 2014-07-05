@@ -20,6 +20,10 @@ polytype make_monotype(TypeGraphRef in) {
     return result;
 }
 
+int is_any(polytype in) {
+    return in.ref == Top.ref;
+}
+
 int is_monotype(polytype in) {
     return (in.argtypes.size == 0);
 }

@@ -96,6 +96,14 @@ TypeInfo concat_types(TypeInfo one, TypeInfo two) {
 TypeInfo intersect_types(polytype a, polytype b) {
     TypeInfo result = make_empty_type();
 
+    //Handle special cases where either a or b are "Any"
+    if (is_any(a)) {
+        return add_type(result, b);
+    }
+    if (is_any(b)) {
+        return add_type(result, a);
+    }
+
     //Is A possibly a subtype of B?
     if (Type_graph_testedge(UniverseGraph, b.ref, a.ref)) {
         //it is. Check if A __is__ B (trivially -- is it exactly the same?)

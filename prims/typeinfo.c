@@ -213,7 +213,8 @@ TypeInfo restrict_type(TypeInfo in, polytype a) {
         result = concat_types(result, intersect_types(in.options.begin[i], a));
     }
     //return simplify_TypeInfo(result); 
-    return trivial_simplify_TypeInfo(result); //TODO: fix simplification
+    //return trivial_simplify_TypeInfo(result); //TODO: fix simplification
+    return result;
 }
 
 //Concats the result of running restrict_type on "in" with the elements of "by"
@@ -225,7 +226,8 @@ TypeInfo restrict_sum(TypeInfo in, TypeInfo by) {
         result = concat_types(result, restrict_type(in, by.options.begin[i]));
     }
     //return simplify_TypeInfo(result);
-    return trivial_simplify_TypeInfo(result);
+    //return trivial_simplify_TypeInfo(result);
+    return result;
 }
 
 //Returns "true" if one can't possibly be anything

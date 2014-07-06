@@ -51,6 +51,9 @@ type_ref make_unknown_type_ref(); //Makes a new type ref that's completely empty
 //Unifies the two type refs
 type_ref unify_type_refs(type_ref one, type_ref two);
 
+//Makes type ref a become a reference to b (mutation) (if it's the principal node, dealloc the associated structure)
+void type_ref_makepoint(type_ref a, type_ref b);
+
 void print_type_ref(type_ref in, nametable names);
 void print_type_ref_list(type_ref_dynarray in, nametable names);
 

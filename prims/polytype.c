@@ -33,8 +33,26 @@ int is_monotype(polytype in) {
 }
 
 TypeInfo polytype_get_subtypes(polytype in) {
+    //Handle the special case of a polymorphic monotype
+    if (in.ref == Mono) {
+        //TODO: handle case of multiple types
+        TypeInfo bound = type_ref_getbound(in.argtypes.begin[0]);
+        return polytype_get_subtypes(bound.options.begin[0]);
+    }
     type_graph_node node = get_graph_node(in.ref);
     return lattice_get_subtypes(in, node.lattice);
+}
+
+//TODO: Remove this, and change the structure of polytypes completely!
+int polytype_pour_args(polytype in, type_ref_dynarray refs) {
+    printf("Polytype size: %d", in.argtypes.size);
+    printf("Args size: %d", refs.size);
+    int i;
+    for (i=0; i < in.argtypes.size; i++) {
+        //Make the variable type ref point toward the polytype's
+        type_ref_makepoint(refs.begin[i], in.argtypes.begin[i]);
+    }
+    return 1; //Successful
 }
 
 //Checks [trivially] if the two polytypes are equal

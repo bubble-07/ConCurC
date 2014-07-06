@@ -74,6 +74,9 @@ void init_type_universe() {
 
 //Returns "true" if it's possible a subtypes b using the type graph data
 int Type_graph_possiblesubtype(Type_graph in, polytype a, polytype b) {
+    if (b.ref == Mono) {
+        return 1;
+    }
     return Type_graph_testedge(in, b.ref, a.ref);
 }
 

@@ -32,8 +32,9 @@ TypeInfo lattice_get_subtypes(polytype in, subtype_lattice* lattice) {
     if (is_monotype(in)) {
         return make_typeinfo(lattice->subtypes);
     }
-    //If it's not a monotype, then it must be a polytype!
-    //Make it so
+    //Merge the information from the incoming polytype into the head [overwrite the head's typerefs]
+    //polytype_pour_args(in, lattice->head);
+    //TODO: SANITIZE CHILD REFERENCES
+    return make_typeinfo(lattice->subtypes);
 
-    return make_empty_type(); //For now, leave unimplemented to make sure everything still works for monotypes
 }

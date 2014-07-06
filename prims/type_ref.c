@@ -16,6 +16,13 @@ type_ref make_unknown_type_ref() {
     return make_known_type_ref(make_unknown_type());
 }
 
+void type_ref_makepoint(type_ref a, type_ref b) {
+    //TODO: If a is NOT forwarding to begin with, memory management!
+    a->data = b;
+    a->kind = type_ref_forwarding;
+    return;
+}
+
 //Gets the representative node
 type_ref find(type_ref in) {
     if (in->kind == type_ref_representative) {

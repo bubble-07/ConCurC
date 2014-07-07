@@ -1,3 +1,7 @@
+type Matrix(Num)
+type OrthoMat(Num)
+OrthoMat(A) <: Matrix(A)
+
 def (int +) (int a) (int b)
     ( )
 def (int *) (int a) (int b)

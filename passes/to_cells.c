@@ -4,10 +4,14 @@
 #include "../prims/function_table.h"
 #include "../prims/type_graph.h"
 #include "../prims/type_ref_info.h"
+#include "../prims/type_env.h"
 
 //Returns 1 if the given expression is a function definition
 //Assumes in.data is "EXPR_LEXID"
 int is_function_def(lexid_tree in) {
+    if (in.children.size == 0) {
+        return 0;
+    }
     //If we know it's a definition of some sort
     if (lexid_eq(in.children.begin[0].data, DEF_LEXID)) {
         //If the second argument to def is an expression [not just a name]
@@ -259,9 +263,112 @@ function load_function_def(lexid_tree in, function_table table) {
     return result;
 }
 
-//For now, just print out every function we make
-//Do NOTHING else
-//Assumes the file contains ONLY function definitions
+//Define nice stuff for loading type definitions
+
+//Returns "true" if the given top-level expression is a type declaration
+int is_type_declaration(lexid_tree in) {
+    if (in.children.size < 2) {
+        return 0;
+    }
+    return lexid_eq(in.children.begin[0].data, TYPE_LEXID);
+}
+//Returns "true" if the given top-level expression is a subtype declaration
+int is_subtype_declaration(lexid_tree in) {
+    if (in.children.size < 3) {
+        return 0;
+    }
+    return lexid_eq(in.children.begin[0].data, SUBS_LEXID);
+}
+
+//Given a type declaration statement, adds it to the type universe
+//TODO: Support restricted polymorphic types!
+void load_type_decl(lexid_tree in) {
+    lexid_tree type_expr = in.children.begin[1];
+    //Get the number of arguments to the polymorphic type
+    int numargs = type_expr.children.size - 1;
+    //Add the type to the type graph
+    type_graph_addpolytype(type_expr.children.begin[0], numargs);
+}
+
+typedef struct {
+    type_env e;
+    typeslot type;
+} parsetype_result; //Represents the result of parsing a type that may contain type parameters
+
+//Given a lexid_tree and a current type environment, gives a new type environment [containing any additional variables
+//that appear in the given expression], and the type of the overall type expression
+parsetype_result parse_type(lexid_tree in, type_env e) {
+    parsetype_result result;
+    if (in.children.size == 0) {
+        //Must be either a type variable or a monotype
+        if (lexid_is_type(in.data)) {
+            //Must be a monotype
+            result.type = typeslot_from_type(make_monotype(get_TypeGraphRef(in.data)));
+            result.e = e;
+        }
+        else {
+            //Must be a type variable
+            if (!type_env_exists(e, in.data)) {
+                //If we haven't seen the variable before
+                //make a new type ref and add it to the environment
+                type_ref newref = make_unknown_type_ref();
+                result.e = type_env_add(e, in.data, newref);
+                result.type = typeslot_from_ref(newref);
+            }
+            else {
+                //Must already be in the environment!
+                type_ref oldref = type_env_lookup(e, in.data);
+                result.e = e;
+                result.type = typeslot_from_ref(oldref);
+            }
+        }
+
+        return result;
+    }
+    //Otherwise, must be a polytype
+    typeslot_dynarray args = typeslot_dynarray_make(1);
+    int i;
+    for (i=1; i < in.children.size; i++) {
+        //Get the result of parsing each child
+        parsetype_result tmp = parse_type(in.children.begin[i], e);
+        //Update the environment according to the children
+        e = tmp.e;
+        //Add to the list of arguments for the result polytype
+        args = typeslot_dynarray_add(args, tmp.type);
+    }
+
+    result.type = typeslot_from_type(make_polytype(get_TypeGraphRef(in.children.begin[0].data), args));
+    result.e = e;
+    return result;
+}
+
+
+
+//Given a subtype declaration statement, add the infos to the type universe
+//TODO: Support the special case of "A <: SomePoly(...)" as far as the type graph is concerned
+void load_subtype_decl(lexid_tree in) {
+    lexid_tree subtype_tree = in.children.begin[1];
+    lexid_tree supertype_tree = in.children.begin[2];
+
+    parsetype_result super_parse = parse_type(supertype_tree, type_env_init());
+    //Parse the subtype using a continuation of the environment of the supertype
+    parsetype_result sub_parse = parse_type(subtype_tree, super_parse.e);
+
+    //Now, for the fun part!
+
+    //Check if the supertype is just a type_ref [if so, ERROR]
+    //TODO: Throw an actual error
+    if (typeslot_get_kind(super_parse.type) == typeslot_ref) {
+        printf("ERROR: Cannot declare subtypes of a type variable!");
+        return;
+    }
+    //Otherwise, the supertype must be a polytype
+    type_graph_add_subtype(sub_parse.type, typeslot_get_type(super_parse.type));
+    return;
+}
+
+
+
 def_collection to_cells(collectnames_result in) {
     lexid_tree parsetree = in.parse.AST;
     function_table table = in.table;
@@ -271,14 +378,14 @@ def_collection to_cells(collectnames_result in) {
     printf("\n");
     //For every top-level definition
     for (i = 0; i < parsetree.children.size; i++) {
-        //Convert it to a function
-        function current = load_function_def(parsetree.children.begin[i], table);
+        if (is_function_def(parsetree.children.begin[i])) {
 
-        //Add it to the passed function table
-        table = add_function(table, current.name, current);
-        //Print it
-        print_function(current, names);
-        printf("\n");
+            //Convert it to a function
+            function current = load_function_def(parsetree.children.begin[i], table);
+
+            //Add it to the passed function table
+            table = add_function(table, current.name, current);
+        }
     }
 
     def_collection result;

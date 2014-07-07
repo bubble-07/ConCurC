@@ -171,6 +171,16 @@ int is_subtype(polytype a, polytype b) {
     return 0;
 }
 
-
-
-
+int polytype_pour(polytype src, polytype dest) {
+    if (polytype_numargs(src) != polytype_numargs(dest)) {
+        return 0;
+    }
+    int i;
+    for (i=0; i < polytype_numargs(dest); i++) {
+        int success = typeslot_pour(get_polytype_arg(src, i), get_polytype_arg(dest, i));
+        if (!success) {
+            return 0;
+        }
+    }
+    return 1; //Must've been successful
+}

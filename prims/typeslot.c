@@ -87,7 +87,7 @@ int typeslot_pour(typeslot from, typeslot to) {
         //Their stems must be trivially equal
         if (srctype.ref == desttype.ref) {
             //Recurse!
-            typeslot_dynarray_pour(srctype, desttype.argtypes);
+            polytype_pour(srctype, desttype);
         }
     }
     //TODO: Handle case that both are refs!
@@ -95,21 +95,6 @@ int typeslot_pour(typeslot from, typeslot to) {
 }
 
         
-
-int typeslot_dynarray_pour(polytype from, typeslot_dynarray to) {
-    if (polytype_numargs(from) != to.size) {
-        return 0;
-    }
-    int i;
-    for (i=0; i < to.size; i++) {
-        int success = typeslot_pour(get_polytype_arg(from, i), to.begin[i]);
-        if (!success) {
-            return 0;
-        }
-    }
-    return 1; //Must've been successful
-}
-
 polytype typeslot_instantiate(typeslot in) {
     //If we're dealing with a ref, just return its bound
     if (in.kind == typeslot_ref) {

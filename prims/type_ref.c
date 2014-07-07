@@ -37,6 +37,11 @@ int hash_type_ref(type_ref in) {
 }
 
 int type_ref_eq(type_ref one, type_ref two) {
+    //Handle special case that both are null
+    //(used for dictionary implementations)
+    if (one == NULL && two == NULL) {
+        return 1;
+    }
     return find(one) == find(two); //Equal iff representative addresses equal
 }
 

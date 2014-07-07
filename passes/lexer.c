@@ -143,6 +143,7 @@ lex_result lex(fileLoc* currentloc) {
     ADDCONST_SYM("String", STRINGID_LEXID);
     ADDCONST_SYM("Float", FLOATID_LEXID);
     ADDCONST_SYM("Any", ANYID_LEXID);
+    ADDCONST_SYM("Either", EITHERID_LEXID);
 
     /*Meat of the actual lexer. Conceptually, it does this by predictive decisions using the 
     current character as a reference.*/

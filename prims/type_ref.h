@@ -35,8 +35,11 @@ typedef type_ref_node* type_ref;
 
 DEFINE_DYNARRAY(type_ref)
 
+static const type_ref type_ref_lookup_failure = NULL;
+
 //Hash to same value iff have same representative node
 int hash_type_ref(type_ref in);
+
 //Equal iff have same representative node
 int type_ref_eq(type_ref one, type_ref two);
 

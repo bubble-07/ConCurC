@@ -69,10 +69,12 @@ int main(int argc, const char* argv[]) {
     init_type_universe();
     
     //Print out our parse tree
-    //display(program.parse.AST, program.parse.names);
+    display(program.parse.AST, program.parse.names);
 
     //Convert to a list of definitions
     def_collection defs = to_cells(program);
+
+    finalize_type_universe();
 
     printf("\n\n Inferring types \n\n");
 

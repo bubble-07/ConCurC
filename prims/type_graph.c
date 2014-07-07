@@ -3,13 +3,13 @@
 
 void mono_subtypes_to_lattice(noderef super, noderef subtype) {
     type_graph_node supernode = Type_graph_getnode(UniverseGraph, super);
-    supernode.lattice = lattice_add_subtype(supernode.lattice, typeslot_from_type(make_monotype(subtype)));
+    supernode.lattice = lattice_add_subtype(supernode.lattice, typeslot_from_type(make_monotype(subtype)), make_monotype(super));
     return;
 }
 
 //Macro for adding a type to the graph with the given internal name (for reference to the node)
 //and the given value for the LEXID (probably hardcoded into lexer.c and lexid.h)
-#define AddMonoType(name, id) noderef name; UniverseGraph = Type_graph_addnode(UniverseGraph, make_type_graph_node(id, make_monotype_lattice()), &name); \
+#define AddMonoType(name, id) noderef name; UniverseGraph = Type_graph_addnode(UniverseGraph, make_type_graph_node(id, make_lattice()), &name); \
                       UniverseDict = lexid_TypeGraphRef_dict_add(UniverseDict, \
                                     lexid_TypeGraphRef_bucket_make(id, name));
 
@@ -22,6 +22,39 @@ void mono_subtypes_to_lattice(noderef super, noderef subtype) {
 //Note that the arrow always points from supertype to subtype
 #define MonoSubs(one, two) UniverseGraph = Type_graph_addedge(UniverseGraph, two, one); mono_subtypes_to_lattice(two, one);
 
+noderef type_graph_addmonotype(lexid name) {
+    AddMonoType(result, name)
+    UniverseGraph = Type_graph_addedge(UniverseGraph, Top.ref, result);
+    return result;
+}
+
+//Adds a polytype with the given number of arguments
+noderef type_graph_addpolytype(lexid name, int args) {
+    //TODO: Handle the number of arguments!
+    subtype_lattice* lattice = make_lattice(args);
+    AddPolyType(result, name, lattice)
+    UniverseGraph = Type_graph_addedge(UniverseGraph, Top.ref, result);
+    return result;
+}
+
+void type_graph_add_subtype(typeslot subtype, polytype supertype) {
+
+    //Get the reference to the node we need to change
+    type_graph_node node = get_graph_node(supertype.ref);
+    //Add the subtype declaration to the lattice
+    lattice_add_subtype(node.lattice, subtype, supertype);
+    
+    //Now, if the subtype we're dealing with is a type_ref...
+    if (typeslot_get_kind(subtype) == typeslot_ref) {
+        //Then, our originating polymorph can be the supertype of any type
+        UniverseGraph = Type_graph_addedge(UniverseGraph, supertype.ref, Top.ref);
+        return;
+    }
+    //Otherwise, the subtype must be a polytype 
+    polytype sub = typeslot_get_type(subtype);
+    UniverseGraph = Type_graph_addedge(UniverseGraph, supertype.ref, sub.ref);
+    return;
+}
 
 void init_type_universe() {
     UniverseGraph = Type_graph_init(2);
@@ -35,18 +68,18 @@ void init_type_universe() {
     Bottom = make_monotype(None);
        
     //Okay, now let's define Either in a hardcoded way
+    Either = type_graph_addpolytype(EITHERID_LEXID, 2);
+
     typeslot a = typeslot_from_ref(make_unknown_type_ref());
     typeslot b = typeslot_from_ref(make_unknown_type_ref());
     typeslot_dynarray eitherargs = typeslot_dynarray_add(typeslot_dynarray_add(typeslot_dynarray_make(1), a), b);
 
+    polytype eitherhead = make_polytype(Either, eitherargs);
 
-    subtype_lattice* eitherlattice = make_polytype_lattice(eitherargs);
+    type_graph_add_subtype(a, eitherhead);
+    type_graph_add_subtype(b, eitherhead);
 
-    eitherlattice = lattice_add_subtype(eitherlattice, a);
-    eitherlattice = lattice_add_subtype(eitherlattice, b);
- 
-    AddPolyType(Eithert, EITHERID_LEXID, eitherlattice)
-    Either = Eithert;
+
     UniverseGraph = Type_graph_addedge(UniverseGraph, Any, Either);
     UniverseGraph = Type_graph_addedge(UniverseGraph, Either, Any); //Any type can subtype Either
 
@@ -62,11 +95,14 @@ void init_type_universe() {
     MonoSubs(Int, Num)
     MonoSubs(Float, Num)
 
-    //Great, let's fill out the rest of the graph automatically
-    UniverseGraph = Type_graph_transitiveclosure(UniverseGraph);
-    UniverseGraph = Type_graph_reflexiveclosure(UniverseGraph);
     return;
 }
+
+void finalize_type_universe() {
+    UniverseGraph = Type_graph_transitiveclosure(UniverseGraph);
+    UniverseGraph = Type_graph_reflexiveclosure(UniverseGraph);
+}
+
 
 //Returns "true" if it's possible a subtypes b using the type graph data
 int Type_graph_possiblesubtype(Type_graph in, polytype a, polytype b) {
@@ -82,6 +118,10 @@ TypeGraphRef get_TypeGraphRef(lexid s) {
     return lexid_TypeGraphRef_dict_get(UniverseDict, s);
 }
 
+int lexid_is_type(lexid in) {
+    //The lexid references a type if it's in the universe dict
+    return lexid_TypeGraphRef_dict_exists(UniverseDict, in);
+}
 
 //TODO: Write this better.
 string get_type_name(TypeGraphRef r, nametable names) {

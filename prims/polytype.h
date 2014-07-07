@@ -54,4 +54,8 @@ int types_are_disjoint(polytype a, polytype b);
 //Returns "true" if the given types are equal (deep comparison)
 int type_eq(polytype a, polytype b);
 
+//Takes the src and fills all type_refs in dest with the info from src (matching)
+//returns 0 for an unsuccessful match
+int polytype_pour(polytype src, polytype dest);
+
 #endif

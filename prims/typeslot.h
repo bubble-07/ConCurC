@@ -30,14 +30,14 @@ polytype typeslot_get_type(typeslot in);
 void print_typeslot(typeslot in, nametable names);
 void print_typeslot_list(typeslot_dynarray in, nametable names);
 
+polytype typeslot_instantiate(typeslot in);
+
 //"Flattens" all type_refs within the dynarray recursively to their upper bounds
 polytype_dynarray typeslot_dynarray_instantiate(typeslot_dynarray in);
 
 int typeslot_trivial_eq(typeslot a, typeslot b);
 int typeslot_dynarray_trivial_eq(typeslot_dynarray a, typeslot_dynarray b);
 
-//Using the arguments from the given polytype, set bounds on type_refs in "to" to match.
-//Returns "0" if there was a failure
-int typeslot_dynarray_pour(polytype from, typeslot_dynarray to);
+int typeslot_pour(typeslot one, typeslot two);
 
 #endif

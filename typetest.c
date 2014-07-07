@@ -19,6 +19,7 @@ int main(int argc, const char* argv[]) {
 
 
     init_type_universe();
+    finalize_type_universe();
 
     
     polytype Int = make_monotype(get_TypeGraphRef(INTID_LEXID));

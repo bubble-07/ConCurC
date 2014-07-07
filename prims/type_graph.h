@@ -46,11 +46,15 @@ polytype Bottom;
 noderef Either;
 
 void init_type_universe();
+void finalize_type_universe();
 TypeGraphRef get_TypeGraphRef(lexid s);
 string get_type_name(TypeGraphRef r, nametable names);
 void print_TypeGraphRef(TypeGraphRef r, nametable names);
 type_graph_node get_graph_node(TypeGraphRef r);
 //Returns "true" if it's possible for a to subtype b
 int Type_graph_possiblesubtype(Type_graph in, polytype a, polytype b);
+int lexid_is_type(lexid in);
+
+void type_graph_add_subtype(typeslot subt, polytype supert);
 
 #endif

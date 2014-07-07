@@ -16,7 +16,8 @@
 extern Type_graph UniverseGraph; //Give access to the type universe
 extern lexid_TypeGraphRef_dict UniverseDict;
 extern polytype Top;
-extern TypeGraphRef Mono; //Defines the bridge from polytypes to monotypes
+extern polytype Bottom;
+extern noderef Either;
 #endif
 
 #ifndef TYPE_GRAPH_DEFINED
@@ -40,7 +41,9 @@ Type_graph UniverseGraph;
 lexid_TypeGraphRef_dict UniverseDict;
 //Give a reference to the "Any" or "Top" type
 polytype Top;
-TypeGraphRef Mono;
+//Give a reference to the "None" or "Bottom" type
+polytype Bottom;
+noderef Either;
 
 void init_type_universe();
 TypeGraphRef get_TypeGraphRef(lexid s);

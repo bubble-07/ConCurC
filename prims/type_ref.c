@@ -2,7 +2,7 @@
 #include "type_ref.h"
 #include "type_ref_info.h"
 
-type_ref make_known_type_ref(TypeInfo in) {
+type_ref make_known_type_ref(polytype in) {
     type_ref_info* info = memalloc(sizeof(type_ref_info));
     info->upperbound = in;
     info->equations = equation_set_init();
@@ -41,10 +41,17 @@ int type_ref_eq(type_ref one, type_ref two) {
 }
 
 //Gets the principal bounding type of the given typeref
-TypeInfo type_ref_getbound(type_ref in) {
+polytype type_ref_getbound(type_ref in) {
     type_ref rep = find(in);
     type_ref_info* info = rep->data;
     return info->upperbound;
+}
+
+type_ref type_ref_setbound(type_ref in, polytype t) {
+    type_ref rep = find(in);
+    type_ref_info* info = rep->data;
+    info->upperbound = t;
+    return in;
 }
 
 //Equal if the two type refs have the same form (that is, unknown variables equal unknown variables,
@@ -104,13 +111,13 @@ type_ref type_ref_addapply_eqn(type_ref in, type_ref func, type_ref_dynarray arg
     return type_ref_add_equation(in, make_apply_eqn(func, args));
 }
 
-int type_ref_restrict(type_ref in, TypeInfo bound) {
+int type_ref_restrict(type_ref in, polytype bound) {
     type_ref rep = find(in);
     type_ref_info* info = rep->data;
 
-    TypeInfo oldbound = copy_type(info->upperbound);
+    polytype oldbound = copy_type(info->upperbound);
 
-    info->upperbound = restrict_sum(info->upperbound, bound);
+    info->upperbound = intersect_types(info->upperbound, bound);
     return !type_eq(oldbound, info->upperbound); //Active if the upper bound has changed
 }
 

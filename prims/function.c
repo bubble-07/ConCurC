@@ -3,15 +3,15 @@
 
 //Gets the type of the parameter in the given position
 //Returns empty type if outside of bounds
-TypeInfo function_ptr_get_parameter_type(function_ptr in, int pos) {
+polytype function_ptr_get_parameter_type(function_ptr in, int pos) {
     pos = pos - 1; //Do this so "1" corresponds to the first element in the array of params
     if (in->params.size > pos) {
         return get_parameter_ptr_bound(in->params.begin[pos]);
     }
-    return make_empty_type();
+    return make_bottom_type();
 }
 //Returns the return type of the given function
-TypeInfo function_ptr_get_return_type(function_ptr in) {
+polytype function_ptr_get_return_type(function_ptr in) {
     return type_ref_getbound(in->ret_type);
 }
 

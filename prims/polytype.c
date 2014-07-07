@@ -4,24 +4,39 @@
 #include "type_ref_info.h"
 
 //Prints a given polytype
-void print_polytype(polytype in, nametable names) {
+void print_type(polytype in, nametable names) {
     print_TypeGraphRef(in.ref, names);
     if (!is_monotype(in)) {
         printf("(");
-        print_type_ref_list(in.argtypes, names);
+        print_typeslot_list(in.argtypes, names);
         printf(")");
     }
     return;
 }
 
-polytype make_polytype(TypeGraphRef in, type_ref_dynarray args) {
+polytype make_polytype(TypeGraphRef in, typeslot_dynarray args) {
     polytype result;
     result.ref = in;
     result.argtypes = args;
     return result;
 }
+
+int polytype_numargs(polytype in) {
+    return in.argtypes.size;
+}
+
+typeslot get_polytype_arg(polytype in, int pos) {
+    return in.argtypes.begin[pos];
+}
 polytype make_monotype(noderef in) {
-    return make_polytype(in, type_ref_dynarray_make(1));
+    return make_polytype(in, typeslot_dynarray_make(1));
+}
+
+polytype make_bottom_type() {
+    return Bottom;
+}
+polytype make_unknown_type() {
+    return Top;
 }
 
 int is_any(polytype in) {
@@ -32,45 +47,130 @@ int is_monotype(polytype in) {
     return (in.argtypes.size == 0);
 }
 
-TypeInfo polytype_get_subtypes(polytype in) {
-    //Handle the special case of a polymorphic monotype
-    if (in.ref == Mono) {
-        //TODO: handle case of multiple types
-        TypeInfo bound = type_ref_getbound(in.argtypes.begin[0]);
-        return polytype_get_subtypes(bound.options.begin[0]);
-    }
+polytype_dynarray polytype_get_subtypes(polytype in) {
     type_graph_node node = get_graph_node(in.ref);
     return lattice_get_subtypes(in, node.lattice);
-}
-
-//TODO: Remove this, and change the structure of polytypes completely!
-int polytype_pour_args(polytype in, type_ref_dynarray refs) {
-    printf("Polytype size: %d", in.argtypes.size);
-    printf("Args size: %d", refs.size);
-    int i;
-    for (i=0; i < in.argtypes.size; i++) {
-        //Make the variable type ref point toward the polytype's
-        type_ref_makepoint(refs.begin[i], in.argtypes.begin[i]);
-    }
-    return 1; //Successful
 }
 
 //Checks [trivially] if the two polytypes are equal
 int polytype_trivial_eq(polytype one, polytype two) {
     if (one.ref != two.ref) {
-        //Deal with the special case of "Mono" as a constructor
-
-        if (is_monotype(one) && two.ref == Mono) {
-            //Deconstruct "Mono" into the type it references
-            TypeInfo twobound = type_ref_getbound(two.argtypes.begin[0]);
-            return polytype_trivial_eq(one, twobound.options.begin[0]);
-        }
-        else if (is_monotype(two) && one.ref == Mono) {
-            return polytype_trivial_eq(two, one); //Reverse and try again
-        }
         return 0; //Can't be equal, not the same constructor
     }
-    return type_ref_dynarray_trivial_eq(one.argtypes, two.argtypes);
+    return typeslot_dynarray_trivial_eq(one.argtypes, two.argtypes);
 }
-    
+
+int type_eq(polytype one, polytype two) {
+    //Equal iff each a subtype of the other
+    return (is_subtype(one, two) && is_subtype(two, one));
+}
+
+polytype copy_type(polytype in) {
+    return in; //FIXME: Actually copy!
+}
+
+//Given two types, returns their union ("Either")
+polytype union_types(polytype a, polytype b) {
+    if (polytype_trivial_eq(a, Bottom)) {
+        return b;
+    }
+    if (polytype_trivial_eq(b, Bottom)) {
+        return a;
+    }
+    typeslot_dynarray args = typeslot_dynarray_make(1);
+    args = typeslot_dynarray_add(args, typeslot_from_type(a));
+    args = typeslot_dynarray_add(args, typeslot_from_type(b));
+    return make_polytype(Either, args);
+}
+
+//Given a list of polytypes, returns one that represents the union of all
+//Must robustly handle the case where we have bottom types
+polytype union_typelist(polytype_dynarray in) {
+    polytype result = Bottom;
+    int i;
+    for (i=0; i < in.size; i++) {
+        result = union_types(result, in.begin[i]);
+    }
+    return result;
+}
+
+//Adds a type to a list of polytypes
+polytype add_type(polytype_dynarray in, polytype a);
+
+//Helper that restricts the given subtype list so it falls under a given type,
+//and then returns a concatenated "either"-ified type
+polytype restrict_type(polytype_dynarray in, polytype constraint) {
+    polytype_dynarray result = polytype_dynarray_make(1);
+    int i;
+    for (i=0; i < in.size; i++) {
+        result = polytype_dynarray_add(result, intersect_types(in.begin[i], constraint));
+    }
+    return union_typelist(result);
+}
+
+//Finds the set of all types that are subtypes of a and b.
+//Note that this version assumes we have the transitive closure
+polytype intersect_types(polytype a, polytype b) {
+    polytype_dynarray result = polytype_dynarray_make(1);
+
+    //Handle special cases where either a or b are "Any"
+    if (is_any(a)) {
+        return b;
+    }
+    if (is_any(b)) {
+        return a;
+    }
+
+    //Is A possibly a subtype of B?
+    if (Type_graph_possiblesubtype(UniverseGraph, a, b)) {
+        //it is. Check if A __is__ B (trivially -- is it exactly the same?)
+        if (polytype_trivial_eq(a, b)) {
+            //Great, they're both the same. Add one to the result and return
+            return a;
+        }
+        else {
+            //Since A is possibly a subtype of B, but A is not B,
+            //we should be able to find A somewhere under B. 
+            //To do so, instantiate B's subtypes in the lattice and recurse
+            //by restricting the set of B's subtypes by A.
+            polytype_dynarray b_subtypes = polytype_get_subtypes(b);
+            return restrict_type(b_subtypes, a);
+        }
+    }
+    //A cannot subtype B
+    //Check if A's children do so instead.
+    return restrict_type(polytype_get_subtypes(a), b);
+}
+
+//Returns "true" if the given types are disjoint
+int types_are_disjoint(polytype a, polytype b) {
+    //They're disjoint if their intersection is "Bottom"
+    return polytype_trivial_eq(intersect_types(a, b), Bottom);
+}
+
+//Returns "true" if a is a subtype of b
+int is_subtype(polytype a, polytype b) {
+    //Is A possibly a subtype of b?
+    if (Type_graph_possiblesubtype(UniverseGraph, a, b)) {
+        //Is A the same as B?
+        if (polytype_trivial_eq(a, b)) {
+            return 1;
+        }
+        //Otherwise, must not be, so recurse on b's children
+        polytype_dynarray b_subtypes = polytype_get_subtypes(b);
+        int i;
+        for (i=0; i < b_subtypes.size; i++) {
+            //If a is a subtype of any subtype of b
+            if (is_subtype(a, b_subtypes.begin[i])) {
+                //Then it's a subtype of b
+                return 1;
+            }
+        }
+    }
+    //In all other cases, it can't be a subtype of b
+    return 0;
+}
+
+
+
 

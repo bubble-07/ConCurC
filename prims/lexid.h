@@ -61,7 +61,7 @@ D_LEX(FLOATID, 32)
 D_LEX(ANYID, 33)
 D_LEX(EITHERID, 34)
 D_LEX(LISTID, 35)
-D_LEX(MONOID, 36) //Defines the internal lexid used for "monotype" (for parametric monotypes)
+D_LEX(NONEID, 36) 
 
 
 //Set the value of the last primitive lexid (so all non-hardcoded identifiers come after)

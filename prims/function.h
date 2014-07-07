@@ -22,8 +22,8 @@ DEFINE_DYNARRAY(function_ptr)
 DEFINE_DYNARRAY(function)
 
 
-TypeInfo function_ptr_get_parameter_type(function_ptr in, int pos);
-TypeInfo function_ptr_get_return_type(function_ptr in);
+polytype function_ptr_get_parameter_type(function_ptr in, int pos);
+polytype function_ptr_get_return_type(function_ptr in);
 function_ptr function_ptr_set_return_type(function_ptr in, type_ref t);
 int function_ptr_accepts(function_ptr in, type_ref_dynarray args);
 void print_function(function in, nametable names);

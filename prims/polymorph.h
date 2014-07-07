@@ -35,28 +35,27 @@ static void polymorph_ptr_free(polymorph_ptr in) {
     return;
 }
             
-
 //Gets a sum type of all possible types the parameter in position pos could be
 //Assumes that the position pos does not accept a type variable
-static TypeInfo polymorph_ptr_get_parameter_type(polymorph_ptr in, int pos) {
+static polytype polymorph_ptr_get_parameter_type(polymorph_ptr in, int pos) {
     function_ptr_dynarray options = polymorph_ptr_get_options(in);
-    TypeInfo result = make_empty_type();
+    polytype result = make_bottom_type();
     int i;
     for (i=0; i < options.size; i++) {
         //Add more options for what the type can be
-        result = concat_types(result, function_ptr_get_parameter_type(options.begin[i], pos));
+        result = union_types(result, function_ptr_get_parameter_type(options.begin[i], pos));
     }
     return result;
 }
 
 //Gets a sum type representing the most general return type of the polymorph.
 //Assumes that the return type is not variable
-static TypeInfo polymorph_ptr_get_return_type(polymorph_ptr in) {
+static polytype polymorph_ptr_get_return_type(polymorph_ptr in) {
     function_ptr_dynarray options = polymorph_ptr_get_options(in);
-    TypeInfo result = make_empty_type();
+    polytype result = make_bottom_type();
     int i;
     for (i=0; i < options.size; i++) {
-        result = concat_types(result, function_ptr_get_return_type(options.begin[i]));
+        result = union_types(result, function_ptr_get_return_type(options.begin[i]));
     }
     return result;
 }

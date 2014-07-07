@@ -2,6 +2,8 @@
 #include "passes/primorder.h"
 #include "passes/collectnames.h"
 #include "passes/to_cells.h"
+#include "prims/polytype.h"
+#include "prims/type_graph.h"
 
 int main(int argc, const char* argv[]) {    
     
@@ -22,13 +24,13 @@ int main(int argc, const char* argv[]) {
     polytype Int = make_monotype(get_TypeGraphRef(INTID_LEXID));
     polytype String = make_monotype(get_TypeGraphRef(STRINGID_LEXID));
 
-    type_ref_dynarray IntString = type_ref_dynarray_make(1);
-    IntString = type_ref_dynarray_add(IntString, make_known_type_ref(make_simple_type(Int)));
-    IntString = type_ref_dynarray_add(IntString, make_known_type_ref(make_simple_type(String)));
+    typeslot_dynarray IntString = typeslot_dynarray_make(1);
+    IntString = typeslot_dynarray_add(IntString, typeslot_from_type(Int));
+    IntString = typeslot_dynarray_add(IntString, typeslot_from_type(String));
 
-    polytype EitherIntString = make_polytype(get_TypeGraphRef(EITHERID_LEXID), IntString);
+    polytype EitherIntString = make_polytype(Either, IntString);
 
-    TypeInfo result = intersect_types(Int, EitherIntString);
+    polytype result = intersect_types(Int, EitherIntString);
 
     print_type(result, program.parse.names); //Print out the result
     return 0;

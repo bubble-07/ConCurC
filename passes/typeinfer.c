@@ -81,7 +81,7 @@ int solve_apply_equation(type_ref node, is_result_of* eqn) {
     //If the given function is a polymorph
     if (poly != NULL) {
         //Figure out what the return type must fall under
-        TypeInfo constraint = polymorph_ptr_get_return_type(poly);
+        polytype constraint = polymorph_ptr_get_return_type(poly);
         
         //TODO: We don't __actually__ mean "restrict" here -- we need to check if the
         //returned type is a subtype of the node's current type. If not, then it's a type error
@@ -98,7 +98,7 @@ int solve_argpos_equation(type_ref node, is_in_pos* eqn) {
     //If the given function is a polymorph
     if (poly != NULL) {
         //Figure out what our parameter would need to fall under
-        TypeInfo constraint = polymorph_ptr_get_parameter_type(poly, eqn->pos);
+        polytype constraint = polymorph_ptr_get_parameter_type(poly, eqn->pos);
 
         //Restrict our node to fall under the new type
         //If we restrict it at all, we are active!

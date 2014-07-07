@@ -18,7 +18,7 @@ type_ref get_parameter_ptr_type_ref(parameter_ptr in) {
 }
 
 //Assumes that the given parameter has a non-variable type
-TypeInfo get_parameter_ptr_bound(parameter_ptr in) {
+polytype get_parameter_ptr_bound(parameter_ptr in) {
     return type_ref_getbound(in->type);
 }
 

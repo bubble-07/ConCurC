@@ -27,7 +27,7 @@ static type_graph_node type_graph_node_add_subtype(type_graph_node in, polytype 
     if (in.lattice == NULL) {
         //Allocate a new one
     }
-    in.lattice = lattice_add_subtype(in.lattice, sub);
+    in.lattice = lattice_add_subtype(in.lattice, typeslot_from_type(sub));
     return in;
 }
 

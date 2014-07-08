@@ -23,24 +23,75 @@ int is_function_def(lexid_tree in) {
     return 0;
 }
 
+typedef struct {
+    type_env e;
+    typeslot type;
+} parsetype_result; //Represents the result of parsing a type that may contain type parameters
 
-//Takes something of the form "name" or "(type name)",
-//and if a type was specified, returns the type, but if
-//it wasn't, return an unknown type
-typeslot name_decl_to_type(lexid_tree in) {
-    //TODO: fail gracefully in the case of a lookup failure
+//Given a lexid_tree and a current type environment, gives a new type environment [containing any additional variables
+//that appear in the given expression], and the type of the overall type expression
+parsetype_result parse_type(lexid_tree in, type_env e) {
+    parsetype_result result;
+    if (in.children.size == 0) {
+        //Must be either a type variable or a monotype
+        if (lexid_is_type(in.data)) {
+            //Must be a monotype
+            result.type = typeslot_from_type(make_monotype(get_TypeGraphRef(in.data)));
+            result.e = e;
+        }
+        else {
+            //Must be a type variable
+            if (!type_env_exists(e, in.data)) {
+                //If we haven't seen the variable before
+                //make a new type ref and add it to the environment
+                type_ref newref = make_unknown_type_ref();
+                result.e = type_env_add(e, in.data, newref);
+                result.type = typeslot_from_ref(newref);
+            }
+            else {
+                //Must already be in the environment!
+                type_ref oldref = type_env_lookup(e, in.data);
+                result.e = e;
+                result.type = typeslot_from_ref(oldref);
+            }
+        }
+
+        return result;
+    }
+    //Otherwise, must be a polytype
+    typeslot_dynarray args = typeslot_dynarray_make(1);
+    int i;
+    for (i=1; i < in.children.size; i++) {
+        //Get the result of parsing each child
+        parsetype_result tmp = parse_type(in.children.begin[i], e);
+        //Update the environment according to the children
+        e = tmp.e;
+        //Add to the list of arguments for the result polytype
+        args = typeslot_dynarray_add(args, tmp.type);
+    }
+
+    result.type = typeslot_from_type(make_polytype(get_TypeGraphRef(in.children.begin[0].data), args));
+    result.e = e;
+    return result;
+}
+
+//Takes something of the form "name" or "(type name)" and a current typing environment
+//and parses out the type in the expression
+parsetype_result name_decl_to_type(lexid_tree in, type_env e) {
+    parsetype_result result;
+
     if (lexid_eq(in.data, EXPR_LEXID)) {
         //type must've been specified
-        lexid type_lexid = in.children.begin[0].data;
-        //Look up the type corresponding to the lexid
-        TypeGraphRef result = get_TypeGraphRef(type_lexid);
-        //Finalize and return
-        return typeslot_from_type(make_monotype(result));
+        lexid_tree type_tree = in.children.begin[0];
+        //Parse it out and return
+        return parse_type(type_tree, e);
     }
     else {
-        //Otherwise, the type must still be unknown
-        return typeslot_from_ref(make_unknown_type_ref());
+        //Otherwise, the type must not have been specified, and is up to inference
+        result.e = e;
+        result.type = typeslot_from_ref(make_unknown_type_ref());
     }
+    return result;
 }
 
 //Gets the name associated with (type name) or name
@@ -53,11 +104,7 @@ lexid name_decl_to_name(lexid_tree in) {
     return in.data;
 }
 
-parameter_ptr name_decl_to_param(lexid_tree in) {
-    return parameter_ptr_make(name_decl_to_type(in), name_decl_to_name(in));
-}
-
-
+/*
 //Makes a lambda form cell_tree from the given exprs for params and body
 //(Return type is left unspecified)
 cell_tree make_lambda_expr(lexid_tree paramtree, lexid_tree body, env e, function_table table) {
@@ -113,7 +160,7 @@ cell_tree convert_lambda_expr(lexid_tree_dynarray in, env e, function_table tabl
     }
     return result; //TODO: THROW AN ERROR! (must be malformed)
 }
-
+*/
 
 //Converts a leaf lexid to a cell_tree
 cell_tree convert_to_singleton_cell(lexid in, env e, function_table table) {
@@ -182,7 +229,8 @@ cell_tree convert_to_cells(lexid_tree in, env e, function_table table) {
 
     //Handle the "lambda" special form
     if (lexid_eq(in.children.begin[0].data, LAMBDA_LEXID)) {
-        return convert_lambda_expr(in.children, e, table);
+        printf("ERROR! Lambdas not yet implemented! \n");
+        //return convert_lambda_expr(in.children, e, table);
     }
 
     //Must be a simple expression, so make an expression subtree
@@ -232,16 +280,32 @@ function load_function_def(lexid_tree in, function_table table) {
     //of the function's name, return type, arguments, and argument types.
     lexid_tree_dynarray typeline = in.children.begin[1].children;
 
+    //Create a uniform typing environment to deal with
+    type_env e = type_env_init();
+
+    parsetype_result ret_type_parse = name_decl_to_type(typeline.begin[0], e);
+    
     //Assign the function's return type
-    result.ret_type = name_decl_to_type(typeline.begin[0]);
+    result.ret_type = ret_type_parse.type;
+
+    //Pass along the type environment
+    e = ret_type_parse.e;
 
     //All that remains are the parameters
     result.params = parameter_ptr_dynarray_make(1);
     int i;
     //for each parameter
     for (i = 1; i < typeline.size; i++) {
+
+        lexid arg_name = name_decl_to_name(typeline.begin[i]);
+
+        parsetype_result arg_type_parse = name_decl_to_type(typeline.begin[i], e);
+        //Pass along the environment
+        e = arg_type_parse.e;
+
         //Convert the current name/type declaration to a parameter
-        parameter_ptr current = name_decl_to_param(typeline.begin[i]);
+        parameter_ptr current = parameter_ptr_make(arg_type_parse.type, arg_name);
+
         //Add it to the function's parameter list
         result.params = parameter_ptr_dynarray_add(result.params, current);
     }
@@ -299,60 +363,6 @@ void load_type_decl(lexid_tree in) {
         return;
     }
 }
-
-typedef struct {
-    type_env e;
-    typeslot type;
-} parsetype_result; //Represents the result of parsing a type that may contain type parameters
-
-//Given a lexid_tree and a current type environment, gives a new type environment [containing any additional variables
-//that appear in the given expression], and the type of the overall type expression
-parsetype_result parse_type(lexid_tree in, type_env e) {
-    parsetype_result result;
-    if (in.children.size == 0) {
-        //Must be either a type variable or a monotype
-        if (lexid_is_type(in.data)) {
-            //Must be a monotype
-            result.type = typeslot_from_type(make_monotype(get_TypeGraphRef(in.data)));
-            result.e = e;
-        }
-        else {
-            //Must be a type variable
-            if (!type_env_exists(e, in.data)) {
-                //If we haven't seen the variable before
-                //make a new type ref and add it to the environment
-                type_ref newref = make_unknown_type_ref();
-                result.e = type_env_add(e, in.data, newref);
-                result.type = typeslot_from_ref(newref);
-            }
-            else {
-                //Must already be in the environment!
-                type_ref oldref = type_env_lookup(e, in.data);
-                result.e = e;
-                result.type = typeslot_from_ref(oldref);
-            }
-        }
-
-        return result;
-    }
-    //Otherwise, must be a polytype
-    typeslot_dynarray args = typeslot_dynarray_make(1);
-    int i;
-    for (i=1; i < in.children.size; i++) {
-        //Get the result of parsing each child
-        parsetype_result tmp = parse_type(in.children.begin[i], e);
-        //Update the environment according to the children
-        e = tmp.e;
-        //Add to the list of arguments for the result polytype
-        args = typeslot_dynarray_add(args, tmp.type);
-    }
-
-    result.type = typeslot_from_type(make_polytype(get_TypeGraphRef(in.children.begin[0].data), args));
-    result.e = e;
-    return result;
-}
-
-
 
 //Given a subtype declaration statement, add the infos to the type universe
 //TODO: Support the special case of "A <: SomePoly(...)" as far as the type graph is concerned

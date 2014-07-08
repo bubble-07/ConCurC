@@ -7,8 +7,7 @@
 /*Defines convenience functions for allocating and dealing with memory*/
 
 inline static void outofmemexception() {
-     printf("%s", "you did something stupid");
-     while (1 == 1) { }
+     printf("%s", "you did something stupid -- OUT OF MEMORY!");
 }
 
 /*wraps malloc*/

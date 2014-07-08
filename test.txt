@@ -2,9 +2,14 @@ type Matrix(Num)
 type OrthoMat(Num)
 OrthoMat(A) <: Matrix(A)
 
+type Decimal
+Decimal <: Num
+
 def (int +) (int a) (int b)
     ( )
 def (int *) (int a) (int b)
+    ( )
+def (decimal +) (decimal a) (decimal b)
     ( )
 def (string +) (string a) (string b)
     ( )

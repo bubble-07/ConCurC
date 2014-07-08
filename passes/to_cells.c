@@ -266,14 +266,14 @@ function load_function_def(lexid_tree in, function_table table) {
 //Define nice stuff for loading type definitions
 
 //Returns "true" if the given top-level expression is a type declaration
-int is_type_declaration(lexid_tree in) {
+int is_type_decl(lexid_tree in) {
     if (in.children.size < 2) {
         return 0;
     }
     return lexid_eq(in.children.begin[0].data, TYPE_LEXID);
 }
 //Returns "true" if the given top-level expression is a subtype declaration
-int is_subtype_declaration(lexid_tree in) {
+int is_subtype_decl(lexid_tree in) {
     if (in.children.size < 3) {
         return 0;
     }
@@ -284,10 +284,20 @@ int is_subtype_declaration(lexid_tree in) {
 //TODO: Support restricted polymorphic types!
 void load_type_decl(lexid_tree in) {
     lexid_tree type_expr = in.children.begin[1];
-    //Get the number of arguments to the polymorphic type
-    int numargs = type_expr.children.size - 1;
-    //Add the type to the type graph
-    type_graph_addpolytype(type_expr.children.begin[0].data, numargs);
+
+    if (type_expr.children.size > 0) {
+        //Must be a polytype!
+        //Get the number of arguments to the polymorphic type
+        int numargs = type_expr.children.size - 1;
+        //Add the type to the type graph
+        type_graph_addpolytype(type_expr.children.begin[0].data, numargs);
+        return;
+    }
+    else {
+        //Must be a monotype, so just add it
+        type_graph_addmonotype(type_expr.data);
+        return;
+    }
 }
 
 typedef struct {
@@ -378,13 +388,20 @@ def_collection to_cells(collectnames_result in) {
     printf("\n");
     //For every top-level definition
     for (i = 0; i < parsetree.children.size; i++) {
-        if (is_function_def(parsetree.children.begin[i])) {
+        lexid_tree current = parsetree.children.begin[i];
+        if (is_function_def(current)) {
 
             //Convert it to a function
-            function current = load_function_def(parsetree.children.begin[i], table);
+            function func = load_function_def(current, table);
 
             //Add it to the passed function table
-            table = add_function(table, current.name, current);
+            table = add_function(table, func.name, func);
+        }
+        else if (is_type_decl(current)) {
+            load_type_decl(current);
+        }
+        else if (is_subtype_decl(current)) {
+            load_subtype_decl(current);
         }
     }
 

@@ -42,6 +42,10 @@ int type_ref_eq(type_ref one, type_ref two) {
     if (one == NULL && two == NULL) {
         return 1;
     }
+    //Otherwise, if only one is null, return 0
+    else if (one == NULL || two == NULL) {
+        return 0;
+    }
     return find(one) == find(two); //Equal iff representative addresses equal
 }
 

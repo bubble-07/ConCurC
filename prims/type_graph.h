@@ -55,6 +55,8 @@ type_graph_node get_graph_node(TypeGraphRef r);
 int Type_graph_possiblesubtype(Type_graph in, polytype a, polytype b);
 int lexid_is_type(lexid in);
 
+noderef type_graph_addpolytype(lexid name, int args);
+
 void type_graph_add_subtype(typeslot subt, polytype supert);
 
 #endif

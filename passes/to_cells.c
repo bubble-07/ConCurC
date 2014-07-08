@@ -287,7 +287,7 @@ void load_type_decl(lexid_tree in) {
     //Get the number of arguments to the polymorphic type
     int numargs = type_expr.children.size - 1;
     //Add the type to the type graph
-    type_graph_addpolytype(type_expr.children.begin[0], numargs);
+    type_graph_addpolytype(type_expr.children.begin[0].data, numargs);
 }
 
 typedef struct {

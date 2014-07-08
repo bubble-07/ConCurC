@@ -1,4 +1,0 @@
--Rename everything to "phi"
--At some point, actually stop being lazy and make proper header files and .c files
--Run valgrind on the whole thing [probably __tons__ of memory leaks]
--At some point, convert the whole lexid_tree thing to use a more flexible structure

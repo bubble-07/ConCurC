@@ -29,6 +29,7 @@ polytype copy_type(polytype in);
 int polytype_trivial_eq(polytype one, polytype two);
 int is_monotype(polytype in);
 int is_bottom(polytype in); //Returns "true" if the given type is "bottom"
+int is_subtype(polytype one, polytype two);
 
 //Given the list of type references (representing free variables), mutates
 //the list of type refs to point to the argument positions of the incoming polytype

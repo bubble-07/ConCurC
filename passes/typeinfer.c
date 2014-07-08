@@ -7,11 +7,11 @@ nametable names;
 
 //Given a reference to an expression involving a function application, returns the respective
 //types of arguments
-type_ref_dynarray get_arg_type_refs(cell_tree in) {
-    type_ref_dynarray result = type_ref_dynarray_make(1);
+typeslot_dynarray get_arg_types(cell_tree in) {
+    typeslot_dynarray result = typeslot_dynarray_make(1);
     int i;
     for (i=1; i < cell_tree_numchildren(in); i++) {
-        result = type_ref_dynarray_add(result, get_cell_type_ref(cell_tree_child_data(in, i)));
+        result = typeslot_dynarray_add(result, get_cell_type(cell_tree_child_data(in, i)));
     }
     return result;
 }
@@ -27,12 +27,34 @@ type_ref_table gen_type_equations(cell_tree in, type_ref_table table) {
     //Now, handle the current node
     CellType kind = cell_tree_getkind(in);
     cell node = cell_tree_data(in);
-    type_ref node_type_ref = cell_tree_get_type_ref(in);
+    typeslot node_type = cell_tree_get_type(in);
+
+    //Get a (possibly empty) type_ref for the type at the root
+    type_ref node_type_ref = typeslot_get_ref(node_type);
+ 
+    //If we're dealing with a parameter of some kind
+    if (kind == PARAMETER) {
+        //Need to replace the cell's type with the parameter's, then continue
+
+        //TODO: Memory management!
+        parameter_ptr p = node.data;
+        typeslot paramtype = p->type;
+        cell_tree_set_type(in, paramtype);
+        //Refresh the information about our node
+        node = cell_tree_data(in);
+        node_type = cell_tree_get_type(in);
+        node_type_ref = typeslot_get_ref(node_type);
+    }
+
+    //If our node is not a type_ref, the rest of this makes no sense
+    if (node_type_ref == NULL) {
+        return table;
+    }
     
     //If we're dealing with a polymorph in the applicative position
     if (kind == POLYMORPH && cell_tree_isapplicative(in)) {
-        //Get the type refs of the arguments
-        type_ref_dynarray argtypes = get_arg_type_refs(cell_tree_parent(in));
+        //Get the types of the arguments
+        typeslot_dynarray argtypes = get_arg_types(cell_tree_parent(in));
         //Get the polymorph referenced by the node
         polymorph_ptr poly = node.data;
         //Generate and add "polymorph" equation to the current cell
@@ -41,43 +63,36 @@ type_ref_table gen_type_equations(cell_tree in, type_ref_table table) {
 
     //If we're dealing with a compound expression
     if (kind == EXPRCELL) {
-        type_ref_dynarray argtypes = get_arg_type_refs(in);
-        type_ref functype = get_cell_type_ref(cell_tree_child_data(in, 0));
+        typeslot_dynarray argtypes = get_arg_types(in);
+        typeslot functype = get_cell_type(cell_tree_child_data(in, 0));
         //Generate and add "apply" equation
         node_type_ref = type_ref_addapply_eqn(node_type_ref, functype, argtypes);
     }
-
-    //If we're dealing with a parameter of some kind
-    if (kind == PARAMETER) {
-        //Need to replace the cell's type ref with the parameter's, then continue
-
-        //TODO: Memory management!
-        parameter_ptr p = node.data;
-        type_ref paramtype = p->type;
-        cell_tree_set_type_ref(in, paramtype);
-        //Refresh the information about our node
-        node = cell_tree_data(in);
-        node_type_ref = cell_tree_get_type_ref(in);
-    }
-
 
     //If we're not in the applicative position, will need to emit an argpos equation
     if (!cell_tree_isapplicative(in)) {
         int pos = cell_tree_get_offset(in);
         //Get the type ref to the function we're dealing with
-        type_ref func = get_cell_type_ref(cell_tree_child_data(cell_tree_parent(in), 0));
+        typeslot func = get_cell_type(cell_tree_child_data(cell_tree_parent(in), 0));
         //Generate the equation
         node_type_ref = type_ref_addargpos_eqn(node_type_ref, func, pos);
     }
     //Add the current node's type ref to the type_ref table and return
-    table = type_ref_table_add(table, cell_tree_get_type_ref(in));
+    table = type_ref_table_add(table, node_type_ref);
     return table;
 }
 
 int solve_apply_equation(type_ref node, is_result_of* eqn) {
-    type_ref func = eqn->func;
+    typeslot func = eqn->func;
 
-    polymorph_ptr poly = type_ref_getpoly(func);
+    //FIXME: Handle non-typeref-ed functions
+    type_ref func_ref = typeslot_get_ref(func);
+
+    if (func_ref == NULL) {
+        return 0;
+    }
+
+    polymorph_ptr poly = type_ref_getpoly(func_ref);
     //If the given function is a polymorph
     if (poly != NULL) {
         //Figure out what the return type must fall under
@@ -92,7 +107,11 @@ int solve_apply_equation(type_ref node, is_result_of* eqn) {
 }
 
 int solve_argpos_equation(type_ref node, is_in_pos* eqn) {
-    type_ref func = eqn->func; //The function the current node is supplied to 
+    type_ref func = typeslot_get_ref(eqn->func); //The function the current node is supplied to 
+    //FIXME: Handle functions that are "right there"
+    if (func == NULL) {
+        return 0;
+    }
 
     polymorph_ptr poly = type_ref_getpoly(func);
     //If the given function is a polymorph

@@ -34,6 +34,7 @@ polytype typeslot_get_type(typeslot in) {
 void print_typeslot(typeslot in, nametable names) {
     if (in.kind == typeslot_ref) {
         print_type_ref(typeslot_get_ref(in), names);
+        return;
     }
     print_type(typeslot_get_type(in), names);
 }

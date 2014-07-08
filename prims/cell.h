@@ -3,11 +3,10 @@
 #include "parameter.h"
 #include "../libs/filehandler.h"
 #include "lambda.h"
+#include "typeslot.h"
 
 #ifndef CELL_DEFINED
 #define CELL_DEFINED
-
-#include "type_ref.h"
 
 typedef enum {
     FUNCTION, //A single function
@@ -32,14 +31,14 @@ Variable: A node that references a parameter
 
 typedef struct {
     CellType kind;
-    type_ref type;
+    typeslot type;
     void* data;
     fileLoc loc;
 } cell;
 
 DEFINE_DYNARRAY(cell)
 
-static type_ref get_cell_type_ref(cell in) {
+static typeslot get_cell_type(cell in) {
     return in.type;
 }
 
@@ -47,7 +46,7 @@ static cell make_expr_cell() {
     cell result;
     result.kind = EXPRCELL;
     result.data = NULL;
-    result.type = make_unknown_type_ref();
+    result.type = typeslot_from_ref(make_unknown_type_ref());
     return result;
 }
 
@@ -66,7 +65,7 @@ static cell make_##t##_cell(t in) { \
     /*Copy the input to a new memory location*/ \
     t * ptr = memalloc(sizeof(t)); \
     *ptr = in; \
-    result.type = make_unknown_type_ref(); \
+    result.type = typeslot_from_ref(make_unknown_type_ref()); \
     result.data = (void*) ptr; \
     return result; \
 }
@@ -82,7 +81,7 @@ static cell make_##name##_cell(t * in) { \
     cell result;  \
     result.kind = cellkind; \
     result.data = (void*) in; \
-    result.type = make_unknown_type_ref(); \
+    result.type = typeslot_from_ref(make_unknown_type_ref()); \
     return result; \
 }
 

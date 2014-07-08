@@ -1,7 +1,7 @@
 #include "parameter.h"
 #include "type_ref_info.h"
 
-parameter_ptr parameter_ptr_make(type_ref type, lexid name) {
+parameter_ptr parameter_ptr_make(typeslot type, lexid name) {
     parameter_ptr result = memalloc(sizeof(parameter));
     result->type = type;
     result->name = name;
@@ -13,23 +13,23 @@ int parameter_ptr_eq(parameter_ptr one, parameter_ptr two) {
     return one == two;
 }
 
-type_ref get_parameter_ptr_type_ref(parameter_ptr in) {
+typeslot get_parameter_ptr_type(parameter_ptr in) {
     return in->type;
 }
 
 //Assumes that the given parameter has a non-variable type
 polytype get_parameter_ptr_bound(parameter_ptr in) {
-    return type_ref_getbound(in->type);
+    return typeslot_instantiate(in->type);
 }
 
-parameter_ptr set_parameter_ptr_type(parameter_ptr in, type_ref i) {
+parameter_ptr set_parameter_ptr_type(parameter_ptr in, typeslot i) {
     in->type = i;
     return in;
 }
 
 //Returns "true" if the parameter's bounding type and the other's bounding type are not disjoint
-int parameter_ptr_accepts(parameter_ptr in, type_ref val) {
-    return !types_are_disjoint(type_ref_getbound(in->type), type_ref_getbound(val));
+int parameter_ptr_accepts(parameter_ptr in, typeslot val) {
+    return !types_are_disjoint(typeslot_instantiate(in->type), typeslot_instantiate(val));
 }
 
 void print_parameter(parameter in, nametable names) {

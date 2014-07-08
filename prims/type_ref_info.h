@@ -5,6 +5,7 @@
 
 #include "equation_set.h"
 #include "polytype.h"
+#include "typeslot.h"
 
 //The actual information is stored in a pointer from the "representative" node
 //Using the following structure
@@ -14,9 +15,9 @@ typedef struct {
 } type_ref_info;
 
 type_ref type_ref_add_equation(type_ref in, type_equation eqn);
-type_ref type_ref_addpoly_eqn(type_ref in, polymorph_ptr poly, type_ref_dynarray args);
-type_ref type_ref_addargpos_eqn(type_ref in, type_ref func, int pos);
-type_ref type_ref_addapply_eqn(type_ref in, type_ref func, type_ref_dynarray args);
+type_ref type_ref_addpoly_eqn(type_ref in, polymorph_ptr poly, typeslot_dynarray args);
+type_ref type_ref_addargpos_eqn(type_ref in, typeslot func, int pos);
+type_ref type_ref_addapply_eqn(type_ref in, typeslot func, typeslot_dynarray args);
 
 type_ref make_known_type_ref(polytype in); //Makes a new type ref with a bounded type
 //Gets a pointer to the polymorph associated with a given type_ref (NULL if nonexistent)

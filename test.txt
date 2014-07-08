@@ -11,6 +11,11 @@ def (int *) (int a) (int b)
     ( )
 def (decimal +) (decimal a) (decimal b)
     ( )
+/*
+//Test of parametric types in functions
+def (Matrix(T) +) (Matrix(T) a) (Matrix(T) b)
+    ( )
+*/
 def (string +) (string a) (string b)
     ( )
 def test a b

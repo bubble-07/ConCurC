@@ -27,7 +27,7 @@ int is_function_def(lexid_tree in) {
 //Takes something of the form "name" or "(type name)",
 //and if a type was specified, returns the type, but if
 //it wasn't, return an unknown type
-type_ref name_decl_to_type(lexid_tree in) {
+typeslot name_decl_to_type(lexid_tree in) {
     //TODO: fail gracefully in the case of a lookup failure
     if (lexid_eq(in.data, EXPR_LEXID)) {
         //type must've been specified
@@ -35,11 +35,11 @@ type_ref name_decl_to_type(lexid_tree in) {
         //Look up the type corresponding to the lexid
         TypeGraphRef result = get_TypeGraphRef(type_lexid);
         //Finalize and return
-        return make_known_type_ref(make_monotype(result));
+        return typeslot_from_type(make_monotype(result));
     }
     else {
         //Otherwise, the type must still be unknown
-        return make_unknown_type_ref();
+        return typeslot_from_ref(make_unknown_type_ref());
     }
 }
 

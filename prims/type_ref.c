@@ -110,13 +110,13 @@ polymorph_ptr type_ref_getpoly(type_ref in) {
 }
 
 
-type_ref type_ref_addpoly_eqn(type_ref in, polymorph_ptr poly, type_ref_dynarray args) {
+type_ref type_ref_addpoly_eqn(type_ref in, polymorph_ptr poly, typeslot_dynarray args) {
     return type_ref_add_equation(in, make_poly_eqn(poly, args));
 }
-type_ref type_ref_addargpos_eqn(type_ref in, type_ref func, int pos) {
+type_ref type_ref_addargpos_eqn(type_ref in, typeslot func, int pos) {
     return type_ref_add_equation(in, make_argpos_eqn(pos, func));
 }
-type_ref type_ref_addapply_eqn(type_ref in, type_ref func, type_ref_dynarray args) {
+type_ref type_ref_addapply_eqn(type_ref in, typeslot func, typeslot_dynarray args) {
     return type_ref_add_equation(in, make_apply_eqn(func, args));
 }
 

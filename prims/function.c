@@ -3,26 +3,26 @@
 
 //Gets the type of the parameter in the given position
 //Returns empty type if outside of bounds
-polytype function_ptr_get_parameter_type(function_ptr in, int pos) {
+typeslot function_ptr_get_parameter_type(function_ptr in, int pos) {
     pos = pos - 1; //Do this so "1" corresponds to the first element in the array of params
     if (in->params.size > pos) {
-        return get_parameter_ptr_bound(in->params.begin[pos]);
+        return get_parameter_ptr_type(in->params.begin[pos]);
     }
-    return make_bottom_type();
+    return typeslot_from_type(make_bottom_type());
 }
 //Returns the return type of the given function
-polytype function_ptr_get_return_type(function_ptr in) {
-    return type_ref_getbound(in->ret_type);
+typeslot function_ptr_get_return_type(function_ptr in) {
+    return in->ret_type;
 }
 
-function_ptr function_ptr_set_return_type(function_ptr in, type_ref t) {
+function_ptr function_ptr_set_return_type(function_ptr in, typeslot t) {
     in->ret_type = t;
     return in;
 }
 
 //Returns true if the given argument types stand a chance of being accepted, 0 otherwise
 //Right now, do this the REALLY dumb way
-int function_ptr_accepts(function_ptr in, type_ref_dynarray args) {
+int function_ptr_accepts(function_ptr in, typeslot_dynarray args) {
     if (in->params.size != args.size) {
         return 0; //TODO: support currying!
     }

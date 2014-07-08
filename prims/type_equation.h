@@ -9,7 +9,7 @@
 
 typedef struct {
     polymorph_ptr poly;
-    type_ref_dynarray args;
+    typeslot_dynarray args;
 } is_polymorph;
 //Defines a structure for the RH side of an equation
 //that says a given type is a polymorphic function
@@ -17,14 +17,14 @@ typedef struct {
 
 typedef struct {
     int pos;
-    type_ref func;
+    typeslot func;
 } is_in_pos;
 //Defines a RH side that says a given type must fit
 //in the specified position of a given function type
 
 typedef struct {
-    type_ref func;
-    type_ref_dynarray args;
+    typeslot func;
+    typeslot_dynarray args;
 } is_result_of;
 //Says that a given type is the result returned from
 //applying func to args
@@ -51,9 +51,9 @@ typedef struct {
 
 typedef type_equation* type_equation_ptr;
 
-type_equation make_poly_eqn(polymorph_ptr p, type_ref_dynarray args);
-type_equation make_argpos_eqn(int pos, type_ref functype);
-type_equation make_apply_eqn(type_ref functype, type_ref_dynarray args);
+type_equation make_poly_eqn(polymorph_ptr p, typeslot_dynarray args);
+type_equation make_argpos_eqn(int pos, typeslot functype);
+type_equation make_apply_eqn(typeslot functype, typeslot_dynarray args);
 
 DEFINE_DYNARRAY(type_equation)
 DEFINE_DYNARRAY(type_equation_ptr)

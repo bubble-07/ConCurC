@@ -30,6 +30,7 @@ polytype typeslot_get_type(typeslot in);
 void print_typeslot(typeslot in, nametable names);
 void print_typeslot_list(typeslot_dynarray in, nametable names);
 
+//Gets a "flattened" version of the typeslot
 polytype typeslot_instantiate(typeslot in);
 
 //"Flattens" all type_refs within the dynarray recursively to their upper bounds

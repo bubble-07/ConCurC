@@ -43,7 +43,7 @@ static polytype polymorph_ptr_get_parameter_type(polymorph_ptr in, int pos) {
     int i;
     for (i=0; i < options.size; i++) {
         //Add more options for what the type can be
-        result = union_types(result, function_ptr_get_parameter_type(options.begin[i], pos));
+        result = union_types(result, typeslot_instantiate(function_ptr_get_parameter_type(options.begin[i], pos)));
     }
     return result;
 }
@@ -55,7 +55,7 @@ static polytype polymorph_ptr_get_return_type(polymorph_ptr in) {
     polytype result = make_bottom_type();
     int i;
     for (i=0; i < options.size; i++) {
-        result = union_types(result, function_ptr_get_return_type(options.begin[i]));
+        result = union_types(result, typeslot_instantiate(function_ptr_get_return_type(options.begin[i])));
     }
     return result;
 }
@@ -99,7 +99,7 @@ static polymorph_ptr add_to_polymorph_ptr(polymorph_ptr in, function_ptr f) {
 //new, "forked" polymorph, deleting the old if it was local.
 //Otherwise, return the input unchanged
 //Assumes the polymorph_ptr passed in is non-null
-static polymorph_ptr polymorph_ptr_restrict(polymorph_ptr in, type_ref_dynarray args) {
+static polymorph_ptr polymorph_ptr_restrict(polymorph_ptr in, typeslot_dynarray args) {
     //Tentatively allocate a new polymorph pointer as a result
     polymorph_ptr result = make_empty_local_polymorph_ptr();
 

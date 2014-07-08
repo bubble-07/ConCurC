@@ -1,6 +1,6 @@
 #include "type_equation.h"
 
-type_equation make_poly_eqn(polymorph_ptr poly, type_ref_dynarray argtypes) {
+type_equation make_poly_eqn(polymorph_ptr poly, typeslot_dynarray argtypes) {
     type_equation result;
     result.expr_kind = is_polymorph_kind;
 
@@ -9,7 +9,7 @@ type_equation make_poly_eqn(polymorph_ptr poly, type_ref_dynarray argtypes) {
     return result;
 }
 
-type_equation make_argpos_eqn(int pos, type_ref functype) {
+type_equation make_argpos_eqn(int pos, typeslot functype) {
     type_equation result;
     result.expr_kind = is_in_pos_kind;
 
@@ -18,7 +18,7 @@ type_equation make_argpos_eqn(int pos, type_ref functype) {
     return result;
 }
 
-type_equation make_apply_eqn(type_ref functype, type_ref_dynarray args) {
+type_equation make_apply_eqn(typeslot functype, typeslot_dynarray args) {
     type_equation result;
     result.expr_kind = is_result_of_kind;
 
@@ -49,7 +49,7 @@ type_equation print_type_equation(type_equation in, nametable names) {
         printf(", [");
 
         //Print argument types
-        print_type_ref_list(RH.args, names);
+        print_typeslot_list(RH.args, names);
 
         printf("] )");
     }
@@ -57,16 +57,16 @@ type_equation print_type_equation(type_equation in, nametable names) {
         is_in_pos RH = get_argpos_RH(in);
         printf("<: argpos( %d", RH.pos);
         printf(",");
-        print_type_ref(RH.func, names);
+        print_typeslot(RH.func, names);
         printf(")");
 
     }
     else if (kind == is_result_of_kind) {
         is_result_of RH = get_apply_RH(in);
         printf("= apply(");
-        print_type_ref(RH.func, names);
+        print_typeslot(RH.func, names);
         printf(", [");
-        print_type_ref_list(RH.args, names);
+        print_typeslot_list(RH.args, names);
         printf("] )");
     }
     printf("\n");

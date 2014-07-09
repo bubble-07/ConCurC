@@ -43,8 +43,11 @@ parsetype_result parse_type(lexid_tree in, type_env e) {
             //Must be a type variable
             if (!type_env_exists(e, in.data)) {
                 //If we haven't seen the variable before
-                //make a new type ref and add it to the environment
-                type_ref newref = make_unknown_type_ref();
+                //make a new parametric type ref and add it to the environment
+
+                //TODO: Restrict the scope of this type variable
+                //according to the parent's polytype!
+                type_ref newref = make_known_parametric_type_ref(make_unknown_type());
                 result.e = type_env_add(e, in.data, newref);
                 result.type = typeslot_from_ref(newref);
             }

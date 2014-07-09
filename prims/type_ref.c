@@ -2,9 +2,12 @@
 #include "type_ref.h"
 #include "type_ref_info.h"
 
-type_ref make_known_type_ref(polytype in) {
+//Helper function to make a type ref from typical type info with no equations
+type_ref make_type_ref(polytype bound, int parametric, int known) {
     type_ref_info* info = memalloc(sizeof(type_ref_info));
-    info->upperbound = in;
+    info->upperbound = bound;
+    info->parametric = parametric;
+    info->known = known;
     info->equations = equation_set_init();
     type_ref_node* result = memalloc(sizeof(type_ref_node));
     result->data = info;
@@ -12,8 +15,14 @@ type_ref make_known_type_ref(polytype in) {
     return result;
 }
 
+//Makes a type_ref that is known and parametric with the given bound
+type_ref make_known_parametric_type_ref(polytype in) {
+    make_type_ref(in, 1, 1);
+}
+
+//Makes a completely unknown type_ref (up to inference)
 type_ref make_unknown_type_ref() {
-    return make_known_type_ref(make_unknown_type());
+    return make_type_ref(make_unknown_type(), 1, 0); //Type_refs are parametric until proven otherwise
 }
 
 void type_ref_makepoint(type_ref a, type_ref b) {
@@ -49,16 +58,47 @@ int type_ref_eq(type_ref one, type_ref two) {
     return find(one) == find(two); //Equal iff representative addresses equal
 }
 
+//Helper to get info of type_ref
+type_ref_info* getinfo(type_ref in) {
+    type_ref rep = find(in);
+    return (type_ref_info*) rep->data;
+}
+
 //Gets the principal bounding type of the given typeref
 polytype type_ref_getbound(type_ref in) {
-    type_ref rep = find(in);
-    type_ref_info* info = rep->data;
+    type_ref_info* info = getinfo(in);
     return info->upperbound;
 }
 
+int type_ref_is_parametric(type_ref in) {
+    type_ref_info* info = getinfo(in);
+    return info->parametric;
+}
+int type_ref_is_simple(type_ref in) {
+    return !type_ref_is_parametric(in);
+}
+int type_ref_is_known(type_ref in) {
+    type_ref_info* info = getinfo(in);
+    return info->known;
+}
+int type_ref_is_unknown(type_ref in) {
+    return !type_ref_is_known(in);
+}
+
+type_ref type_ref_setknown(type_ref in, int known) {
+    type_ref_info* info = getinfo(in);
+    info->known = known;
+    return in;
+}
+
+type_ref type_ref_setparametric(type_ref in, int parametric) {
+    type_ref_info* info = getinfo(in);
+    info->parametric = parametric;
+    return in;
+}
+
 type_ref type_ref_setbound(type_ref in, polytype t) {
-    type_ref rep = find(in);
-    type_ref_info* info = rep->data;
+    type_ref_info* info = getinfo(in);
     info->upperbound = t;
     return in;
 }

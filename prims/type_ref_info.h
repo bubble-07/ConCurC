@@ -10,8 +10,10 @@
 //The actual information is stored in a pointer from the "representative" node
 //Using the following structure
 typedef struct {
-    polytype upperbound;
-    equation_set equations;
+    polytype upperbound; //Represents the current upper bound on the type
+    equation_set equations; //Represents the set of equations that apply to the type_ref
+    int parametric; //Will be "0" if the type_ref in question is a simple type, and "1" if it could represent a parametric type
+    int known; //Will be "0" until the type_ref is known, at which point this becomes "1"
 } type_ref_info;
 
 type_ref type_ref_add_equation(type_ref in, type_equation eqn);
@@ -19,8 +21,16 @@ type_ref type_ref_addpoly_eqn(type_ref in, polymorph_ptr poly, typeslot_dynarray
 type_ref type_ref_addargpos_eqn(type_ref in, typeslot func, int pos);
 type_ref type_ref_addapply_eqn(type_ref in, typeslot func, typeslot_dynarray args);
 
-type_ref make_known_type_ref(polytype in); //Makes a new type ref with a bounded type
 //Gets a pointer to the polymorph associated with a given type_ref (NULL if nonexistent)
+type_ref make_known_parametric_type_ref(polytype in);
+
+int type_ref_is_simple(type_ref in); 
+int type_ref_is_parametric(type_ref in);
+int type_ref_is_known(type_ref in);
+int type_ref_is_unknown(type_ref in);
+
+type_ref type_ref_setknown(type_ref in, int known);
+type_ref type_ref_setparametric(type_ref in, int parametric);
 
 polytype type_ref_getbound(type_ref in);
 type_ref type_ref_setbound(type_ref in, polytype type);

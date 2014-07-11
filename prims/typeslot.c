@@ -1,5 +1,6 @@
 #include "typeslot.h"
 #include "type_ref_info.h"
+#include "type_graph.h"
 
 typeslot typeslot_from_ref(type_ref in) {
     typeslot result;
@@ -15,6 +16,34 @@ typeslot typeslot_from_type(polytype in) {
     result.kind = typeslot_type;
     return result;
 }
+typeslot make_bottom_typeslot() {
+    return typeslot_from_type(make_bottom_type());
+}
+int is_bottom_typeslot(typeslot in) {
+    if (in.kind == typeslot_type) {
+        return polytype_trivial_eq(typeslot_get_type(in), Bottom);
+    }
+    return 0;
+}
+
+//Returns the union of the two typeslots.
+typeslot union_typeslots(typeslot one, typeslot two) {
+    if (one.kind == typeslot_type && two.kind == typeslot_type) {
+        return typeslot_from_type(union_types(typeslot_get_type(one), typeslot_get_type(two)));
+    }
+    if (is_bottom_typeslot(one)) {
+        return two;
+    }
+    if (is_bottom_typeslot(two)) {
+        return one;
+    }
+    //Otherwise, just "Either" them together
+    typeslot_dynarray args = typeslot_dynarray_make(1);
+    args = typeslot_dynarray_add(args, one);
+    args = typeslot_dynarray_add(args, two);
+    return typeslot_from_type(make_polytype(Either, args));
+}
+
 typeslot_kind typeslot_get_kind(typeslot in) {
     return in.kind;
 }
@@ -118,7 +147,6 @@ polytype typeslot_instantiate(typeslot in) {
     return make_polytype(incoming.ref, packedargs);
 }
 
-
 polytype_dynarray typeslot_dynarray_instantiate(typeslot_dynarray in) {
     polytype_dynarray result = polytype_dynarray_make(1);
     int i;
@@ -127,3 +155,28 @@ polytype_dynarray typeslot_dynarray_instantiate(typeslot_dynarray in) {
     }
     return result;
 }
+
+typeslot typeslot_dissociate(typeslot in) {
+    //If we're dealing with a ref, need to return a dissociated version
+    if (in.kind == typeslot_ref) {
+        return typeslot_from_ref(type_ref_get_rep(typeslot_get_ref(in)));
+    }
+    //Otherwise, it must be a polytype
+    polytype incoming = typeslot_get_type(in);
+    
+    //Create an dissociated version of the result's arguments
+    typeslot_dynarray resultargs = typeslot_dynarray_dissociate(incoming.argtypes);
+
+    //Return our final dissociated copy
+    return typeslot_from_type(make_polytype(incoming.ref, resultargs));
+}
+
+typeslot_dynarray typeslot_dynarray_dissociate(typeslot_dynarray in) {
+    typeslot_dynarray result = typeslot_dynarray_make(1);
+    int i;
+    for (i=0; i < in.size; i++) {
+        result = typeslot_dynarray_add(result, typeslot_dissociate(in.begin[i]));
+    }
+    return result;
+}
+

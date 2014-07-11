@@ -10,9 +10,35 @@ typeslot function_ptr_get_parameter_type(function_ptr in, int pos) {
     }
     return typeslot_from_type(make_bottom_type());
 }
-//Returns the return type of the given function
-typeslot function_ptr_get_return_type(function_ptr in) {
-    return in->ret_type;
+//Returns the return type of the given function for the given args
+typeslot function_ptr_get_return_type(function_ptr in, typeslot_dynarray args) {
+    //Record all bounds associated with all type_refs in the function signature
+    type_ref_info_ptr_dynarray bounds = get_type_ref_info_list(in->type_vars);
+    
+    int i;
+    int success = 1; //Will be 0 if there was a failure in argument matching
+    for (i=0; i < in->params.size; i++) {
+        //"pour" each argument in to the mold given 
+        //Note: parameter_ptr_pour fails if the incoming type is too general,
+        //which is exactly what we want for checking left-to-right
+        success = success && parameter_ptr_pour(args.begin[i], in->params.begin[i]);
+    }
+
+    //Generate the result by turning all type_refs in the return type into type_refs
+    //that reference the representative nodes of type_refs so we can safely sever the first
+    //level of links when we reset the types [for future invocations]
+    typeslot result = typeslot_dissociate(in->ret_type);
+    
+    //Reset the bounds on all of the type_refs the function has in its signature
+    restore_type_ref_info_list(bounds, in->type_vars);
+
+    if (success == 1) { 
+        //If we were able to apply the function
+        //Return the result of 
+        return result;
+    }
+    //Otherwise, just say that the function can return anything
+    return typeslot_from_type(make_unknown_type());
 }
 
 function_ptr function_ptr_set_return_type(function_ptr in, typeslot t) {

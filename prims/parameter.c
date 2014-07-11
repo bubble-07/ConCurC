@@ -45,4 +45,6 @@ void print_parameter_ptr(parameter_ptr in, nametable names) {
     return;
 }
 
-
+int parameter_ptr_pour(typeslot src, parameter_ptr dest) {
+    return typeslot_pour(src, dest->type);
+}

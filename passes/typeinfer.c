@@ -96,12 +96,12 @@ int solve_apply_equation(type_ref node, is_result_of* eqn) {
     //If the given function is a polymorph
     if (poly != NULL) {
         //Figure out what the return type must fall under
-        polytype constraint = polymorph_ptr_get_return_type(poly);
+        typeslot constraint = polymorph_ptr_get_return_type(poly, eqn->args);
         
         //TODO: We don't __actually__ mean "restrict" here -- we need to check if the
         //returned type is a subtype of the node's current type. If not, then it's a type error
 
-        return type_ref_restrict(node, constraint);
+        return type_ref_constrain(node, constraint);
     }
     return 0; //TODO: Add other kinds of functions here!
 }

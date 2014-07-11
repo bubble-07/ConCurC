@@ -41,6 +41,10 @@ type_ref find(type_ref in) {
     return find((type_ref) in->data);
 }
 
+type_ref type_ref_get_rep(type_ref in) {
+    return find(in);
+}
+
 int hash_type_ref(type_ref in) {
     return (int) find(in); //Return address of representative
 }
@@ -62,6 +66,32 @@ int type_ref_eq(type_ref one, type_ref two) {
 type_ref_info* getinfo(type_ref in) {
     type_ref rep = find(in);
     return (type_ref_info*) rep->data;
+}
+
+//Helper to set a type_ref's "data" field to point to given type_ref_info
+type_ref setinfo(type_ref in, type_ref_info* info) {
+    in->data = (void*) info;
+    in->kind = type_ref_representative;
+    return in;
+}
+
+//Given a list of type_refs, returns the respective pointers to type_ref info
+//for each of them [scraped from representative nodes]
+type_ref_info_ptr_dynarray get_type_ref_info_list(type_ref_dynarray in) {
+    type_ref_info_ptr_dynarray result = type_ref_info_ptr_dynarray_make(1);
+    int i;
+    for (i=0; i < in.size; i++) {
+        result = type_ref_info_ptr_dynarray_add(result, getinfo(in.begin[i]));
+    }
+    return result;
+}
+
+type_ref_info_ptr_dynarray restore_type_ref_info_list(type_ref_info_ptr_dynarray infos, type_ref_dynarray dest) {
+    int i;
+    for (i=0; i < infos.size; i++) {
+        setinfo(dest.begin[i], infos.begin[i]);
+    }
+    return infos;
 }
 
 //Gets the principal bounding type of the given typeref
@@ -168,6 +198,24 @@ int type_ref_restrict(type_ref in, polytype bound) {
 
     info->upperbound = intersect_types(info->upperbound, bound);
     return !type_eq(oldbound, info->upperbound); //Active if the upper bound has changed
+}
+
+int type_refs_same_class(type_ref one, type_ref two) {
+    return (find(one) == find(two));
+}
+
+int type_ref_constrain(type_ref in, typeslot bound) {
+    //Try to see if the incoming bound is actually parametric
+    type_ref bound_ref = typeslot_get_ref(bound);
+    if (bound_ref == NULL) {
+        //Must not actually be a type_ref, so just call restrict
+        return type_ref_restrict(in, typeslot_get_type(bound));
+    }
+    //Otherwise, we should (for now) take the incoming type ref
+    //and make it point at the bound's type ref
+    int active = !type_refs_same_class(in, bound_ref); //Active iff they weren't in the same class to begin with
+    type_ref_makepoint(in, bound_ref);
+    return active;
 }
 
 //Really dumb way to print type refs FIXME: Make this generate sensible unique names

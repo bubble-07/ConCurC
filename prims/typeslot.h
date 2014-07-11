@@ -25,6 +25,16 @@ DEFINE_DYNARRAY(typeslot)
 typeslot typeslot_from_ref(type_ref in);
 typeslot typeslot_from_type(polytype in);
 typeslot_kind typeslot_get_kind(typeslot in);
+
+//Makes a typeslot that represents the bottom (empty) type
+typeslot make_bottom_typeslot();
+
+//Returns true if the given typeslot is "bottom"
+int is_bottom_typeslot(typeslot in);
+
+//Returns the union of two typeslots, with special rules for type_refs
+typeslot union_typeslots(typeslot one, typeslot two);
+
 type_ref typeslot_get_ref(typeslot in);
 polytype typeslot_get_type(typeslot in);
 void print_typeslot(typeslot in, nametable names);
@@ -40,5 +50,9 @@ int typeslot_trivial_eq(typeslot a, typeslot b);
 int typeslot_dynarray_trivial_eq(typeslot_dynarray a, typeslot_dynarray b);
 
 int typeslot_pour(typeslot one, typeslot two);
+
+//Takes a typeslot, and recursively changes all type_refs to their representative nodes
+typeslot typeslot_dissociate(typeslot in);
+typeslot_dynarray typeslot_dynarray_dissociate(typeslot_dynarray in);
 
 #endif

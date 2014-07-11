@@ -12,4 +12,6 @@ type_ref type_env_lookup(type_env in, lexid name) {
 int type_env_exists(type_env in, lexid name) {
     return lexid_type_ref_dict_exists(in, name);
 }
-
+type_ref_dynarray type_env_extract_type_refs(type_env in) {
+    return lexid_type_ref_dict_get_all_values(in);
+}

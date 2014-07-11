@@ -25,6 +25,8 @@ int parameter_ptr_accepts(parameter_ptr in, typeslot val);
 void print_parameter(parameter in, nametable names);
 void print_parameter_ptr(parameter_ptr in, nametable names);
 
+int parameter_ptr_pour(typeslot src, parameter_ptr dest);
+
 DEFINE_DYNARRAY(parameter)
 DEFINE_DYNARRAY(parameter_ptr)
 

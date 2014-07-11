@@ -48,14 +48,13 @@ static polytype polymorph_ptr_get_parameter_type(polymorph_ptr in, int pos) {
     return result;
 }
 
-//Gets a sum type representing the most general return type of the polymorph.
-//Assumes that the return type is not variable
-static polytype polymorph_ptr_get_return_type(polymorph_ptr in) {
+//Gets the most general type that the polymorph would return for the given argument types
+static typeslot polymorph_ptr_get_return_type(polymorph_ptr in, typeslot_dynarray args) {
     function_ptr_dynarray options = polymorph_ptr_get_options(in);
-    polytype result = make_bottom_type();
+    typeslot result = make_bottom_typeslot();
     int i;
     for (i=0; i < options.size; i++) {
-        result = union_types(result, typeslot_instantiate(function_ptr_get_return_type(options.begin[i])));
+        result = union_typeslots(result, function_ptr_get_return_type(options.begin[i], args));
     }
     return result;
 }

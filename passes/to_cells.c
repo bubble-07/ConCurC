@@ -26,6 +26,7 @@ int is_function_def(lexid_tree in) {
 typedef struct {
     type_env e;
     typeslot type;
+    type_ref_dynarray refs;
 } parsetype_result; //Represents the result of parsing a type that may contain type parameters
 
 //Given a lexid_tree and a current type environment, gives a new type environment [containing any additional variables
@@ -322,6 +323,9 @@ function load_function_def(lexid_tree in, function_table table) {
     //Get the function's name
     lexid name = load_function_name(in);
     result.name = name;
+
+    //Add all of the type_refs previously encountered to the function
+    result.type_vars = type_env_extract_type_refs(e);
 
     //Free the temporary environment we created
     free_env(innerenv);

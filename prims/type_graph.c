@@ -1,9 +1,10 @@
 #include "type_graph.h"
 #include "type_ref.h"
+#include "type_ref_info.h"
 
 void mono_subtypes_to_lattice(noderef super, noderef subtype) {
     type_graph_node supernode = Type_graph_getnode(UniverseGraph, super);
-    supernode.lattice = lattice_add_subtype(supernode.lattice, typeslot_from_type(make_monotype(subtype)), make_monotype(super));
+    supernode.lattice = lattice_add_subtype(supernode.lattice, typeslot_from_type(make_monotype(subtype)), make_monotype(super), type_ref_dynarray_make(1));
     return;
 }
 
@@ -37,12 +38,12 @@ noderef type_graph_addpolytype(lexid name, int args) {
     return result;
 }
 
-void type_graph_add_subtype(typeslot subtype, polytype supertype) {
+void type_graph_add_subtype(typeslot subtype, polytype supertype, type_ref_dynarray refs) {
 
     //Get the reference to the node we need to change
     type_graph_node node = get_graph_node(supertype.ref);
     //Add the subtype declaration to the lattice
-    lattice_add_subtype(node.lattice, subtype, supertype);
+    lattice_add_subtype(node.lattice, subtype, supertype, refs);
     
     //Now, if the subtype we're dealing with is a type_ref...
     if (typeslot_get_kind(subtype) == typeslot_ref) {
@@ -70,14 +71,17 @@ void init_type_universe() {
     //Okay, now let's define Either in a hardcoded way
     Either = type_graph_addpolytype(EITHERID_LEXID, 2);
 
-    typeslot a = typeslot_from_ref(make_unknown_type_ref());
-    typeslot b = typeslot_from_ref(make_unknown_type_ref());
+    type_ref a_ref = make_known_parametric_type_ref(make_unknown_type());
+    type_ref b_ref = make_known_parametric_type_ref(make_unknown_type());
+
+    typeslot a = typeslot_from_ref(a_ref);
+    typeslot b = typeslot_from_ref(b_ref);
     typeslot_dynarray eitherargs = typeslot_dynarray_add(typeslot_dynarray_add(typeslot_dynarray_make(1), a), b);
 
     polytype eitherhead = make_polytype(Either, eitherargs);
 
-    type_graph_add_subtype(a, eitherhead);
-    type_graph_add_subtype(b, eitherhead);
+    type_graph_add_subtype(a, eitherhead, type_ref_dynarray_add(type_ref_dynarray_make(1), a_ref));
+    type_graph_add_subtype(b, eitherhead, type_ref_dynarray_add(type_ref_dynarray_make(1), b_ref));
 
 
     UniverseGraph = Type_graph_addedge(UniverseGraph, Any, Either);

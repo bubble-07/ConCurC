@@ -34,6 +34,7 @@ typedef struct {
 typedef type_ref_node* type_ref;
 
 DEFINE_DYNARRAY(type_ref)
+DEFINE_DYNARRAY(type_ref_dynarray)
 
 static const type_ref type_ref_lookup_failure = NULL;
 

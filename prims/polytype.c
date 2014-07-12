@@ -47,7 +47,7 @@ int is_monotype(polytype in) {
     return (in.argtypes.size == 0);
 }
 
-polytype_dynarray polytype_get_subtypes(polytype in) {
+typeslot_dynarray polytype_get_subtypes(polytype in) {
     type_graph_node node = get_graph_node(in.ref);
     return lattice_get_subtypes(in, node.lattice);
 }
@@ -133,13 +133,15 @@ polytype intersect_types(polytype a, polytype b) {
             //we should be able to find A somewhere under B. 
             //To do so, instantiate B's subtypes in the lattice and recurse
             //by restricting the set of B's subtypes by A.
-            polytype_dynarray b_subtypes = polytype_get_subtypes(b);
-            return restrict_type(b_subtypes, a);
+            typeslot_dynarray b_subtypes = polytype_get_subtypes(b);
+            //TODO: Eliminate the instantiation going on here
+            return restrict_type(typeslot_dynarray_instantiate(b_subtypes), a);
         }
     }
     //A cannot subtype B
     //Check if A's children do so instead.
-    return restrict_type(polytype_get_subtypes(a), b);
+    //TODO: Remove instantiation going on here
+    return restrict_type(typeslot_dynarray_instantiate(polytype_get_subtypes(a)), b);
 }
 
 //Returns "true" if the given types are disjoint
@@ -157,7 +159,8 @@ int is_subtype(polytype a, polytype b) {
             return 1;
         }
         //Otherwise, must not be, so recurse on b's children
-        polytype_dynarray b_subtypes = polytype_get_subtypes(b);
+        //TODO: Eliminate instantiation here!
+        polytype_dynarray b_subtypes = typeslot_dynarray_instantiate(polytype_get_subtypes(b));
         int i;
         for (i=0; i < b_subtypes.size; i++) {
             //If a is a subtype of any subtype of b

@@ -38,7 +38,7 @@ int polytype_pour_args(polytype in, type_ref_dynarray refs);
 //Returns true if the incoming polytype is "Any"
 int is_any(polytype in);
 
-polytype_dynarray polytype_get_subtypes(polytype in);
+typeslot_dynarray polytype_get_subtypes(polytype in);
 
 //Returns a type that represents the intersection of a and b
 polytype intersect_types(polytype a, polytype b);

@@ -389,8 +389,9 @@ void load_subtype_decl(lexid_tree in) {
         printf("ERROR: Cannot declare subtypes of a type variable!");
         return;
     }
-    //Otherwise, the supertype must be a polytype
-    type_graph_add_subtype(sub_parse.type, typeslot_get_type(super_parse.type));
+    //Otherwise, the supertype must be a polytype, so we add it and pass along
+    //the type_refs we used
+    type_graph_add_subtype(sub_parse.type, typeslot_get_type(super_parse.type), type_env_extract_type_refs(sub_parse.e));
     return;
 }
 

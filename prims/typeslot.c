@@ -100,9 +100,12 @@ int typeslot_dynarray_trivial_eq(typeslot_dynarray a, typeslot_dynarray b) {
     return 1;
 }
 
+//TODO: Modify so if "from" is a type_ref,
+//and its bound falls under "to", it still is successful
 int typeslot_pour(typeslot from, typeslot to) {
     //If the destination is a ref and the source is a polytype
     if (to.kind == typeslot_ref && from.kind == typeslot_type) {
+        //TODO: Check if the source falls under the dest's type_ref!
         //Change the destination type_ref's bound
         type_ref destref = typeslot_get_ref(to);
         //Set the bounds correctly
@@ -120,6 +123,12 @@ int typeslot_pour(typeslot from, typeslot to) {
             polytype_pour(srctype, desttype);
         }
     }
+    //Handle the case where "from" is a ref -- only goes through if
+    //the bound falls under the polytype of "to"
+    if (from.kind == typeslot_ref && to.kind == typeslot_type) {
+        return (is_subtype(type_ref_getbound(typeslot_get_ref(from)), typeslot_get_type(to)));
+    }
+     
     //TODO: Handle case that both are refs!
     return 0;
 }

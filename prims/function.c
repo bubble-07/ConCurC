@@ -12,6 +12,7 @@ typeslot function_ptr_get_parameter_type(function_ptr in, int pos) {
 }
 //Returns the return type of the given function for the given args
 typeslot function_ptr_get_return_type(function_ptr in, typeslot_dynarray args) {
+    
     //Record all bounds associated with all type_refs in the function signature
     type_ref_info_ptr_dynarray bounds = get_type_ref_info_list(in->type_vars);
     
@@ -35,6 +36,7 @@ typeslot function_ptr_get_return_type(function_ptr in, typeslot_dynarray args) {
     if (success == 1) { 
         //If we were able to apply the function
         //Return the result of 
+
         return result;
     }
     //Otherwise, just say that the function can return anything

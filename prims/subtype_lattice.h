@@ -17,14 +17,15 @@
 typedef struct {
     polytype_dynarray head; //The list of possible incoming types to match
     typeslot_dynarray subtypes; //Set of all subtypes that derive from the head
+    type_ref_dynarray_dynarray refs; //List of lists of type_refs that appear in formulae for each
 } subtype_lattice;
 
 typedef subtype_lattice sub_lat; //Shorthand
 
 //Gets the subtypes of the incoming type that are enumerated in the lattice
-polytype_dynarray lattice_get_subtypes(polytype in, subtype_lattice* lattice);
+typeslot_dynarray lattice_get_subtypes(polytype in, subtype_lattice* lattice);
 
 subtype_lattice* make_lattice();
 
-subtype_lattice* lattice_add_subtype(subtype_lattice* in, typeslot subtype, polytype supertype);
+subtype_lattice* lattice_add_subtype(subtype_lattice* in, typeslot subtype, polytype supertype, type_ref_dynarray refs);
 #endif

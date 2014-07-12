@@ -206,7 +206,8 @@ function_ptr infer_function(function_ptr in) {
     
     //Set the return type of the function to the outermost body expression type
     cell outermost = cell_tree_data(in->body);
-    in->ret_type = outermost.type;
+    //TODO: This is a really stupid idea
+    //in->ret_type = outermost.type;
 
     return in;
 }

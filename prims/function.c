@@ -36,7 +36,6 @@ typeslot function_ptr_get_return_type(function_ptr in, typeslot_dynarray args) {
     if (success == 1) { 
         //If we were able to apply the function
         //Return the result of 
-
         return result;
     }
     //Otherwise, just say that the function can return anything

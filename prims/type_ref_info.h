@@ -47,6 +47,8 @@ type_ref type_ref_get_rep(type_ref in);
 //Returns "1" if the type was restricted, "0" otherwise
 int type_ref_restrict(type_ref in, polytype info);
 
+int type_ref_restrictbound(type_ref in, typeslot bound);
+
 //Similar to restrict, but accepts a typeslot
 int type_ref_constrain(type_ref in, typeslot info);
 

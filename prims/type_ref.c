@@ -204,6 +204,30 @@ int type_refs_same_class(type_ref one, type_ref two) {
     return (find(one) == find(two));
 }
 
+//If the bound is a polytype, then if the bound is more general
+//than in's bound, return 0 [failure]. If it's more specific, 
+//restrict "in"'s bound to fall under bound
+//If the bound is a type_ref, then unify the two type_refs.
+//Returns 1 unless they are already unified
+int type_ref_restrictbound(type_ref in, typeslot bound) {
+    type_ref bound_ref = typeslot_get_ref(bound);
+    if (bound_ref == NULL) {
+        //Polytype case
+        polytype bound_type = typeslot_get_type(bound);
+        //If the bound type is too general
+        if (is_subtype(type_ref_getbound(in), bound_type)) {
+            return 0;
+        }
+        //Otherwise, call type_ref_restrict
+        return type_ref_restrict(in, bound_type);
+    }
+    //type_ref case
+    int result = !type_refs_same_class(in, bound_ref);
+    unify_type_refs(in, bound_ref);
+    return result;
+}
+
+
 int type_ref_constrain(type_ref in, typeslot bound) {
     //Try to see if the incoming bound is actually parametric
     type_ref bound_ref = typeslot_get_ref(bound);
@@ -211,12 +235,35 @@ int type_ref_constrain(type_ref in, typeslot bound) {
         //Must not actually be a type_ref, so just call restrict
         return type_ref_restrict(in, typeslot_get_type(bound));
     }
-    //Otherwise, we should (for now) take the incoming type ref
-    //and make it point at the bound's type ref
+    //Otherwise, we should unify the constraints of the two type_refs
     int active = !type_refs_same_class(in, bound_ref); //Active iff they weren't in the same class to begin with
-    type_ref_makepoint(in, bound_ref);
+    unify_type_refs(in, bound_ref);
     return active;
 }
+
+type_ref type_ref_addequations(type_ref in, type_equation_dynarray eqns) {
+    int i;
+    for (i=0; i < eqns.size; i++) {
+        in = type_ref_add_equation(in, eqns.begin[i]);
+    }
+    return in;
+}
+
+//TODO: Make this so the equations between the two are concatenated
+type_ref unify_type_refs(type_ref one, type_ref two) {
+    //If they're already unified
+    if (type_refs_same_class(one, two)) {
+        return one;
+    }
+    polytype onebound = type_ref_getbound(one);
+    polytype twobound = type_ref_getbound(two);
+    polytype newbound = intersect_types(onebound, twobound);
+    type_ref_setbound(two, newbound);
+    type_ref_addequations(two, type_equation_dynarray_copy(type_ref_get_equations(one)));
+    type_ref_makepoint(one, two);
+    return one;
+}
+
 
 //Really dumb way to print type refs FIXME: Make this generate sensible unique names
 void print_type_ref(type_ref in, nametable names) {

@@ -100,8 +100,7 @@ int solve_apply_equation(type_ref node, is_result_of* eqn) {
         
         //TODO: We don't __actually__ mean "restrict" here -- we need to check if the
         //returned type is a subtype of the node's current type. If not, then it's a type error
-
-        return type_ref_constrain(node, constraint);
+        return type_ref_restrictbound(node, constraint);
     }
     return 0; //TODO: Add other kinds of functions here!
 }

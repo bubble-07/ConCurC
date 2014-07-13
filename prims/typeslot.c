@@ -128,6 +128,8 @@ int typeslot_pour(typeslot from, typeslot to) {
     if (from.kind == typeslot_ref && to.kind == typeslot_type) {
         return (is_subtype(type_ref_getbound(typeslot_get_ref(from)), typeslot_get_type(to)));
     }
+    //Handle the case that both are refs -- in this case, restrict "to" so it falls under "from" and unify
+    return type_ref_restrictbound(typeslot_get_ref(to), from);
      
     //TODO: Handle case that both are refs!
     return 0;

@@ -24,9 +24,6 @@ type_equation* equation_set_getkind(eqn_set s, type_expr_kind k);
 //Gets all equations of a given kind
 type_equation_ptr_dynarray equation_set_getall(eqn_set s, type_expr_kind k);
 
-void print_type_equations(eqn_set s, nametable names);
-
-
 //eqn_set equation_set_addequals(eqn_set s, type_ref other);
 
 #endif

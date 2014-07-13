@@ -11,10 +11,10 @@ type_ref_table type_ref_table_init() {
 void print_type_ref_table_equations(type_ref_table in, nametable names) {
     int i;
     for (i=0; i < in.size; i++) {
-        print_type_ref(in.begin[i], names);
         type_equation_dynarray eqns = type_ref_get_equations(in.begin[i]);
         int j;
         for (j=0; j < eqns.size; j++) {
+            print_type_ref(in.begin[i], names);
             print_type_equation(eqns.begin[j], names);
         }
     }

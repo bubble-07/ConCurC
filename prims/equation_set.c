@@ -36,14 +36,3 @@ type_equation_ptr_dynarray equation_set_getall(eqn_set s, type_expr_kind k) {
     return result;
 }
         
-
-void print_type_equations(eqn_set eqns, nametable names) {
-    int i;
-    for (i=0; i < eqns.size; i++) {
-        printf("blah \n");
-        print_type_equation(eqns.begin[i], names);
-    }
-    return;
-}
-    
-

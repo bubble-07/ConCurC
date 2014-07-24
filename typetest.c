@@ -31,7 +31,7 @@ int main(int argc, const char* argv[]) {
 
     polytype EitherIntString = make_polytype(Either, IntString);
 
-    polytype result = intersect_types(Int, EitherIntString);
+    polytype result = intersect_types(EitherIntString, EitherIntString);
 
     print_type(result, program.parse.names); //Print out the result
     return 0;

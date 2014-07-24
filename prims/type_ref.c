@@ -215,7 +215,7 @@ int type_ref_restrictbound(type_ref in, typeslot bound) {
         //Polytype case
         polytype bound_type = typeslot_get_type(bound);
         //If the bound type is too general
-        if (is_subtype(type_ref_getbound(in), bound_type)) {
+        if (!is_subtype(bound_type, type_ref_getbound(in))) {
             return 0;
         }
         //Otherwise, call type_ref_restrict

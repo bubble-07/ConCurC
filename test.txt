@@ -2,6 +2,9 @@ type Matrix(Num)
 type SquareMat(Num)
 SquareMat(A) <: Matrix(A)
 
+def (num +) (num a) (num b)
+    ( )
+
 def (int +) (int a) (int b)
     ( )
 def (int *) (int a) (int b)
@@ -17,7 +20,7 @@ def (A id) (A arg)
 
 //If inference works correctly, you should be able to do this
 def test a b
-    id(a) + (id(a) * id(b))
+    a + (a * b)
 /*
 def test a b
     a + (a * b)

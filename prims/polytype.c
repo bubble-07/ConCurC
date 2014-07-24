@@ -77,6 +77,9 @@ polytype union_types(polytype a, polytype b) {
     if (polytype_trivial_eq(b, Bottom)) {
         return a;
     }
+    if (polytype_trivial_eq(a, b)) {
+        return a;
+    }
     typeslot_dynarray args = typeslot_dynarray_make(1);
     args = typeslot_dynarray_add(args, typeslot_from_type(a));
     args = typeslot_dynarray_add(args, typeslot_from_type(b));

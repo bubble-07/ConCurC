@@ -1,5 +1,6 @@
 #include "function.h"
 #include "type_ref_info.h"
+#include "type_graph.h"
 
 //Gets the type of the parameter in the given position
 //Returns empty type if outside of bounds
@@ -23,6 +24,11 @@ typeslot function_ptr_get_return_type(function_ptr in, typeslot_dynarray args) {
         //Note: parameter_ptr_pour fails if the incoming type is too general,
         //which is exactly what we want for checking left-to-right
         success = success && parameter_ptr_pour(args.begin[i], in->params.begin[i]);
+        //Handle the case that the last "pour" was not successful
+        if (!success) {
+            break;
+        }
+
     }
 
     //Generate the result by turning all type_refs in the return type into type_refs
@@ -38,8 +44,21 @@ typeslot function_ptr_get_return_type(function_ptr in, typeslot_dynarray args) {
         //Return the result of 
         return result;
     }
-    //Otherwise, just say that the function can return anything
-    return typeslot_from_type(make_unknown_type());
+    //Otherwise, we were unable to apply the function to the arguments as written
+    //Check if the last argument seen is a sum type. If so, we can split it and try again
+    if (typeslot_is_sum_type(args.begin[i])) {
+        //Construct two more typeslot dynarrays with the args
+        typeslot_dynarray args1 = typeslot_dynarray_copy(args);
+        typeslot_dynarray args2 = typeslot_dynarray_copy(args);
+        //Modify position at i to be elements of sum type
+        args1.begin[i] = typeslot_from_type(typeslot_instantiate(typeslot_sum_type_option_one(args.begin[i])));
+        args2.begin[i] = typeslot_from_type(typeslot_instantiate(typeslot_sum_type_option_two(args.begin[i])));
+        printf("\n applying branch\n");
+        return union_typeslots(function_ptr_get_return_type(in, args1), function_ptr_get_return_type(in, args2));
+    }
+
+    //We failed
+    return make_bottom_typeslot();
 }
 
 function_ptr function_ptr_set_return_type(function_ptr in, typeslot t) {

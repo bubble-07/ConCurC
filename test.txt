@@ -2,9 +2,6 @@ type Matrix(Num)
 type SquareMat(Num)
 SquareMat(A) <: Matrix(A)
 
-def (num +) (num a) (num b)
-    ( )
-
 def (int +) (int a) (int b)
     ( )
 def (int *) (int a) (int b)

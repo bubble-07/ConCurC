@@ -55,4 +55,11 @@ int typeslot_pour(typeslot one, typeslot two);
 typeslot typeslot_dissociate(typeslot in);
 typeslot_dynarray typeslot_dynarray_dissociate(typeslot_dynarray in);
 
+//Returns true if the given typeslot represents a sum type
+int typeslot_is_sum_type(typeslot in);
+
+//Get respective constituent types of a sum
+typeslot typeslot_sum_type_option_one(typeslot in);
+typeslot typeslot_sum_type_option_two(typeslot in);
+
 #endif

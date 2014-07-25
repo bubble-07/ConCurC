@@ -155,6 +155,9 @@ int types_are_disjoint(polytype a, polytype b) {
 
 //Returns "true" if a is a subtype of b
 int is_subtype(polytype a, polytype b) {
+    if (polytype_trivial_eq(b, Top)) {
+        return 1; //Everything is a subtype of "top"
+    }
     //Is A possibly a subtype of b?
     if (Type_graph_possiblesubtype(UniverseGraph, a, b)) {
         //Is A the same as B?

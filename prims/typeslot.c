@@ -120,8 +120,9 @@ int typeslot_pour(typeslot from, typeslot to) {
         //Their stems must be trivially equal
         if (srctype.ref == desttype.ref) {
             //Recurse!
-            polytype_pour(srctype, desttype);
+            return polytype_pour(srctype, desttype);
         }
+        return 0;
     }
     //Handle the case where "from" is a ref -- only goes through if
     //the bound falls under the polytype of "to"
@@ -189,5 +190,35 @@ typeslot_dynarray typeslot_dynarray_dissociate(typeslot_dynarray in) {
         result = typeslot_dynarray_add(result, typeslot_dissociate(in.begin[i]));
     }
     return result;
+}
+
+int typeslot_is_sum_type(typeslot in) {
+    type_ref ref = typeslot_get_ref(in);
+    if (ref != NULL) {
+        //Must be dealing with a type variable
+        return typeslot_is_sum_type(typeslot_from_type(type_ref_getbound(ref)));
+    }
+    //Otherwise, must be dealing with a polytype
+    polytype t = typeslot_get_type(in);
+    return (t.ref == Either);
+}
+
+typeslot typeslot_get_polytype_pos(typeslot in, int pos) {
+    type_ref ref = typeslot_get_ref(in);
+    polytype t;
+    if (ref != NULL) {
+        t = type_ref_getbound(ref);
+    }
+    else {
+        //Otherwise, must be a polytype
+        t = typeslot_get_type(in);
+    }
+    return t.argtypes.begin[pos];
+}
+typeslot typeslot_sum_type_option_one(typeslot in) {
+    return typeslot_get_polytype_pos(in, 0);
+}
+typeslot typeslot_sum_type_option_two(typeslot in) {
+    return typeslot_get_polytype_pos(in, 1);
 }
 
